@@ -1,0 +1,105 @@
+  @media screen and (max-height: 450px) {
+    .sidenav {padding-top: 50%;}
+    .sidenav a {font-size: 18px;}
+  }
+ 
+  .sidebar-header{
+    margin-top: 15%;
+    margin-left: 5%;
+    height: 15%;
+  }
+
+  .user-pic{
+    float: left;
+    width: 60px;
+    height: 60px;
+    margin-left: 5%;
+    margin-right: 15px;
+  }
+
+  .user-info{
+    margin-left: 40%;
+    display: block;
+    color: #818181;
+  }
+
+  .user-name{
+    font-size: 100%;
+  }
+
+  .user-role, .user-status{
+    font-size: 80%;
+  }
+
+  .img-rounded{
+    border-radius: 12px;
+    height: 70px;
+    weight: 70px;
+  }
+
+  .icon-space{
+      margin-right: 10%;
+  }
+
+  .sidenav {
+      height: 100%;
+      width: 20%;
+      position: fixed;
+      z-index: 1;
+      top: 0;
+      left: 0;
+      background-color: #111;
+      overflow-x: hidden;
+      transition: 0.5s;
+      
+  }
+
+  .sidenav p {
+      font-weight: bold; 
+      margin-left: 5%;
+      margin-top: 5%;
+      text-decoration: none;
+      font-size: 25px;
+      color: #818181;
+      display: block;
+      transition: 0.3s;
+  }
+
+  .sidenav a {
+      padding: 8px 8px 8px 32px;
+      text-decoration: none;
+      font-size: 18px;
+      color: #818181;
+      display: block;
+      transition: 0.3s;
+  }
+
+  .sidenav a:hover {
+      color: #f1f1f1;
+  }
+
+  .main-header{
+      height:80px;
+      background: linear-gradient(to top, #005bbf 20%, #525252);
+      /*background: linear-gradient(to bottom, #005bbf, white);*/
+      padding: 1%;    
+  }
+
+  header {
+      padding:0px;
+  }
+
+  .sidebar-body{
+    display: block;
+    position: relative;
+    height: 70%;
+    overflow: auto;
+  }
+
+  .sidebar-footer{
+    position: fixed;
+  }
+
+  .sidebar-footer-submenu{
+    float: left;
+  }

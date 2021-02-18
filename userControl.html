@@ -1,0 +1,308 @@
+<html>
+    <body>
+        <div>
+            <form class="form-horizontal" role="form">
+                <div class="form-group">
+                    <div class="my-custom-scrollbar table-reponsive-xl">
+                        <table class="table table-striped" id="ListUsers">    
+                            <thead>
+                                <tr>
+                                    <th scope="col">N°</th>
+                                    <th scope="col">Rut</th>
+                                    <th scope="col">Permisos</th>
+                                    <th scope="col">Nombre</th>
+                                    <th scope="col">Apellido</th>
+                                    <th scope="col">Correo</th>
+                                    <th scope="col">Teléfono</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </body>
+
+    <style>
+        .my-custom-scrollbar{
+            height: 50%;
+        }
+    </style>
+<!------------------------------ ADD A NEW USER FORM ---------------------------------------->
+    <!-- Modal -->
+    <div id="AddUserForm" class="modal fade" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" style="z-index:1100;">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    
+        <!-- Modal content-->
+            <div class="modal-content">
+                
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title"><span class="icon-add-user"></span> Agregar Usuario</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+            
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <form>
+                        <fieldset enabled>
+                            <div class="form-group">
+                                <label for="addUname">Rut</label>
+                                <input id="addUname" type="text" class="form-control" placeholder="Rut">
+                            </div>
+                          
+                            <div class="form-group">
+                                <label for="addName">Nombre</label>
+                                <input id="addName" type="text" class="form-control" placeholder="Nombre">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="addLastname">Apellido</label>
+                                <input id="addLastname" type="text" class="form-control" placeholder="Apellido">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="addEmail">Correo</label>
+                                <input id="addEmail" type="text" class="form-control" placeholder="Correo">
+                            </div>
+
+                            <div class="form-group">
+                                <div class="form-group">
+                                    <label for="addPhone">Celular (Opcional)</label>
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                          <div class="input-group-text">+569</div>
+                                        </div>
+                                        <input id="addPhone" type="text" class="form-control" placeholder="Teléfono">
+                                      </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="">Permisos</label>
+                                <div class="custom-control custom-checkbox ">
+                                    <ul class="list-group ">
+                                        <li class="list-group-item">
+                                            <div style="margin-left: 2%;">
+                                                <input type="checkbox" class="custom-control-input" id="addAdministrator">
+                                                <label class="custom-control-label" for="addAdministrator">Administrador </label>
+                                            </div>
+                                        </li>
+                                        
+                                        <li class="list-group-item">
+                                            <div style="margin-left: 2%;">
+                                                <input type="checkbox" class="custom-control-input" id="addMechanic">
+                                                <label class="custom-control-label" for="addMechanic">Mecánico </label>
+                                            </div>
+                                        </li>
+                                        
+                                        <li class="list-group-item">
+                                            <div style="margin-left: 2%;">
+                                                <input type="checkbox" class="custom-control-input" id="addElectrician">
+                                                <label class="custom-control-label" for="addElectrician">Electricista </label>
+                                            </div>
+                                        </li>
+                                        
+                                        <li class="list-group-item">
+                                            <div style="margin-left: 2%;">
+                                                <input type="checkbox" class="custom-control-input" id="addGardener">
+                                                <label class="custom-control-label" for="addGardener">Jardinero </label>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+            
+                <!-- Modal footer -->
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-success" onclick="AddUser()"><span class="icon-add-user"></span> Agregar</button>
+                    <button type="button" class="btn btn-danger" data-toggle="modal" data-dismiss="modal"><span class="icon-circle-with-cross"></span> Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+<!------------------------------ SEARCH A USER ---------------------------------------->
+    <!-- Modal -->
+    <div id="LoadUserForm" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+    
+        <!-- Modal content-->
+            <div class="modal-content">
+                
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title"><span class="icon-magnifying-glass"></span> Editar</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+            
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <div class="form-group">
+                <!--         <label for="searchUname">Rut</label> -->
+                        <input id="searchUname" type="text" class="form-control" placeholder="Rut">
+                    </div>
+                    
+        <!------------------------------ EDIT USER´S DATAS ---------------------------------------->
+                    <!-- Modal -->
+                    <div id="SearchResultsForm" class="modal fade" style="z-index:1100;" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                    
+                        <!-- Modal content-->
+                            <div class="modal-content">
+                                
+                                <!-- Modal Header -->
+                                <div class="modal-header">
+                                    <h4 class="modal-title"><span class="icon-user"></span> Editar Usuario</h4>
+                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                </div>
+     
+                                <!-- Modal body -->
+                                <div class="modal-body">
+                                    <form>
+                                        <fieldset enabled>
+                                            <div class="form-group">
+                                                <label for="usernamePrevious">Rut</label>
+                                                <input id="usernamePrevious" type="text" class="form-control" placeholder="Rut">
+                                            </div>
+                                        
+                                            <div class="form-group">
+                                                <label for="resultName">Nombre</label>
+                                                <input id="resultName" type="text" class="form-control" placeholder="Nombre">
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="resultLastname">Apellido</label>
+                                                <input id="resultLastname" type="text" class="form-control" placeholder="Apellido">
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="resultEmail">Correo</label>
+                                                <input id="resultEmail" type="text" class="form-control" placeholder="Correo">
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="resultPhone">Celular (Opcional)</label>
+                                                <div class="input-group mb-2">
+                                                    <div class="input-group-prepend">
+                                                      <div class="input-group-text">+569</div>
+                                                    </div>
+                                                    <input id="resultPhone" type="text" class="form-control" placeholder="Teléfono">
+                                                  </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="">Permisos</label>
+                                                <div class="custom-control custom-checkbox ">
+                                                    <ul class="list-group">
+                                                        <li class="list-group-item">
+                                                            <div style="margin-left: 2%;">
+                                                                <input type="checkbox" class="custom-control-input" id="editAdministrator">
+                                                                <label class="custom-control-label" for="editAdministrator">Administrador </label>
+                                                            </div>
+                                                        </li>
+                                                        
+                                                        <li class="list-group-item">
+                                                            <div style="margin-left: 2%;">
+                                                                <input type="checkbox" class="custom-control-input" id="editMechanic">
+                                                                <label class="custom-control-label" for="editMechanic">Mecánico </label>
+                                                            </div>
+                                                        </li>
+                                                        
+                                                        <li class="list-group-item">
+                                                            <div style="margin-left: 2%;">
+                                                                <input type="checkbox" class="custom-control-input" id="editElectrician">
+                                                                <label class="custom-control-label" for="editElectrician">Electricista </label>
+                                                            </div>
+                                                        </li>
+                                                        
+                                                        <li class="list-group-item">
+                                                            <div style="margin-left: 2%;">
+                                                                <input type="checkbox" class="custom-control-input" id="editGardener">
+                                                                <label class="custom-control-label" for="editGardener">Jardinero </label>
+                                                            </div>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </fieldset>
+                                    </form>
+                                </div>
+
+                                <!-- Modal footer -->
+                                <div class="modal-footer justify-content-center">
+                                    <button type="button" class="btn btn-success" onclick="UpdateUser()"><span class="icon-user"></span> Confirmar</button>
+                                    <button type="button" class="btn btn-danger" id="bttnCloseUpdateUser"><span class="icon-circle-with-cross"></span> Cerrar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            
+                <!-- Modal footer -->
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-primary" onclick="LoadUser()"><span class="icon-magnifying-glass"></span> Buscar</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal"><span class="icon-circle-with-cross"></span> Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+<!------------------------------ DELETE A USER ---------------------------------------->
+    <!-- Modal -->
+    <div id="DeleteUserForm" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+    
+        <!-- Modal content-->
+            <div class="modal-content">
+                
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title"><span class="icon-remove-user"></span> Eliminar Usuario</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+            
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <div class="form-group">
+                        <input id="deleteUname" type="text" class="form-control" placeholder="Rut">
+                    </div>
+                </div>
+            
+                <!-- Modal footer -->
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-success" onclick="SearchUser()"><span class="icon-remove-user"></span> Eliminar</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal"><span class="icon-circle-with-cross"></span> Cerrar</button>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+
+    <!------------------------------ CONFIRM DELETE USER ---------------------------------------->
+    <div id="ConfirmDeleteUser" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- Header Modal -->
+                <div class="modal-header">
+                    <h5><span class="icon-warning"></span> Confirmar Eliminación</h5>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                
+                <!-- Modal Body -->
+                <div class="modal-body">
+                    <p>¿Estás seguro que deseas eliminar al usuario?<p>
+		    <p id="userToDelete"></p>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" onclick="DeleteUser()"><span class="icon-remove-user"></span> Eliminar</button>
+                    <button type="button" class="btn btn-danger" data-toggle="modal" data-dismiss="modal">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</html>

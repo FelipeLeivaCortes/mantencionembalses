@@ -1,0 +1,419 @@
+<html>
+    <body>
+        <div>
+            <form class="form-horizontal" role="form">
+                <div class="form-group">
+                    <div class="my-custom-scrollbar table-reponsive-xl">
+                        <table class="table table-striped" id="tableActivities">    
+                            <thead>
+                                <tr>
+                                    <th scope="col">N°</th>
+                                    <th scope="col">Nombre</th>
+                                    <th scope="col">Área</th>
+                                    <th scope="col2">Acción</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </body>
+
+    <style>
+        .my-custom-scrollbar{
+            height: 600px;
+        }
+        .table-reponsive-xl{
+            height: 300px;
+            width: 120%;
+        }
+    </style>
+
+    <!------------------------------ ADD A NEW ACTIVITY FORM ---------------------------------------->
+    <!-- Modal -->
+    <div id="addActivityForm" class="modal fade" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" style="z-index:1100;">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    
+            <div class="modal-content">
+                
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title"><span class="icon-add-to-list"></span> Agregar Actividad</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+            
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <form class="form-horizontal" role="form">
+                        <div class="form-group">
+                            <label for="addActivityName" class="col-3 control-label">Nombre</label>
+                            <div class="col-9">
+                                <input id="addActivityName" type="text" class="form-control">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="addActivityDate" class="col-3 control-label">Fecha de inicio</label>
+                            <div class="col-9">
+                                <input id="addActivityDate" type="date" class="form-control">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="addActivityFrecuency" class="col-3 control-label">Frecuencia</label>
+                            <div class="col-9">
+                                <select id="addActivityFrecuency" class="custom-select">
+                                    <option>Diaria</option>
+                                    <option>Quincenal</option>
+                                    <option>Mensual</option>
+                                    <option>Bimensual</option>
+                                    <option>Trimestral</option>
+                                    <option>Semestral</option>
+                                    <option>Anual</option>
+                                    <option>Bianual</option>
+                                    <option>Trianual</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="addActivityLocation" class="col-3 control-label">Ubicación</label>
+                            <div class="col-9">
+                                <select id="addActivityLocation" class="custom-select"></select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="addActivityPriority" class="col-3 control-label">Prioridad</label>
+                            <div class="col-9">
+                                <select id="addActivityPriority" class="custom-select">
+                                    <option>Baja</option>
+                                    <option>Media</option>
+                                    <option>Alta</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="addActivityArea" class="col-3 control-label">Área</label>
+                            <div class="col-9">
+                                <select id="addActivityArea" class="custom-select">
+                                    <option>Mecánica</option>
+                                    <option>Eléctrica</option>
+                                    <option>Jardinería</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="addActivityComments" class="col-3 control-label">Observación (Opcional)</label>
+                            <div class="col-9">
+                                <textarea class="form-control" id="addActivityComments"></textarea>
+                            </div>
+                        </div>
+                    </form>                    
+                </div>
+            
+                <!-- Modal footer -->
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-success" onclick="AddActivity()"><span class="icon-add-to-list"></span> Agregar</button>
+                    <button type="button" class="btn btn-danger" data-toggle="modal" data-dismiss="modal"><span class="icon-circle-with-cross"></span> Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!------------------------------ FILTER ACTIVITY FORM ---------------------------------------->
+    <!-- Modal -->
+    <div id="filterActivityForm" class="modal fade" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" style="z-index:1100;">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    
+            <div class="modal-content">
+                
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title"><span class="icon-magnifying-glass"></span> Filtrar Actividades</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+            
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <form class="form-horizontal" role="form">
+                        <div class="form-group">
+                            <label for="filterLocation">Ubicación</label>
+                            <select class="form-control" id="filterLocation"></select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="filterArea">Área</label>
+                            <select class="form-control" id="filterArea">
+                                <option>--- TODAS ---</option>
+                                <option>Mecánica</option>
+                                <option>Eléctrica</option>
+                                <option>Jardinería</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="filterPriority">Prioridad</label>
+                            <select class="form-control" id="filterPriority">
+                                <option>--- TODAS ---</option>
+                                <option>Alta</option>
+                                <option>Media</option>
+                                <option>Baja</option>
+                            </select>
+                        </div>
+                    </form>               
+                </div>
+            
+                <!-- Modal footer -->
+                <div class="modal-footer justify-content-center">
+                    <button class="btn btn-primary" onclick="javascript:filterActivities();"><span class="icon-magnifying-glass"></span> Buscar</button>
+                    <button type="button" class="btn btn-danger" data-toggle="modal" data-dismiss="modal"><span class="icon-circle-with-cross"></span> Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!------------------------------ LOAD ACTIVITYIES FROM EXCEL FORM ---------------------------------------->
+    <!-- Modal -->
+    <div id="loadExcelForm" class="modal fade" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" style="z-index:1100;">
+        <div class="modal-dialog modal-md modal-dialog-scrollable">
+    
+            <div class="modal-content">
+                
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title"><span class="icon-magnifying-glass"></span> Cargar Actividades desde Excel</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+            
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <form class="form-horizontal" role="form">
+                        <div class="form-group">
+                            <label for="ProjectExcel">Archivo Excel</label>
+                            <div class="file-field">
+                                <input type="file" id="activitiesExcel" style="background:linear-gradient(to top, #847e86, #c3c0c4);">
+                           </div>
+                        </div>
+                    </form>               
+                </div>
+            
+                <!-- Modal footer -->
+                <div class="modal-footer justify-content-center">
+                    <button id="loadActivitiesBtn" class="btn btn-primary" onclick="javascript:LoadActivitiesFromExcel();"><span class="icon-document-landscape"></span> Cargar</button>
+                    <button type="button" class="btn btn-danger" data-toggle="modal" data-dismiss="modal"><span class="icon-circle-with-cross"></span> Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!------------------------------ ABOUT AN ACTIVITY FORM ---------------------------------------->
+    <!-- Modal -->
+    <div id="aboutActivityForm" class="modal fade" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" style="z-index:1400;">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+
+            <div class="modal-content">
+                
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title"><span class="icon-info"></span> Detalles</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+            
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <form class="form-horizontal" role="form">
+                        <div class="form-group">
+                            <label for="aboutActivityName" class="col-3 control-label">Nombre</label>
+                            <div class="col-9">
+                                <input id="aboutActivityName" type="text" class="form-control" readonly="readonly">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="aboutActivityDateStart" class="col-3 control-label">Inicio de actividad</label>
+                            <div class="col-9">
+                                <input id="aboutActivityDateStart" type="text" class="form-control" readonly="readonly">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="aboutActivityFrecuency" class="col-3 control-label">Frecuencia</label>
+                            <div class="col-9">
+                                <input id="aboutActivityFrecuency" type="text" class="form-control" readonly="readonly">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="aboutActivityLocation" class="col-3 control-label">Ubicación</label>
+                            <div class="col-9">
+                                <input id="aboutActivityLocation" type="text" class="form-control" readonly="readonly">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="aboutActivityPriority" class="col-3 control-label">Prioridad</label>
+                            <div class="col-9">
+                                <input id="aboutActivityPriority" type="text" class="form-control" readonly="readonly">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="aboutActivityArea" class="col-3 control-label">Área</label>
+                            <div class="col-9">
+                                <input id="aboutActivityArea" type="text" class="form-control" readonly="readonly">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="aboutActivityComments" class="col-3 control-label">Observación</label>
+                            <div class="col-9">
+                                <textarea class="form-control" id="aboutActivityComments" readonly="readonly"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            
+                <!-- Modal footer -->
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-danger" data-toggle="modal" data-dismiss="modal"><span class="icon-circle-with-cross"></span> Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!------------------------------ EDIT AN ACTIVITY FORM ---------------------------------------->
+    <!-- Modal -->
+    <div id="editActivityForm" class="modal fade" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" style="z-index:1100;">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    
+            <div class="modal-content">
+                
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title"><span class="icon-add-user"></span> Editar Actividad</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+            
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <form class="form-horizontal" role="form">
+                        <div class="form-group">
+                            <label for="codeActivity" class="col-3 control-label">Código</label>
+                            <div class="col-9">
+                                <input id="codeActivity" type="text" class="form-control" readonly="readonly">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editActivityName" class="col-3 control-label">Nombre</label>
+                            <div class="col-9">
+                                <input id="editActivityName" type="text" class="form-control" placeholder="Nombre">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editActivityDateStart" class="col-3 control-label">Inicio de Actividad</label>
+                            <div class="col-9">
+                                <input id="editActivityDateStart" type="date" class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editActivityFrecuency" class="col-3 control-label">Frecuencia</label>
+                            <div class="col-9">
+                                <select id="editActivityFrecuency" class="custom-select">
+                                    <option>Diaria</option>
+                                    <option>Quincenal</option>
+                                    <option>Mensual</option>
+                                    <option>Bimensual</option>
+                                    <option>Trimestral</option>
+                                    <option>Semestral</option>
+                                    <option>Anual</option>
+                                    <option>Bianual</option>
+                                    <option>Trianual</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="editActivityLocation" class="col-3 control-label">Ubicación</label>
+                            <div class="col-9">
+                                <select id="editActivityLocation" class="custom-select">
+                                    <option>Bodega</option>
+                                    <option>Caverna</option>
+                                    <option>Coronamiento</option>
+                                    <option>Estación Metereológica</option>
+                                    <option>Oficina Central</option>
+                                    <option>Planta de Tratamiento</option>
+                                    <option>Porton Principal</option>
+                                    <option>Sala de Válvulas</option>
+                                    <option>Tunel Auxiliar</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="editActivityPriority" class="col-3 control-label">Prioridad</label>
+                            <div class="col-9">
+                                <select id="editActivityPriority" class="custom-select">
+                                    <option>Baja</option>
+                                    <option>Media</option>
+                                    <option>Alta</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="editActivityArea" class="col-3 control-label">Área</label>
+                            <div class="col-9">
+                                <select id="editActivityArea" class="custom-select">
+                                    <option>Mecánica</option>
+                                    <option>Eléctrica</option>
+                                    <option>Jardinería</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="editActivityComments" class="col-3 control-label">Observación (Opcional)</label>
+                            <div class="col-9">
+                                <textarea class="form-control" id="editActivityComments"></textarea>
+                            </div>
+                        </div>
+                    </form>                    
+                </div>
+            
+                <!-- Modal footer -->
+                <div class="modal-footer justify-content-center">
+                    <button class="btn btn-warning" data-toggle="modal" href="#ModalConfirmEvent"><span class="icon-edit"></span> Editar</button>
+                    <button class="btn btn-danger" data-toggle="modal" data-dismiss="modal"><span class="icon-circle-with-cross"></span> Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Report Event -->
+    <div id="ModalConfirmEvent" class="modal fade" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" style="z-index:1500;">
+        <div class="modal-dialog modal-md modal-dialog-scrollable">
+    
+        <!-- Modal content-->
+            <div class="modal-content">
+                
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 id="headerEvent" class="modal-title"><span class="icon-add-user"></span> Reporte de evento</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+          
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <div class="d-flex flex-column">
+                        <div class="row">
+                            <div class="col-12"><p id="bodyEvent"></p></div>
+                        </div>
+                    </div>    
+                </div>
+          
+                <!-- Modal footer -->
+                <div class="modal-footer justify-content-center">
+                    <button id="btnConfirm" type="button" class="btn btn-success" data-toggle="modal" data-dismiss="modal">Confirmar</button>
+                    <button type="button" class="btn btn-danger" data-toggle="modal" data-dismiss="modal"><span class="icon-circle-with-cross"></span> Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</html>
