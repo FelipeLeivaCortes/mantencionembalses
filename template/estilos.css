@@ -1,3 +1,12 @@
+#navbar-container{
+    margin-bottom: 5%;
+}
+
+textarea{
+    overflow: scroll;
+    resize: none;
+}
+
 li{
     margin-right: 3%;
 }

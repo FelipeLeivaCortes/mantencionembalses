@@ -224,15 +224,23 @@ function loadContacts(){
 }
 
 function loadManuals(){
+    var role    = document.getElementById("user-role").innerHTML;
     document.getElementById("title-page").innerHTML = "Manuales";
+
+    if( role == 'Administrador' ){
+        var navbar = new XMLHttpRequest();
+        navbar.open('get', 'nav-manuals.html');
+        navbar.send();
+        navbar.onload = function(){document.getElementById('navbar-container').innerHTML = navbar.responseText};
+
+    }else{
+        document.getElementById('navbar-container').innerHTML = '<div></div>';
+    }
 
     var qr = new XMLHttpRequest();
     qr.open('get', 'manuals.html');
     qr.send();
-    qr.onload = function(){
-        document.getElementById('body-container').innerHTML = qr.responseText;
-        document.getElementById('navbar-container').innerHTML = "<div></div>";
-    }
+    qr.onload = function(){document.getElementById('body-container').innerHTML = qr.responseText;};
 
     var timeout = 500;
     ShowSpinner(timeout);
