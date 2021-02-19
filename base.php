@@ -1,23 +1,12 @@
 <html>
     <head>
-	<?php
-	   include "template/session.php";
-	?>
-
+	    <?php
+	        include "template/session.php";
+	    ?>
         <meta http-equiv="Content-Type" content="text/html; charset=gb18030">
         <meta name="viewport" content="width=device-width, user-scalable=no">
-
-        <script src="scripts/sidenav.js"></script>
-        <script src="scripts/common.js"></script>
-        <script src="scripts/base.js"></script>
-        <script src="scripts/home.js"></script>
-        <script src="scripts/administration.js"></script>
-        <script src="scripts/activities.js"></script>
-        <script src="scripts/maintances.js"></script>
-        <script src="scripts/records.js"></script>
-        <script src="scripts/configuration.js"></script>
-        <script src="scripts/contactUs.js"></script>
-    </head>  
+    </head>
+      
     <body>
         <div class="container-fluid h-100">
             <div class = "row">

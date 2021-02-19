@@ -204,6 +204,66 @@
         </div>
     </div>
 
+    <!------------------------------ LOAD CALENDAR FORM ---------------------------------------->
+    <!-- Modal -->
+    <div id="loadCalendarForm" class="modal fade" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" style="z-index:1100;">
+        <div class="modal-dialog modal-md modal-dialog-scrollable">
+    
+            <div class="modal-content">
+                
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title"><span class="icon-calendar"></span> Calendario de actividades</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+            
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <p>Ingrese parámetros de búsqueda</p>
+                    <form class="form-horizontal" role="form">
+                        <div class="form-group row">
+                            <label for="filterDateCalendar">Periodo</label>
+                            <div class="col-8">
+                                <select id="filterDateCalendar">
+                                    <option>2021</option>
+                                    <option>2020</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="filterAreaCalendar">Área</label>
+                            <div class="col-8">
+                                <select id="filterAreaCalendar">
+                                    <option>Mecánica</option>
+                                    <option>Eléctrica</option>
+                                    <option>Jardinería</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="filterPriorityCalendar">Prioridad</label>
+                            <div class="col-8">
+                                <select id="filterPriorityCalendar">
+                                    <option>Alta</option>
+                                    <option>Media</option>
+                                    <option>Baja</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>             
+                </div>
+            
+                <!-- Modal footer -->
+                <div class="modal-footer justify-content-center">
+                    <button id="loadActivitiesBtn" class="btn btn-primary" onclick="javascript:alert('Load calendar');"><span class="icon-magnifying-glass"></span> Buscar</button>
+                    <button type="button" class="btn btn-danger" data-toggle="modal" data-dismiss="modal"><span class="icon-circle-with-cross"></span> Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!------------------------------ ABOUT AN ACTIVITY FORM ---------------------------------------->
     <!-- Modal -->
     <div id="aboutActivityForm" class="modal fade" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" style="z-index:1400;">

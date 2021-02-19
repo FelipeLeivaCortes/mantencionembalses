@@ -6,7 +6,7 @@
 	
 	<?php
 	  session_start();
-	  include 'template/resources.php';	
+	  include 'template/resources.php';
 	?>
         
         <script src="scripts/login.js"></script>

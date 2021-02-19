@@ -31,15 +31,14 @@ window.addEventListener("load", function(){
 
 function ConfigureSystem(){
    var idCompany	= sessionStorage.getItem("ID_COMPANY");
-   var path		= "/img/logoCompany" + idCompany + ".png";
+   var path		= "img/logoCompany" + idCompany + ".png";
 
    document.getElementById("logoCompany").setAttribute("src", path);
-/*
-   var Variables 	= "idCompany=" + idCompany; 
-   $.post("backend/setConfiguration.php", Variables, function(DATA){
-	
-   });
-*/
+
+   /*
+    IN THE NEWEST VERSION, IS NECCESARY CHANGE THE USER THAT CONNECT WITH THE DATABASE
+   */
+
 };
 
 function refillNotifications(data){
@@ -222,4 +221,22 @@ function loadContacts(){
         document.getElementById('body-container').innerHTML = qr.responseText;
         document.getElementById('navbar-container').innerHTML = "<div></div>";
     }
+}
+
+function loadManuals(){
+    document.getElementById("title-page").innerHTML = "Manuales";
+
+    var qr = new XMLHttpRequest();
+    qr.open('get', 'manuals.html');
+    qr.send();
+    qr.onload = function(){
+        document.getElementById('body-container').innerHTML = qr.responseText;
+        document.getElementById('navbar-container').innerHTML = "<div></div>";
+    }
+
+    var timeout = 500;
+    ShowSpinner(timeout);
+    setTimeout(function(){
+        ManualsInit();
+    }, timeout);
 }

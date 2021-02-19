@@ -11,7 +11,7 @@
 	   $username	=   $_POST["username"];
 	   $password	=   $_POST["password"];
 
-	   $QUERY	=   $LINK -> prepare("SELECT idEmpresa, estado, AES_DECRYPT(clave,?), permisos, nombre, apellido FROM usuario WHERE rut = ?");
+	   $QUERY	=   $LINK->prepare("SELECT idEmpresa, estado, AES_DECRYPT(clave,?), permisos, nombre, apellido FROM usuario WHERE rut = ?;");
 	   $QUERY	->  bind_param('si', $KEY, $username);
 	   $QUERY	->  execute();
 	   $QUERY	->  store_result();

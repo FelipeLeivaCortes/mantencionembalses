@@ -9,13 +9,23 @@
         <link rel="stylesheet" type="text/css" href="template/estilos.css">     <!-- Personal´s css -->
         <link rel="stylesheet" href="template/iconmoon/style.css">              <!-- Iconmoon´s css -->
         <link rel="stylesheet" href="template/sidenav.css">                     <!-- Sidenav´s css -->
-  
-	<script src="scripts/jquery.min.js"></script>
 
-  </head>
+        <script src="scripts/jquery.min.js"></script>
+    </head>
     
     <body>
-        <script src="scripts/jquery.min.js"></script>
+        <script src="scripts/sidenav.js"></script>
+        <script src="scripts/common.js"></script>
+        <script src="scripts/base.js"></script>
+        <script src="scripts/home.js"></script>
+        <script src="scripts/administration.js"></script>
+        <script src="scripts/activities.js"></script>
+        <script src="scripts/maintances.js"></script>
+        <script src="scripts/records.js"></script>
+        <script src="scripts/configuration.js"></script>
+        <script src="scripts/contactUs.js"></script>
+        <script src="scripts/manuals.js"></script>
+
         <script src="scripts/jspdf.min.js"></script>
         <script src="scripts/jspdf.plugin.autotable.min.js"></script>
         <script src="scripts/bootstrap.min.js"></script>

@@ -31,7 +31,7 @@
             $.post("backend/login.php", Variables, function(DATA){
                 console.log(DATA);
                 var delay   = 100;
-                /*
+                
                 setTimeout(function(){
                     if( DATA.ERROR === true ){
                         ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
@@ -99,7 +99,7 @@
                         location.href   = "base.php";
                     }
                 }, delay);
-                */
+                
             });
         }    
     }

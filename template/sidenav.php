@@ -50,9 +50,9 @@
                     <a href="javascript:loadContacts();"><span class="icon-phone icon-space"></span>Contactos</a>
                 </div>
 
-		<div>
-		   <a href="/docs/manual_usuario.pdf"><span class="icon-document icon-space"></span>Descargar Manual</a>
-		</div>
+                <div>
+                <a href="javascript:loadManuals();"><span class="icon-document icon-space"></span>Manuales</a>
+                </div>
             </div>
 
             <!-- sidebar-footer  -->

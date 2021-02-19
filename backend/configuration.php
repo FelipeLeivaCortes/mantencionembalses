@@ -1,10 +1,10 @@
 <?php
 
-	$URL		= "127.0.0.1";
+	$URL		= "localhost";
 //	$USERNAME	= "JVRE";
 //	$PASSWORD	= "LtLt1505#";
   $USERNAME     = "Test";
-  $PASSWORD     = "12345";
+  $PASSWORD     = "";
 	$DATABASE   	= "administration";
 
 # The next variable is to assgin by default the last and next maintance of an activity
