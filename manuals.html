@@ -48,27 +48,25 @@
             
                 <!-- Modal body -->
                 <div class="modal-body">
-                    <form class="form-horizontal" role="form">
+                    <form id="formUploadDocument" class="form-horizontal" role="form" enctype="multipart/form-data" method="POST">
                         <div class="form-group">
-                            <p for="documentUploaded">Seleccione el documento</p>
+                            <p for="documentToUpload">Seleccione el documento</p>
                             <div class="file-field">
-                                <input type="file" id="documentUploaded" style="background:linear-gradient(to top, #847e86, #c3c0c4);">
+                                <input name="subir_archivo" type="file" id="documentToUpload" style="background:linear-gradient(to top, #847e86, #c3c0c4);">
                            </div>
                         </div>
-                    </form>
 
-                    <form>
                         <div class="form-group">
                             <p for="descriptionDocument">Agregue descripción</p>
-                            <textarea class="form-control" rows="3" id="descriptionDocument" placeholder="Describa brevemente el contenido del manual"></textarea>
+                            <textarea name='descriptionDocument' class="form-control" rows="3" id="descriptionDocument" placeholder="Describa brevemente el contenido del manual"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="container-fluid d-flex justify-content-center">
+                                <input id="btnUploadDocument" type="submit" class="btn btn-primary" value="Enviar Archivo"/>
+                            </div>
                         </div>
                     </form>
-                </div>
-            
-                <!-- Modal footer -->
-                <div class="modal-footer justify-content-center">
-                    <button id="uploadDocumentBtn" class="btn btn-primary" onclick="javascript:alert('OK');"><span class="icon-document-landscape"></span> Cargar</button>
-                    <button type="button" class="btn btn-danger" data-toggle="modal" data-dismiss="modal"><span class="icon-circle-with-cross"></span> Cancelar</button>
                 </div>
             </div>
         </div>
