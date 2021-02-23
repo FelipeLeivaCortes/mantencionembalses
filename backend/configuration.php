@@ -1,11 +1,10 @@
 <?php
 
-	$URL		= "localhost";
-//	$USERNAME	= "JVRE";
-//	$PASSWORD	= "LtLt1505#";
-  $USERNAME     = "Test";
-  $PASSWORD     = "";
-	$DATABASE   	= "administration";
+	$URL        = "localhost";
+	$USERNAME   = "JVRE";
+	$PASSWORD   = "LtLt1505#";
+	$DATABASE   = "administration";
+  $PATH_FILES = "../docs/empresa";
 
 # The next variable is to assgin by default the last and next maintance of an activity
 	$defaultDate 	= '1900-01-01';

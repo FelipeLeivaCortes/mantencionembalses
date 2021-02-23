@@ -596,19 +596,27 @@ function delActivity(id){
             ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
         
         }else{
-            var table   = document.getElementById("tableActivities");
-
             ModalReportEvent("Operación Exitosa", "", DATA.MESSAGE);
 
-            for(var i=0; i<table.children[1].children.length; i++){
-                var arrayAux    = table.children[1].children[i].id.split(":"); 
+            var table   = document.getElementById("tableActivities");
+            var target  = "row:" + id;
 
-                if( arrayAux[1] == id ){
-                    table.deleteRow(i+1);
-                    break;
+            if( table.children[1].children.length > 1 ){
+                for(var i=0; i<table.children[1].children.length; i++){
+                    if( target == table.children[1].children[i].id ){
+                        table.deleteRow(i + 1);
+
+                        for(var j=i; j<table.children[1].children.length; j++){
+                            table.children[1].children[j].cells[0].textContent  = j + 1;
+                        }
+
+                        break;
+                    }
                 }
+
+            }else{
+                document.getElementById("containerTable").remove();
             }
-            
         }
     });
 };

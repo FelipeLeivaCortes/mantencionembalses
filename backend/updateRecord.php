@@ -63,7 +63,6 @@
                     $QUERY  	->	bind_param('ssi', $today, $nextMaintein, $idActivity);
                     $QUERY  	->  execute();
 
-                    $DATA["test"]   = $QUERY->affected_rows;
                     if( $QUERY->affected_rows == 1 ){
                         array_push($DATA, [
                             'idActivity'        => $idActivity,

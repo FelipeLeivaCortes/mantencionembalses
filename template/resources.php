@@ -11,21 +11,6 @@
         <link rel="stylesheet" href="template/sidenav.css">                     <!-- Sidenav´s css -->
 
         <script src="scripts/jquery.min.js"></script>
-    </head>
-    
-    <body>
-        <script src="scripts/sidenav.js"></script>
-        <script src="scripts/common.js"></script>
-        <script src="scripts/base.js"></script>
-        <script src="scripts/home.js"></script>
-        <script src="scripts/administration.js"></script>
-        <script src="scripts/activities.js"></script>
-        <script src="scripts/maintances.js"></script>
-        <script src="scripts/records.js"></script>
-        <script src="scripts/configuration.js"></script>
-        <script src="scripts/contactUs.js"></script>
-        <script src="scripts/manuals.js"></script>
-
         <script src="scripts/jspdf.min.js"></script>
         <script src="scripts/jspdf.plugin.autotable.min.js"></script>
         <script src="scripts/bootstrap.min.js"></script>
@@ -33,10 +18,9 @@
         <script src="scripts/html2canvas.min.js"></script>
         <script src="scripts/xlsx.full.min.js"></script>
         <script src="scripts/jszip.js"></script>
-        
-        <script src="scripts/moment.min.js"></script>
-        <script src="scripts/mdb.min.js"></script>
-
+    </head>
+    
+    <body>
         <!-- Modal Report Event -->
         <div id="ModalReportEvent" class="modal fade" role="dialog" aria-labelledby="myLargeModalLabel" style="z-index:1400;">
             <div class="modal-dialog modal-lg modal-dialog-scrollable">
