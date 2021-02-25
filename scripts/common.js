@@ -1,8 +1,8 @@
  
- function RemoveElement(id){
-    var element = document.getElementById(id);
-    element.parentNode.removeChild(element);
- }
+function RemoveElement(id){
+var element = document.getElementById(id);
+element.parentNode.removeChild(element);
+}
 
 function digits_count(number){
     var chain       = number.toString();
@@ -12,7 +12,8 @@ function digits_count(number){
 }
 
 function RecoveryPass(){
-    var status      = isValidRut("recoveryUname");
+    var rut         = document.getElementById("recoveryUname").value;
+    var status      = isValidRut(rut, "recoveryUname");
     
     if( status === true ){
         var username    = ParseRut(document.getElementById("recoveryUname").value);
@@ -29,23 +30,23 @@ console.log(DATA);
             }
         });
     }
- }
+}
  
- function ShowSpinner(Timeout){
- 
-    $("#modalSpinner").modal({
-        backdrop: "static", //remove ability to close modal with click
-        keyboard: false, //remove option to close with keyboard
-        show: true //Display loader!
-    });
-    
-    setTimeout(function() {
-      $("#modalSpinner").modal("hide");
-    }, Timeout);
-    
- }
+function ShowSpinner(Timeout){
 
- function FormatNumber(Value){
+$("#modalSpinner").modal({
+    backdrop: "static", //remove ability to close modal with click
+    keyboard: false, //remove option to close with keyboard
+    show: true //Display loader!
+});
+
+setTimeout(function() {
+    $("#modalSpinner").modal("hide");
+}, Timeout);
+
+}
+
+function FormatNumber(Value){
     
     var dot     = String(Value).split(".");
     
@@ -76,11 +77,11 @@ console.log(DATA);
     }
 }
 
- function SetTitle(Title){
-    document.getElementById("titlePage").innerHTML  = Title;
- }
+function SetTitle(Title){
+document.getElementById("titlePage").innerHTML  = Title;
+}
 
- function FormatDate(date){
+function FormatDate(date){
 
     date    = date.split('-');
     date    = date[2] + "/" + date[1] + "/" + date[0];
@@ -89,7 +90,7 @@ console.log(DATA);
    // let currentDate = newDate.toISOString().slice(0,10);
  return date;
  //   return currentDate;
- }
+}
 
 function CompareTwoDates(dateRequired, index){
     
@@ -111,87 +112,55 @@ function CompareTwoDates(dateRequired, index){
         return true;
     }
      
- }
+}
 
- function FocusOn(id){
-     document.getElementById(id).focus();
- }
+function FocusOn(id){
+    document.getElementById(id).focus();
+}
 
- function ClearTable(id){
-    var table   = document.getElementById(id);
+function ClearTable(id){
+var table   = document.getElementById(id);
+
+if( table.rows.length > 1 ){
+    var items   = table.rows.length - 1;
     
-    if( table.rows.length > 1 ){
-        var items   = table.rows.length - 1;
-        
-        for( var i=0; i<items; i++){
-            table.deleteRow(1);
-        }    
-    }
+    for( var i=0; i<items; i++){
+        table.deleteRow(1);
+    }    
+}
 
- }
+}
  
- function NormalizeString(parameter1){
+function NormalizeString(parameter1){
     var aux = parameter1.split(" ");
     aux[0]  = aux[0].toLowerCase();
     
     return aux[0].charAt(0).toUpperCase() + aux[0].slice(1);
- }
+}
 
- function CloseModal(id) {
-    $(id).modal('hide');
-    $('body').children('div:nth-last-child(1)').fadeOut();
-    $('body').children('div:nth-last-child(2)').fadeOut();
- }
+function CloseModal(id) {
+$(id).modal('hide');
+$('body').children('div:nth-last-child(1)').fadeOut();
+$('body').children('div:nth-last-child(2)').fadeOut();
+}
  
- function EventToPressEnter(Function, id){
-     
-    if( id === "" ){
-        document.addEventListener("keypress", function(event){
-            if (event.which == 13 || event.keyCode == 13){
-                window[Function]();
-            }
-        });
-        
-    }else{
-        document.getElementById(id).addEventListener("keypress", function(event){
-            if (event.which == 13 || event.keyCode == 13){
-                window[Function]();
-            }
-        });
-    }
- }
-
- function EventToChangeInput(id){
-     
-    document.getElementById(id).addEventListener("change", function(event){
-        var status  = isValidRut(id);
+function EventToPressEnter(Function, id){
+    
+if( id === "" ){
+    document.addEventListener("keypress", function(event){
+        if (event.which == 13 || event.keyCode == 13){
+            window[Function]();
+        }
     });
- }
-
- function isValidRut(id){
-	
-	var rut     = document.getElementById(id).value;
-	var regex   = /([1-9]{1})([0-9]{0,1})\.([0-9]{3})\.([0-9]{3})\-((K|k|[0-9])){1}$/g;
-	
-	if( !regex.test(rut) ){ 
-        ModalReportEvent("Error", "15", "El rut ingresado no es válido");
-	    document.getElementById(id).value   = "";
-	    return false;
-	}
-	
-	var cRut    = clearFormat(rut);
-	var cDv     = cRut.charAt(cRut.length - 1).toUpperCase();
-	var nRut    = parseInt(cRut.substr(0, cRut.length - 1));
-
-    if( computeDv(nRut).toString().toUpperCase() === cDv ){
-        return true;
-        
-    }else{
-        ModalReportEvent("Error", 16, "El dígito verificador no coincide");
-	    return false;
-    }
-
- }
+    
+}else{
+    document.getElementById(id).addEventListener("keypress", function(event){
+        if (event.which == 13 || event.keyCode == 13){
+            window[Function]();
+        }
+    });
+}
+}
 
  function isValidName(Name, index){
     var regex   = /([a-zA-Z\ \u00C0-\u00FF]){1,30}$/;
@@ -300,6 +269,7 @@ Here we only have four permissions, these are:
     
     if( regex.test(value) ){
         return value;
+
     }else{
         ModalReportEvent("Error", 29, "El N° ingresado contiene carácteres incorrectos");
         return 0;
@@ -342,66 +312,58 @@ function ParseRut(rut){
 
 function FormatRut(id){
    
-  document.getElementById(id).addEventListener("keypress", function(event){
-      var x       = event.which || event.keyCode;
-      
-      if (event.which != 13 || event.keyCode != 13){
-          var char        = String.fromCharCode(x);
-          var input       = document.getElementById(id).value;
-          
-          if( input === "" ){
-              
-          }else if( input.length == 1 ){
-              document.getElementById(id).value = input + "-";
-              
-          }else{
-              var valPrevious     = input.split("-");
-                  valPrevious[0]  = clearFormat(valPrevious[0]);
-              
-              if( valPrevious[1] === undefined ){
-                  var digits      = valPrevious[0].split("");
-                  var DV          = digits[digits.length - 1];
-                  
-                  var rut             = "";
-                  var count           = 0;
-                  
-                  for( var i=digits.length; i>0; i--){
-                      
-                      if( count == 3 ){
-                          rut     = digits[i -1] + "." + rut;
-                          count   = 1;
-                      
-                      }else{
-                          rut     = digits[i - 1] + rut;
-                          count++;
-                      }
-                  }
-                  
-                  document.getElementById(id).value = rut + "-" + DV;                   
-              }else{
-                  var value           = valPrevious[0] + "" + valPrevious[1];
-                  var valueArray      = value.split("");
-                  var rut             = "";
-                  var count           = 0;
-                  
-                  for( var i=valueArray.length; i>0; i--){
-                      
-                      if( count == 3 ){
-                          rut     = valueArray[i -1] + "." + rut;
-                          count   = 1;
-                      
-                      }else{
-                          rut     = valueArray[i - 1] + rut;
-                          count++;
-                      }
-                  }
-                  
-                  document.getElementById(id).value = rut + "-" ;
-              }
-              
-          }
-      }
-  });
+    document.getElementById(id).addEventListener("change", function(event){
+     
+        if( event.which != 13 || event.keyCode != 13 ){
+            var input   = document.getElementById(id).value;
+            var digits  = input.split("");
+
+            if( digits.length == 8 || digits.length == 9 ){
+                var rut;
+
+                if( digits.length == 8 ){
+                    rut = digits[0] + "." + digits[1] + digits[2] + digits[3] + "." + digits[4] + digits[5] + digits[6] + "-" + digits[7];
+
+                }else if( digits.length == 9 ){
+                    rut = digits[0] + digits[1] + "." + digits[2] + digits[3] + digits[4] + "." + digits[5] + digits[6] + digits[7] + "-" + digits[8];
+                
+                }
+
+                isValidRut(rut, id);
+
+            }else{
+                ModalReportEvent("Error", "15", "El rut ingresado no es válido");
+	            document.getElementById(id).value   = "";
+
+            }
+        }
+    });
+}
+
+function isValidRut(rut, id){
+	
+	var regex   = /([1-9]{1})([0-9]{0,1})\.([0-9]{3})\.([0-9]{3})\-((K|k|[0-9])){1}$/g;
+	
+	if( !regex.test(rut) ){ 
+        ModalReportEvent("Error", "15", "El rut ingresado no es válido");
+	    document.getElementById(id).value   = "";
+	    return false;
+	}
+	
+	var cRut    = clearFormat(rut);
+	var cDv     = cRut.charAt(cRut.length - 1).toUpperCase();
+	var nRut    = parseInt(cRut.substr(0, cRut.length - 1));
+
+    if( computeDv(nRut).toString().toUpperCase() === cDv ){
+        document.getElementById(id).value   = rut;
+        return true;
+        
+    }else{
+        ModalReportEvent("Error", 16, "El dígito verificador no coincide");
+        document.getElementById(id).value   = "";
+	    return false;
+    }
+
 }
 
 function GenerateRut(Value){
@@ -452,16 +414,3 @@ function clearFormat(value){
 		default	: return 11 - (suma % 11);
 	}
  }
-
-function isValidExcel(Filename, id){
-    var regex   = /([a-zA-Z0-9\ \u00C0-\u00FF]){1,30}\.(xlsx|xls)/g;
-    
-    if( !regex.test(Filename) ){
-        ModalReportEvent("Error", 39, "El archivo ingresado no es tipo excel");
-        document.getElementById(id).value  = "";
-        return false;
-        
-    }else{
-        return true;
-    }
-}

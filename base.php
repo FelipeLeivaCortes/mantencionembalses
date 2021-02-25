@@ -3,6 +3,7 @@
 	    <?php
 	        include "template/session.php";
 	    ?>
+
         <meta http-equiv="Content-Type" content="text/html; charset=gb18030">
         <meta name="viewport" content="width=device-width, user-scalable=no">
 

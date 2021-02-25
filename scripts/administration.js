@@ -4,20 +4,14 @@
     $('#bttnCloseUpdateUser').click(function(){
         $('#SearchResultsForm').modal('toggle');
     });
- 
-    FormatRut("addUname");
-    FormatRut("searchUname");
-    FormatRut("usernamePrevious");
-    FormatRut("deleteUname");
-    
+     
 //The arguments are: function, id
     EventToPressEnter("LoadUser", "searchUname");
     EventToPressEnter("SearchUser", "deleteUname");
 
-    EventToChangeInput("addUname");
-    EventToChangeInput("searchUname");
-    EventToChangeInput("usernamePrevious");
-    EventToChangeInput("deleteUname");
+    FormatRut("addUname");
+    FormatRut("searchUname");
+    FormatRut("deleteUname");
 
     GetListUsers();
     filterPermissions("Add", "change");
@@ -96,7 +90,7 @@ function GetListUsers(){
           $('#ListUsersForm').modal('show');
 	}
      });
- }
+}
 
 /*
 This function was designed to add any person to the platform.
@@ -108,10 +102,10 @@ The phone field is optional.
 */
 
 function AddUser(){
-    var status = isValidRut("addUname");
+    var rut     = document.getElementById("addUname").value;
+    var status  = isValidRut(rut, "addUname");
     
     if( status === true ){
-        var rut         = document.getElementById("addUname").value;
         var username    = ParseRut(rut);
         var name        = NormalizeString(document.getElementById("addName").value);
         status          = isValidName(name, "nombre");
@@ -177,10 +171,10 @@ function AddUser(){
 }
 
 function LoadUser(){
-    var status      = isValidRut("searchUname");
+    var rut         = document.getElementById("searchUname").value;
+    var status      = isValidRut(rut, "searchUname");
     
     if( status === true ){
-        var rut         = document.getElementById("searchUname").value;
         var username    = ParseRut(rut);
         var Variables   = "username=" + username;
         
@@ -246,10 +240,10 @@ function LoadUser(){
 
 function UpdateUser(){
     var id          = sessionStorage.getItem("idUsername");
-    var status      = isValidRut("usernamePrevious");
+    var rut         = document.getElementById("usernamePrevious").value;
+    var status      = isValidRut(rut, "usernamePrevious");
     
     if( status === true ){
-        var rut         = document.getElementById("usernamePrevious").value;
         var username    = ParseRut(rut);
         var permissions = areValidPermissions("edit");
         
@@ -298,11 +292,10 @@ function UpdateUser(){
 }
 
 function SearchUser(){
-    
-    let status      = isValidRut("deleteUname");
+    var rut         = document.getElementById("deleteUname").value;
+    let status      = isValidRut(rut, "deleteUname");
      
     if( status ){
-        let rut         = document.getElementById("deleteUname").value;
         let username    = ParseRut(rut);
         let Variables   = "username=" + username;
 

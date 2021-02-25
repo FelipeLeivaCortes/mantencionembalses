@@ -5,12 +5,6 @@ function activityInit(){
     document.getElementById("addActivityPriority").value	= "";
     document.getElementById("addActivityArea").value            = "";
 
-
-/*    if(sessionStorage.getItem('USERNAME') != 19040800){
-        document.getElementById("loadExcelBtn").disabled    = true;
-    }
-*/
-
     var idCompany   = "empresa" + sessionStorage.getItem("ID_COMPANY");
     var Variables   = "idCompany=" + idCompany;
 

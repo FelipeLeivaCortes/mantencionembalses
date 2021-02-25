@@ -167,9 +167,11 @@ function loadMaintances(){
     qr.send();
     qr.onload = function(){document.getElementById('body-container').innerHTML = qr.responseText}
 
-    var timeout = 100;
+    var timeout = 1000;
+    ShowSpinner(1000);
+    
     setTimeout(function(){
-        maintancesInit();
+        document.getElementById("idRecord").focus();
     }, timeout);
 }
 
@@ -185,12 +187,6 @@ function loadRecords(){
     qr.open('get', 'records.html');
     qr.send();
     qr.onload = function(){document.getElementById('body-container').innerHTML = qr.responseText}
-
-    var timeout = 1000;
-    ShowSpinner(timeout);
-    setTimeout(function(){
-        recordInit();
-    }, timeout);
 }
 
 function loadConfiguration(){

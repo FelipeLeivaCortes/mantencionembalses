@@ -1,5 +1,27 @@
-<html>
+<html>    
     <body>
+        <div>
+            <form class="form-horizontal" role="form">
+                <div class="form-group">
+                    <div class="my-custom-scrollbar table-reponsive-xl">
+                        <table class="table table-striped" id="ListActivities">    
+                            <thead>
+                                <tr>
+                                    <th scope="col">N°</th>
+                                    <th scope="col">Nombre</th>
+                                    <th scope="col">Ubicación</th>
+                                    <th scope="col">Ultima Mantanción</th>
+                                    <th scope="col">Días de atraso</th>
+                                    <th scope="col">Prioridad</th>
+                                    <th scope="col">Observación</th>
+                                    <th scope="col">Seleccionar</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
+            </form>
+        </div>
     </body>
 
     <style>
@@ -124,34 +146,4 @@
         </div>
     </div>
 
-    <!------------------------------ Modal Report Event ----------------------------------------------->
-    <div id="ModalConfirmEvent" class="modal fade" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" style="z-index:1500;">
-        <div class="modal-dialog modal-md modal-dialog-scrollable">
-    
-        <!-- Modal content-->
-            <div class="modal-content">
-                
-                <!-- Modal Header -->
-                <div class="modal-header">
-                    <h4 id="headerEvent" class="modal-title"><span class="icon-add-user"></span> Reporte de evento</h4>
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                </div>
-          
-                <!-- Modal body -->
-                <div class="modal-body">
-                    <div class="d-flex flex-column">
-                        <div class="row">
-                            <div class="col-12"><p id="bodyEvent"></p></div>
-                        </div>
-                    </div>    
-                </div>
-          
-                <!-- Modal footer -->
-                <div class="modal-footer justify-content-center">
-                    <button id="btnConfirm" type="button" class="btn btn-success" data-toggle="modal" data-dismiss="modal">Confirmar</button>
-                    <button type="button" class="btn btn-danger" data-toggle="modal" data-dismiss="modal"><span class="icon-circle-with-cross"></span> Cancelar</button>
-                </div>
-            </div>
-        </div>
-    </div>
 </html>

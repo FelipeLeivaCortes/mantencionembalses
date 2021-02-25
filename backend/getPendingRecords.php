@@ -18,7 +18,8 @@
         $QUERY  ->  store_result();
         $QUERY  ->  bind_result($id, $startDate);
 
-        $DATA["count"]  = $QUERY->num_rows;
+        $DATA["COUNT"]  = $QUERY->num_rows;
+
         while ( $QUERY -> fetch() ){
             array_push($DATA, [
                 'id'        => $id,
