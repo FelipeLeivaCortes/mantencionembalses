@@ -1,11 +1,12 @@
 function initHome(){
     $('#listActivities').filterByText($('#filterActivities'));
-    var delay = 2000;
+    var delay = 1000;
 
-    ShowSpinner(delay);    
     setTimeout(function(){
         document.getElementById("areaFilter").value         = "";
         document.getElementById("listActivities").disabled  = true;
+
+        CloseSpinner();
     }, delay);
 
 }
@@ -40,16 +41,19 @@ jQuery.fn.filterByText = function(textbox) {
   };
 
 function getActivitesPerArea(){
+    ShowSpinner();
+
     var idCompany   = "empresa" + sessionStorage.getItem("ID_COMPANY");
     var area        = document.getElementById("areaFilter").value;
     var Variables   = "idCompany=" + idCompany + "&area=" + area;
 
     $.post("backend/getActivitiesPerArea.php", Variables, function(DATA){
-        var delay   = 1000;
-        ShowSpinner(delay);
-
+        
         if(DATA.ERROR){
-            ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
+            setTimeout(function(){
+                CloseSpinner();
+                ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
+            }, 1000);
         
         }else{
             $('#listActivities').empty();
@@ -64,12 +68,16 @@ function getActivitesPerArea(){
             select.value    = "";
 
             document.getElementById("listActivities").disabled  = false;
+
+            CloseSpinner();
         }
 
     });
 }
 
 function getRecordsPerActivity(){
+    $('#historyRecordForm').modal('toggle');
+
     var activityName;
     var activitySelected    = document.getElementById("listActivities").value;
 
@@ -87,6 +95,8 @@ function getRecordsPerActivity(){
             $('#historyRecordForm').modal('toggle');
         
         }else{
+            ShowSpinner();
+
             var idCompany   = "empresa" + sessionStorage.getItem("ID_COMPANY");
             var position    = document.getElementById("listActivities").selectedIndex;
             var id          = document.getElementById("listActivities").children[position].id;
@@ -94,185 +104,179 @@ function getRecordsPerActivity(){
             var Variables   = "idCompany=" + idCompany + "&idActivity=" + id;
     
             $.post("backend/getRecordsPerActivity.php", Variables, function(DATA){
-                var delay   = 5000;
-                ShowSpinner(delay);
-    
-                setTimeout(function(){
-                    
-                    if(DATA.ERROR){
+                if( DATA.ERROR ){
+                    setTimeout(function(){
+                        CloseSpinner();
+
                         ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
 
-			try{
-                           document.getElementById("containerButton").children[0].remove();
-                           document.getElementById("formContainer").remove();
-			
-			}catch(e){                    
-			   console.log(e);
-
-			}
-
-                    }else{
-    
-                        var formContainer   = document.createElement("form");
-                            formContainer.setAttribute("id", "formContainer");
-                            formContainer.setAttribute("class", "form-horizontal");
-                            formContainer.setAttribute("role", "form");
-    
-                        // Name of the activity
-                        var divNameActivity = document.createElement("div");
-                            divNameActivity.setAttribute("id", "containerActivityName");    
-                            divNameActivity.setAttribute("class", "form-group row");
-                            divNameActivity.setAttribute("style", "margin-left: 2%;");
-                            divNameActivity.setAttribute("style", "margin-top: 3%;");
-    
-                        var labelNameActivity   = document.createElement("label");
-                            labelNameActivity.innerHTML = "Nombre: ";
-    
-                        var nameActivity            = document.createElement("p");
-                            nameActivity.innerHTML  = document.getElementById("listActivities").value;
-                            nameActivity.setAttribute("id", "activityName");
-    
-                        divNameActivity.appendChild(labelNameActivity);
-                        divNameActivity.appendChild(nameActivity);
-                        formContainer.appendChild(divNameActivity);
-    
-                        // Area of the activity
-    
-                        var divAreaActivity = document.createElement("div");
-                            divNameActivity.setAttribute("id", "containerActivityArea");
-                            divAreaActivity.setAttribute("class", "form-group row");
-                            divAreaActivity.setAttribute("style", "margin-left: 2%;");
-                            divAreaActivity.setAttribute("style", "margin-top: 3%;");
-    
-                        var labelAreaActivity   = document.createElement("label");
-                            labelAreaActivity.innerHTML = "Área:   ";
-    
-                        var areaActivity            = document.createElement("p");
-                            areaActivity.innerHTML  = document.getElementById("areaFilter").value;
-                            nameActivity.setAttribute("id", "activityArea");
-    
-                        divAreaActivity.appendChild(labelAreaActivity);
-                        divAreaActivity.appendChild(areaActivity);
-                        formContainer.appendChild(divAreaActivity);
-    
-                        //  Body with the record relationated with some activity
-    
-                        var divTable    = document.createElement("div");
-                            divTable.setAttribute("class", "table-modal table-reponsive-xl");
-    
-                        var table       = document.createElement("table");
-                            table.setAttribute("class", "table table-striped");
-                            table.setAttribute("id", "tableRecords");
-    
-                        var thead               = document.createElement("thead");
-                        var rowHead             = document.createElement("tr");
-    
-                        var indexHeadCell       = document.createElement("th");
-                        var usernameHeadCell    = document.createElement("th");
-                        var startDateHeadCell   = document.createElement("th");
-                        var endDateHeadCell     = document.createElement("th");
-                        var statusHeadCell      = document.createElement("th");
-    
-                        indexHeadCell.setAttribute("scope", "col");
-                        usernameHeadCell.setAttribute("scope", "col");
-                        startDateHeadCell.setAttribute("scope", "col");
-                        endDateHeadCell.setAttribute("scope", "col");
-                        statusHeadCell.setAttribute("scope", "col");
-    
-                        var indexHead           = document.createTextNode("N°");
-                        var usernameHead        = document.createTextNode("Encargado");
-                        var startDateHead       = document.createTextNode("Fecha de Inicio");
-                        var endDateHead         = document.createTextNode("Fecha de Término");
-                        var statusHead          = document.createTextNode("Estado");
-
-                        indexHeadCell.appendChild(indexHead);
-                        usernameHeadCell.appendChild(usernameHead);
-                        startDateHeadCell.appendChild(startDateHead);
-                        endDateHeadCell.appendChild(endDateHead);
-                        statusHeadCell.appendChild(statusHead);
-    
-                        rowHead.appendChild(indexHeadCell);
-                        rowHead.appendChild(usernameHeadCell);
-                        rowHead.appendChild(startDateHeadCell);
-                        rowHead.appendChild(endDateHeadCell);
-                        rowHead.appendChild(statusHeadCell);
-    
-                        thead.appendChild(rowHead);
-                        table.appendChild(thead);
-    
-                        var bodyTable   = document.createElement("tbody");
-    
-                        // Create the rows
-                        for (var i = 0; i < DATA.count; i++){
-    
-                            // Here is created every row
-                            var row             = document.createElement("tr");
-    
-                            // Here is created every cell
-                            var indexCell	= document.createElement("td");
-                            var usernameCell	= document.createElement("td");
-                            var startDateCell	= document.createElement("td");
-                            var endDateCell	= document.createElement("td");
-                            var statusCell	= document.createElement("td");
-    
-                            // Here is storaged the content into a node
-                            var index           = document.createTextNode( i + 1 );
-                            var username	= document.createTextNode( DATA[i].name + " " + DATA[i].lastname );
-                            var startDate	= document.createTextNode( FormatDate(DATA[i].startDate) );
-                            var endDate;
-                            var status
-    
-                            if( DATA[i].statusRecord == 0 ){
-				endDate	= document.createTextNode("Pendiente");
-                                status	= document.createTextNode("Pendiente");
-
-                            }else{
-				endDate	= document.createTextNode( FormatDate(DATA[i].endDate) );
-                                status	= document.createTextNode("Aprobada");
-                            }
-    
-                            // Here is inserted the content into the cells
-                            indexCell.appendChild(index);
-                            usernameCell.appendChild(username);
-                            startDateCell.appendChild(startDate);
-                            endDateCell.appendChild(endDate);
-                            statusCell.appendChild(status);
-    
-                            // Here is inserted the cells into a row
-                            row.appendChild(indexCell);
-                            row.appendChild(usernameCell);
-                            row.appendChild(startDateCell);
-                            row.appendChild(endDateCell);
-                            row.appendChild(statusCell);
-    
-                            // Here is inserted the row into the table´s body
-                            bodyTable.appendChild(row);
+                        try{
+                            document.getElementById("containerButton").children[0].remove();
+                            document.getElementById("formContainer").remove();
+                        }catch(e){                    
+                            console.log(e);
                         }
-    
-                        // Here is inserted the body´s table into the table
-                        table.appendChild(bodyTable);
-                        divTable.appendChild(table);
-                        formContainer.appendChild(divTable);
-                        document.getElementById("body-container").appendChild(formContainer);
-    
-                        if( document.getElementById("containerButton").children[0] == null ){
-                            var buttonPDF       = document.createElement("button");
-                            var iconPrint       = document.createElement("span");
-                                iconPrint.setAttribute("class", "icon-print");
-    
-                            buttonPDF.appendChild(iconPrint);
-                            buttonPDF.textContent = " Imprimir";
-                            buttonPDF.setAttribute("onclick", "javascript:printPDF(); return false");
-                            buttonPDF.setAttribute("class", "btn btn-primary");
-                        
-                            document.getElementById("containerButton").appendChild(buttonPDF);
+                    }, 500)
+
+                }else{
+
+                    var formContainer   = document.createElement("form");
+                        formContainer.setAttribute("id", "formContainer");
+                        formContainer.setAttribute("class", "form-horizontal");
+                        formContainer.setAttribute("role", "form");
+
+                    // Name of the activity
+                    var divNameActivity = document.createElement("div");
+                        divNameActivity.setAttribute("id", "containerActivityName");    
+                        divNameActivity.setAttribute("class", "form-group row");
+                        divNameActivity.setAttribute("style", "margin-left: 2%;");
+                        divNameActivity.setAttribute("style", "margin-top: 3%;");
+
+                    var labelNameActivity   = document.createElement("label");
+                        labelNameActivity.innerHTML = "Nombre: ";
+
+                    var nameActivity            = document.createElement("p");
+                        nameActivity.innerHTML  = document.getElementById("listActivities").value;
+                        nameActivity.setAttribute("id", "activityName");
+
+                    divNameActivity.appendChild(labelNameActivity);
+                    divNameActivity.appendChild(nameActivity);
+                    formContainer.appendChild(divNameActivity);
+
+                    // Area of the activity
+
+                    var divAreaActivity = document.createElement("div");
+                        divNameActivity.setAttribute("id", "containerActivityArea");
+                        divAreaActivity.setAttribute("class", "form-group row");
+                        divAreaActivity.setAttribute("style", "margin-left: 2%;");
+                        divAreaActivity.setAttribute("style", "margin-top: 3%;");
+
+                    var labelAreaActivity   = document.createElement("label");
+                        labelAreaActivity.innerHTML = "Área:   ";
+
+                    var areaActivity            = document.createElement("p");
+                        areaActivity.innerHTML  = document.getElementById("areaFilter").value;
+                        nameActivity.setAttribute("id", "activityArea");
+
+                    divAreaActivity.appendChild(labelAreaActivity);
+                    divAreaActivity.appendChild(areaActivity);
+                    formContainer.appendChild(divAreaActivity);
+
+                    //  Body with the record relationated with some activity
+
+                    var divTable    = document.createElement("div");
+                        divTable.setAttribute("class", "table-modal table-reponsive-xl");
+
+                    var table       = document.createElement("table");
+                        table.setAttribute("class", "table table-striped");
+                        table.setAttribute("id", "tableRecords");
+
+                    var thead               = document.createElement("thead");
+                    var rowHead             = document.createElement("tr");
+
+                    var indexHeadCell       = document.createElement("th");
+                    var usernameHeadCell    = document.createElement("th");
+                    var startDateHeadCell   = document.createElement("th");
+                    var endDateHeadCell     = document.createElement("th");
+                    var statusHeadCell      = document.createElement("th");
+
+                    indexHeadCell.setAttribute("scope", "col");
+                    usernameHeadCell.setAttribute("scope", "col");
+                    startDateHeadCell.setAttribute("scope", "col");
+                    endDateHeadCell.setAttribute("scope", "col");
+                    statusHeadCell.setAttribute("scope", "col");
+
+                    var indexHead           = document.createTextNode("N°");
+                    var usernameHead        = document.createTextNode("Encargado");
+                    var startDateHead       = document.createTextNode("Fecha de Inicio");
+                    var endDateHead         = document.createTextNode("Fecha de Término");
+                    var statusHead          = document.createTextNode("Estado");
+
+                    indexHeadCell.appendChild(indexHead);
+                    usernameHeadCell.appendChild(usernameHead);
+                    startDateHeadCell.appendChild(startDateHead);
+                    endDateHeadCell.appendChild(endDateHead);
+                    statusHeadCell.appendChild(statusHead);
+
+                    rowHead.appendChild(indexHeadCell);
+                    rowHead.appendChild(usernameHeadCell);
+                    rowHead.appendChild(startDateHeadCell);
+                    rowHead.appendChild(endDateHeadCell);
+                    rowHead.appendChild(statusHeadCell);
+
+                    thead.appendChild(rowHead);
+                    table.appendChild(thead);
+
+                    var bodyTable   = document.createElement("tbody");
+
+                    // Create the rows
+                    for (var i = 0; i < DATA.count; i++){
+
+                        // Here is created every row
+                        var row             = document.createElement("tr");
+
+                        // Here is created every cell
+                        var indexCell	= document.createElement("td");
+                        var usernameCell	= document.createElement("td");
+                        var startDateCell	= document.createElement("td");
+                        var endDateCell	= document.createElement("td");
+                        var statusCell	= document.createElement("td");
+
+                        // Here is storaged the content into a node
+                        var index           = document.createTextNode( i + 1 );
+                        var username	= document.createTextNode( DATA[i].name + " " + DATA[i].lastname );
+                        var startDate	= document.createTextNode( FormatDate(DATA[i].startDate) );
+                        var endDate;
+                        var status
+
+                        if( DATA[i].statusRecord == 0 ){
+                            endDate	= document.createTextNode("Pendiente");
+                            status	= document.createTextNode("Pendiente");
+
+                        }else{
+                            endDate	= document.createTextNode( FormatDate(DATA[i].endDate) );
+                            status	= document.createTextNode("Aprobada");
                         }
-    
-                        $('#historyRecordForm').modal('toggle');
-    
+
+                        // Here is inserted the content into the cells
+                        indexCell.appendChild(index);
+                        usernameCell.appendChild(username);
+                        startDateCell.appendChild(startDate);
+                        endDateCell.appendChild(endDate);
+                        statusCell.appendChild(status);
+
+                        // Here is inserted the cells into a row
+                        row.appendChild(indexCell);
+                        row.appendChild(usernameCell);
+                        row.appendChild(startDateCell);
+                        row.appendChild(endDateCell);
+                        row.appendChild(statusCell);
+
+                        // Here is inserted the row into the table´s body
+                        bodyTable.appendChild(row);
                     }
-    
-                }, delay);
+
+                    // Here is inserted the body´s table into the table
+                    table.appendChild(bodyTable);
+                    divTable.appendChild(table);
+                    formContainer.appendChild(divTable);
+                    document.getElementById("body-container").appendChild(formContainer);
+
+                    if( document.getElementById("containerButton").children[0] == null ){
+                        var buttonPDF       = document.createElement("button");
+                        var iconPrint       = document.createElement("span");
+                            iconPrint.setAttribute("class", "icon-print");
+
+                        buttonPDF.appendChild(iconPrint);
+                        buttonPDF.textContent = " Imprimir";
+                        buttonPDF.setAttribute("onclick", "javascript:printPDF(); return false");
+                        buttonPDF.setAttribute("class", "btn btn-primary");
+                    
+                        document.getElementById("containerButton").appendChild(buttonPDF);
+                    }
+
+                    CloseSpinner();
+                }
                 
             });
         }

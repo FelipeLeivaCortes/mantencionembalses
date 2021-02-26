@@ -110,7 +110,11 @@ function loadHome(){
     qr.send();
     qr.onload = function(){document.getElementById('body-container').innerHTML = qr.responseText}
 
-    initHome();
+    ShowSpinner();
+
+    setTimeout(function(){
+        initHome();
+    }, 1000);
 }
 
 function loadUsers(){
@@ -126,11 +130,11 @@ function loadUsers(){
     qr.send();
     qr.onload = function(){document.getElementById('body-container').innerHTML = qr.responseText}
 
-    var timeout = 1000;
-    ShowSpinner(timeout);
+    ShowSpinner();
+
     setTimeout(function(){
-        AdministrationInit();
-    }, timeout);
+        initAdministration();
+    }, 1000);
 }
 
 function loadActivities(){
@@ -146,11 +150,11 @@ function loadActivities(){
     qr.send();
     qr.onload = function(){document.getElementById('body-container').innerHTML = qr.responseText}
 
-    var timeout = 1000;
-    ShowSpinner(timeout);
+    ShowSpinner();
+
     setTimeout(function(){
-        activityInit();
-    }, timeout);
+        initActivity();
+    }, 1000);
     
 }
 
@@ -200,11 +204,11 @@ function loadConfiguration(){
         document.getElementById('navbar-container').innerHTML = "<div></div>";
     }
 
-    var timeout = 500;
-    ShowSpinner(timeout);
+    ShowSpinner();
+    
     setTimeout(function(){
-        ConfigurationInit();
-    }, timeout);
+        initConfiguration();
+    }, 500);
 }
 
 function loadContacts(){
@@ -238,9 +242,9 @@ function loadManuals(){
     qr.send();
     qr.onload = function(){document.getElementById('body-container').innerHTML = qr.responseText;};
 
-    var timeout = 500;
-    ShowSpinner(timeout);
+    ShowSpinner();
+
     setTimeout(function(){
-        ManualsInit();
-    }, timeout);
+        initManuals();
+    }, 500);
 }

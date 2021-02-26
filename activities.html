@@ -1,23 +1,5 @@
 <html>
     <body>
-        <div>
-            <form class="form-horizontal" role="form">
-                <div class="form-group">
-                    <div class="my-custom-scrollbar table-reponsive-xl">
-                        <table class="table table-striped" id="tableActivities">    
-                            <thead>
-                                <tr>
-                                    <th scope="col">N°</th>
-                                    <th scope="col">Nombre</th>
-                                    <th scope="col">Área</th>
-                                    <th scope="col2">Acción</th>
-                                </tr>
-                            </thead>
-                        </table>
-                    </div>
-                </div>
-            </form>
-        </div>
     </body>
 
     <style>
@@ -257,7 +239,7 @@
             
                 <!-- Modal footer -->
                 <div class="modal-footer justify-content-center">
-                    <button id="loadActivitiesBtn" class="btn btn-primary" onclick="javascript:alert('Load calendar');"><span class="icon-magnifying-glass"></span> Buscar</button>
+                    <button id="loadActivitiesBtn" class="btn btn-primary" onclick="javascript:loadCalendar();"><span class="icon-magnifying-glass"></span> Buscar</button>
                     <button type="button" class="btn btn-danger" data-toggle="modal" data-dismiss="modal"><span class="icon-circle-with-cross"></span> Cancelar</button>
                 </div>
             </div>

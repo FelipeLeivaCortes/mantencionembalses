@@ -32,18 +32,12 @@ console.log(DATA);
     }
 }
  
-function ShowSpinner(Timeout){
+function ShowSpinner(){
+    $("#modalSpinner").modal('show');
+}
 
-$("#modalSpinner").modal({
-    backdrop: "static", //remove ability to close modal with click
-    keyboard: false, //remove option to close with keyboard
-    show: true //Display loader!
-});
-
-setTimeout(function() {
-    $("#modalSpinner").modal("hide");
-}, Timeout);
-
+function CloseSpinner(){
+    $("#modalSpinner").modal("toggle");
 }
 
 function FormatNumber(Value){
@@ -92,24 +86,34 @@ function FormatDate(date){
  //   return currentDate;
 }
 
-function CompareTwoDates(dateRequired, index){
-    
-   var today	= new Date();
-   today	= today.toISOString().slice(0,10);
+function CompareTwoDates(dateAux, index){
+    var today   = new Date();
+    today       = today.toISOString().slice(0,10);
 
-   var date	= new Date(dateRequired);
-   date		= date.toISOString().slice(0,10);
+    dateAux     = dateAux.split("-");
 
-    if( date < today ){
-        if(index == -1){
-            ModalReportEvent("Error", 52, "No es posible iniciar actividades en periodos anteriores a hoy");
+    if( dateAux.length == 3 ){
+        dateRequired    = dateAux[2] + "-" + dateAux[1] + "-" + dateAux[0];
+
+        var date    = new Date( dateRequired );
+        date        = date.toISOString().slice(0,10);
+
+        if( date < today ){
+            if(index == -1){
+                ModalReportEvent("Error", 52, "No es posible iniciar actividades en periodos anteriores a hoy");
+            }else{
+                ModalReportEvent("Error", 47, "La fecha de inicio en la fila " + index + " es previa al dia de hoy");
+            }
+
+            return false;
         }else{
-            ModalReportEvent("Error", 47, "La fecha de inicio en la posición " + index + " es previa al dia de hoy");
+            return true;
         }
 
-        return false;
     }else{
-        return true;
+        if( index != -1){
+            ModalReportEvent("Error", 64, "La fecha de inicio en la fila " + index + " contiene un error de escritura");
+        }
     }
      
 }

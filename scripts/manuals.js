@@ -1,77 +1,74 @@
-function ManualsInit(){
-    var delay   = 2000;
 
-    ShowSpinner(delay);
+function initManuals(){
+    document.getElementById("btnUploadDocument").disabled   = true;
 
-    setTimeout(function(){
-        document.getElementById("btnUploadDocument").disabled   = true;
-    
-        document.getElementById('documentToUpload').addEventListener('change', VerifyNameDocument, false);
-        document.getElementById('formUploadDocument').addEventListener('submit', function(e){
-            e.preventDefault();
-
-            var delay   = 2000;
-            ShowSpinner(delay);
+    document.getElementById('documentToUpload').addEventListener('change', VerifyNameDocument, false);
+    document.getElementById('formUploadDocument').addEventListener('submit', function(e){
+        e.preventDefault();
             
-            setTimeout(function(){
-                
-                var description = document.getElementById("descriptionDocument").value;
-                var file        = document.getElementById("documentToUpload").value;
+        var description = document.getElementById("descriptionDocument").value;
+        var file        = document.getElementById("documentToUpload").value;
 
-                if( file != "" ){
-                    if( description != "" ){
-                        var formData    = new FormData(document.getElementById("formUploadDocument"));
+        if( file != "" ){
+            if( description != "" ){
+                $('#uploadDocumentForm').modal('toggle');
 
-                        formData.append('nameFile', document.getElementById("documentToUpload").value.slice(12));
-                        formData.append('ID_COMPANY', sessionStorage.getItem('ID_COMPANY'));
-                        formData.append('description', description);
-                        formData.append('username', sessionStorage.getItem('USERNAME'));
+                ShowSpinner();
 
-                        $.ajax({
-                            url: "backend/addDocument.php",
-                            type: "post",
-                            dataType: "html",
-                            data: formData,
-                            cache: false,
-                            contentType: false,
-                            processData: false
-                        })
-                        .done(function(DATA){
-                            DATA    = JSON.parse(DATA);
-                            
-                            if( DATA.ERROR ){
-                                ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
+                var formData    = new FormData(document.getElementById("formUploadDocument"));
 
-                                $('#uploadDocumentForm').modal('toggle');
-                                document.getElementById('documentToUpload').value       = "";
-                                document.getElementById("descriptionDocument").value   = "";
+                formData.append('nameFile', document.getElementById("documentToUpload").value.slice(12));
+                formData.append('ID_COMPANY', sessionStorage.getItem('ID_COMPANY'));
+                formData.append('description', description);
+                formData.append('username', sessionStorage.getItem('USERNAME'));
 
-                            }else{
-                                ModalReportEvent("Operación exitosa", "", DATA.MESSAGE);
+                $.ajax({
+                    url: "backend/addDocument.php",
+                    type: "post",
+                    dataType: "html",
+                    data: formData,
+                    cache: false,
+                    contentType: false,
+                    processData: false
+                })
+                .done(function(DATA){
+                    DATA    = JSON.parse(DATA);
+                    
+                    if( DATA.ERROR ){
+                        setTimeout(function(){
+                            CloseSpinner();
 
-                                $('#uploadDocumentForm').modal('toggle');
-                                document.getElementById('documentToUpload').value       = "";
-                                document.getElementById("descriptionDocument").value   = "";
-
-                                getManuals();
-                            }
-                        });
+                            ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
+                        
+                            document.getElementById('documentToUpload').value       = "";
+                            document.getElementById("descriptionDocument").value   = "";
+                        }, 500);
 
                     }else{
-                        ModalReportEvent("Error", 54, "No se ha agregado ninguna descripción al documento");
+                        setTimeout(function(){
+                            document.getElementById('documentToUpload').value       = "";
+                            document.getElementById("descriptionDocument").value   = "";
+
+                            getManuals();
+
+                            ModalReportEvent("Operación exitosa", "", DATA.MESSAGE);
+                        }, 500);
+                        
                     }
+                });
 
-                }else{
-                    ModalReportEvent("Error", 56, "No se ha seleccionado ningun documento");
-                }
-            }, delay);
+            }else{
+                ModalReportEvent("Error", 54, "No se ha agregado ninguna descripción al documento");
+            }
 
-        });
-    
-    }, delay - 1000);
-    
+        }else{
+            ModalReportEvent("Error", 56, "No se ha seleccionado ningun documento");
+        }
+
+    });
+        
     getManuals();
-}
+};
 
 function VerifyNameDocument(){
 
@@ -85,11 +82,11 @@ function VerifyNameDocument(){
         document.getElementById("btnUploadDocument").disabled   = false;
             
     }else{
-        ModalReportEvent("Error", 53, "El archivo ingresado no es tipo pdf");
+        ModalReportEvent("Error", 53, "El archivo ingresado no es tipo pdf");
         document.getElementById("btnUploadDocument").disabled   = true;
         document.getElementById("documentToUpload").value       = "";
     }
-}
+};
 
 function getManuals(){
     var idCompany   = 'empresa' + sessionStorage.getItem('ID_COMPANY');
@@ -98,7 +95,10 @@ function getManuals(){
     $.post("backend/getManuals.php", Variables, function(DATA){
 
         if( DATA.ERROR ){
-            ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
+            setTimeout(function(){
+                CloseSpinner();
+                ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
+            }, 500);
         
         }else{
             var table;
@@ -242,6 +242,8 @@ function getManuals(){
             table.appendChild(bodyTable);
             divTable.appendChild(table);
             document.getElementById("body-container").appendChild(divTable);
+
+            CloseSpinner();
         }
     });
 };
@@ -281,20 +283,26 @@ function editDocument(idFile, extension, oldNameFile, oldDescription){
         ModalReportEvent("Advertencia", "", "No se han realizado cambios");
     
     }else{
-        
+        $('#ModalConfirmEvent').modal('toggle');
+        $('#editDocumentForm').modal('toggle');
+
+        ShowSpinner();
+
         var Variables   = "idFile=" + idFile + "&idCompany=" + idCompany + "&newNameFile=" + newNameFile + "&newDescription=" + newDescription;
 
         $.post("backend/updateDocument.php", Variables, function(DATA){
-            $('#ModalConfirmEvent').modal('toggle');
-            $('#editDocumentForm').modal('toggle');
-
             if( DATA.ERROR  == true ){
-                ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
+                setTimeout(function(){
+                    CloseSpinner();
+
+                    ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
+                }, 500);
 
             }else{
-                ModalReportEvent("Operación Exitosa", "", DATA.MESSAGE);
-                getManuals();
-                
+                setTimeout(function(){
+                    getManuals();
+                    ModalReportEvent("Operación Exitosa", "", DATA.MESSAGE);
+                }, 500);
             }
         });
     }

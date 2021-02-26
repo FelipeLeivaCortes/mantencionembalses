@@ -1,10 +1,9 @@
-
- function AdministrationInit(){
+ function initAdministration(){
     
     $('#bttnCloseUpdateUser').click(function(){
         $('#SearchResultsForm').modal('toggle');
     });
-     
+        
 //The arguments are: function, id
     EventToPressEnter("LoadUser", "searchUname");
     EventToPressEnter("SearchUser", "deleteUname");
@@ -14,7 +13,10 @@
     FormatRut("deleteUname");
 
     GetListUsers();
+    
     filterPermissions("Add", "change");
+
+    CloseSpinner();
 }
 
 function GetListUsers(){

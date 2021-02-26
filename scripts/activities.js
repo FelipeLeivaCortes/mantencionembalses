@@ -1,19 +1,20 @@
-function activityInit(){
+function initActivity(){
     document.getElementById('activitiesExcel').addEventListener('change', handleExcelProject, false);
+
     document.getElementById("loadActivitiesBtn").disabled       = true;
     document.getElementById("addActivityFrecuency").value       = "";
-    document.getElementById("addActivityPriority").value	= "";
+    document.getElementById("addActivityPriority").value	    = "";
     document.getElementById("addActivityArea").value            = "";
 
     var idCompany   = "empresa" + sessionStorage.getItem("ID_COMPANY");
     var Variables   = "idCompany=" + idCompany;
 
     $.post("backend/getLocations.php", Variables, function(DATA){
-
         if(DATA.ERROR){
+            CloseSpinner();
             ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
-        }else{
 
+        }else{
             var selectAdd       = document.getElementById("addActivityLocation");
             var selectFilter    = document.getElementById("filterLocation");
 
@@ -34,20 +35,15 @@ function activityInit(){
 
             selectAdd.value     = "";
             selectFilter.value  = "--- TODAS ---";
+
+            CloseSpinner();
         }
     });
-
-    var delay = 7000;
-    ShowSpinner(delay);
-    setTimeout(function(){
-    }, delay);
 };
 
 function handleExcelProject(){
 
-    var delay = 2000;
-
-    ShowSpinner(delay);
+    ShowSpinner();
 
     //Reference the FileUpload element.
     var fileUpload = document.getElementById("activitiesExcel");
@@ -104,17 +100,29 @@ function ProcessExcel(data){
     //Read all rows from First Sheet into an JSON array.
     var excelRows = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[firstSheet]);
     sessionStorage.setItem("ACTIVITIES", JSON.stringify(excelRows));
+    
+    setTimeout(function(){
+        CloseSpinner();
+    }, 500);
+    
 };
 
 function LoadActivitiesFromExcel(){
+    ShowSpinner();
+
     document.getElementById("loadActivitiesBtn").disabled    = true;
     var data   = JSON.parse(sessionStorage.getItem("ACTIVITIES"));
     sessionStorage.removeItem('ACTIVITIES');
     document.getElementById("activitiesExcel").value    = "";
 
-    if(data.length > 0){
-        ShowSpinner(20000);
-
+    if(data.length == 0){
+        
+        setTimeout(function(){
+            CloseSpinner();
+            ModalReportEvent("Error", 41, "No hay actividades en el documento Excel");
+        }, 500);
+    
+    }else{
         var arrayNames      = [];
         var arrayDateStart  = [];
         var arrayFrecuency  = [];
@@ -132,7 +140,7 @@ function LoadActivitiesFromExcel(){
         for(var i=0; i<data.length; i++){
             var j = i + 2;
             if(isValidActivityName(data[i].Nombre, j )){
-                if(CompareTwoDates(data[i].FechaInicio, j)){
+                if(CompareTwoDates(data[i].FechaInicio, j )){
                     if(parseStringToDate(data[i].Frecuencia, j) != 0 ){
                         if(isValidLocation(data[i].Ubicacion, j)){
                             if(isValidPriority(data[i].Prioridad, j)){
@@ -142,9 +150,9 @@ function LoadActivitiesFromExcel(){
                                     arrayFrecuency.push( parseStringToDate(data[i].Frecuencia, -1 ));
                                     arrayLocation.push( data[i].Ubicacion );
 					
-				    var aux1 	= data[i].Prioridad.split(" ");
-				    aux1[0]	= aux1[0].toLowerCase();
-				    var aux2	= aux1[0].charAt(0).toUpperCase() + aux1[0].slice(1);
+                                    var aux1 	= data[i].Prioridad.split(" ");
+                                    aux1[0]	= aux1[0].toLowerCase();
+                                    var aux2	= aux1[0].charAt(0).toUpperCase() + aux1[0].slice(1);
 
                                     arrayPriority.push( aux2 );
                                     arrayArea.push( data[i].Area );
@@ -178,13 +186,19 @@ function LoadActivitiesFromExcel(){
 
         data    = null;
 
-        if(!error){
+        if(error){
+            setTimeout(function(){
+                CloseSpinner();
+            }, 500);
+
+        }else{
             var idCompany   = "empresa" + sessionStorage.getItem("ID_COMPANY");
             var Variables   = "idCompany=" + idCompany + "&names=" + JSON.stringify(arrayNames) + "&dates=" + JSON.stringify(arrayDateStart) + "&frecuencies=" + JSON.stringify(arrayFrecuency) + "&locations=" + JSON.stringify(arrayLocation) + "&priorities=" + JSON.stringify(arrayPriority) + "&areas=" + JSON.stringify(arrayArea) + "&comments=" + JSON.stringify(arrayComments);
 
             $.post("backend/loadActivities.php", Variables, function(DATA){
                 console.log(DATA);
-            
+                CloseSpinner();
+
                 if(DATA.ERROR){
                     ModalReportEvent("Precausión", DATA.ERRNO, DATA.MESSAGE);
                 }else{
@@ -193,9 +207,6 @@ function LoadActivitiesFromExcel(){
                 }
             });
         }
-
-    }else{
-        ModalReportEvent("Error", 41, "No hay actividades en el documento Excel");
     }
 };
 
@@ -372,11 +383,9 @@ function parseDateToString(variable){
 };
 
 function filterActivities(){
+    $('#filterActivityForm').modal('toggle');
 
-    var delay = 1000;
-    ClearTable("tableActivities");
-
-    ShowSpinner(delay);
+    ShowSpinner();
 
     var idCompany       = "empresa" + sessionStorage.getItem("ID_COMPANY");
     var filterLocation  = document.getElementById("filterLocation").value;
@@ -400,12 +409,64 @@ function filterActivities(){
     $.post("backend/getActivities.php", Variables, function(DATA){
 
         if( DATA.ERROR  === true ){
-            ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
+            setTimeout(function(){
+                CloseSpinner();
+                ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
+            }, 1000);
 
         }else{
+            var table, divTable, idTable, idContainer;
 
-            // Create the Table´s Body
-            var table       = document.getElementById("tableActivities");
+            idTable     = "tableActivities";
+            idContainer = "containerActivities";
+
+            if( document.getElementById(idContainer) == null ){
+                divTable    = document.createElement("div");
+                divTable.setAttribute("class", "table-modal table-reponsive-xl");
+                divTable.setAttribute("id", idContainer);
+        
+                table       = document.createElement("table");
+                table.setAttribute("class", "table table-striped");
+                table.setAttribute("id", idTable);
+        
+                var thead               = document.createElement("thead");
+                var rowHead             = document.createElement("tr");
+
+                var indexHeadCell       = document.createElement("th");
+                var nameHeadCell        = document.createElement("th");
+                var areaHeadCell        = document.createElement("th");
+                var actionsHeadCell     = document.createElement("th");
+
+                indexHeadCell.setAttribute("scope", "col");
+                nameHeadCell.setAttribute("scope", "col");
+                areaHeadCell.setAttribute("scope", "col");
+                actionsHeadCell.setAttribute("scope", "col2");
+
+                var indexHead       = document.createTextNode("N°");
+                var nameHead        = document.createTextNode("Nombre");
+                var areaHead = document.createTextNode("Área");
+                var actionsHead     = document.createTextNode("Acciones");
+
+                indexHeadCell.appendChild(indexHead);
+                nameHeadCell.appendChild(nameHead);
+                areaHeadCell.appendChild(areaHead);
+                actionsHeadCell.appendChild(actionsHead);
+
+                rowHead.appendChild(indexHeadCell);
+                rowHead.appendChild(nameHeadCell);
+                rowHead.appendChild(areaHeadCell);
+                rowHead.appendChild(actionsHeadCell);
+
+                thead.appendChild(rowHead);
+                table.appendChild(thead);
+            
+            }else{
+                divTable    = document.getElementById(idContainer);
+                table       = document.getElementById(idTable);
+                ClearTable(idTable);
+
+            }
+            
             var bodyTable   = document.createElement("tbody");
         
             // Create the rows
@@ -475,16 +536,17 @@ function filterActivities(){
                 bodyTable.appendChild(row);
             }
 
-        // Here is inserted the body´s table into the table
-        table.appendChild(bodyTable);
+            // Here is inserted the body´s table into the table
+            table.appendChild(bodyTable);
+            divTable.appendChild(table);
+            document.getElementById("body-container").appendChild(divTable);
 
+            CloseSpinner();
         }
 
         document.getElementById("filterLocation").value = "--- TODAS ---";
         document.getElementById("filterArea").value     = "--- TODAS ---";
         document.getElementById("filterPriority").value = "--- TODAS ---";
-
-        $('#filterActivityForm').modal('toggle');
     });   
 };
 
@@ -614,3 +676,22 @@ function delActivity(id){
         }
     });
 };
+
+function loadCalendar(){
+    // Parameters to get the calendar
+    var idCompany   = "empresa" + sessionStorage.getItem("ID_COMPANY");
+    var year        = document.getElementById("filterDateCalendar").value;
+    var area        = document.getElementById("filterAreaCalendar").value;
+    var priority    = document.getElementById("filterPriorityCalendar").value;
+
+    var Variables   = "idCompany=" + idCompany + "&year=" + year + "&area=" + area + "&priority=" + priority;
+
+    $.post("backend/getCalendarActivities.php", Variables, function(DATA){
+        console.log(DATA);
+        if( DATA.ERROR ){
+            ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
+        }else{
+            alert("CREATE CALENDAR");
+        }
+    });
+}

@@ -2,18 +2,18 @@
     include "configuration.php";
 
 	if( empty($LINK) ){
-           $DATA["ERROR"]      = true;
-           $DATA["ERRNO"]      = 1;
+		$DATA["ERROR"]      = true;
+		$DATA["ERRNO"]      = 1;
  	   $DATA["MESSAGE"]    = "El servidor no responde";
 	
 	}else{
-		$idCompany	= $_POST["idCompany"];
+		$idCompany		= $_POST["idCompany"];
 		$name       	= $_POST["name"];
 		$dateStart  	= $_POST["date"];
-        	$frecuency  	= $_POST["frecuency"];
+        $frecuency  	= $_POST["frecuency"];
 		$location   	= $_POST["location"];
 		$priority   	= $_POST["priority"];
-		$area      	= $_POST["area"];
+		$area			= $_POST["area"];
 		$comments   	= $_POST["comments"];
 
 		$LINK	->  close();
@@ -35,7 +35,7 @@
 		  
 		  $QUERY  ->  free_result();
     		  $QUERY  =   $LINK -> prepare("INSERT INTO actividad (nombre, fechaInicio, frecuencia, sector, prioridad, area, ultimaMantencion, proximaMantencion, observacion) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);");
-    		  $QUERY  ->  bind_param('ssissssss', $name, $dateStart, $frecuency, $location, $priority, $area, $defaultDate, $defaultDate, $comments);
+    		  $QUERY  ->  bind_param('ssissssss', $name, $dateStart, $frecuency, $location, $priority, $area, $defaultDate, $dateStart, $comments);
 	       	  $QUERY  ->  execute();
 
             	  if( $QUERY->affected_rows == 1 ){

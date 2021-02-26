@@ -1,7 +1,9 @@
-function ConfigurationInit(){
+function initConfiguration(){
     EventToPressEnter("changePassword", "currentPassword");
     EventToPressEnter("changePassword", "newPassword");
     EventToPressEnter("changePassword", "confirmNewPassword");
+
+    CloseSpinner();
 }
 
 function changePassword(){
