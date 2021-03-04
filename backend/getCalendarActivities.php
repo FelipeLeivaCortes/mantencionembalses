@@ -14,29 +14,50 @@
         $priority   = $_POST["priority"];
 
         $LINK       = new mysqli($URL, $USERNAME, $PASSWORD, $idCompany);
+        $found      = false;
 
-        $QUERY  =   $LINK -> prepare("SELECT id, nombre, proximaMantencion FROM actividad WHERE prioridad = ? AND area = ? AND year(proximaMantencion) = ? ORDER BY proximaMantencion DESC");
-        $QUERY  ->  bind_param("ssi", $priority, $area, $year);
-        $QUERY  ->  execute();
-        $QUERY  ->  store_result();
-        $QUERY  ->  bind_result($id, $name, $nextMaintance);
+        for($i=0; $i<12; $i++){
+            $arrayIds   = array();
+            $arrayNames = array();
+            $arrayDates = array();
 
-        if( $QUERY->num_rows == 0 ){
+            $QUERY  =   $LINK -> prepare("SELECT id, nombre, proximaMantencion, sector FROM actividad WHERE prioridad = ? AND area = ? AND YEAR(proximaMantencion) = ? AND MONTH(proximaMantencion) = ? ORDER BY nombre DESC");
+            $QUERY  ->  bind_param("ssii", $priority, $area, $year, $i);
+            $QUERY  ->  execute();
+            $QUERY  ->  store_result();
+            $QUERY  ->  bind_result($id, $name, $nextMaintance, $location);
+
+            $index  = 0;
+
+            if( $QUERY->num_rows>0 ){
+                $found  = true;
+            }
+
+            while( $QUERY->fetch() ){
+                $arrayIds[$index]   = $id;
+                $arrayNames[$index] = $location.": ".$name;
+                $arrayDates[$index] = $nextMaintance;
+
+                $index++;
+            }
+
+            array_push($DATA, [
+                'elements'          => $index,
+                'ids'               => $arrayIds,
+                'names'             => $arrayNames,
+                'nextMaintances'    => $arrayDates,    
+            ]);
+
+            $QUERY  -> free_result();
+        }
+
+        if( !$found ){
             $DATA["ERROR"]      = true;
             $DATA["ERRNO"]      = 8;
-		    $DATA["MESSAGE"]    = "No se han encontrado resultados en su búsqueda";
-
+            $DATA["MESSAGE"]    = "No se han encontrado resultados en su búsqueda";
+        
         }else{
             $DATA["ERROR"]  = false;
-			$DATA["COUNT"]  = $QUERY->num_rows;
-    
-            while ( $QUERY->fetch() ){
-                array_push($DATA, [
-                    'id'            => $id,
-                    'name'          => $name,
-                    'nextMaintance' => $nextMaintance,
-                ]);
-			}
         }
 
         $QUERY ->  free_result();

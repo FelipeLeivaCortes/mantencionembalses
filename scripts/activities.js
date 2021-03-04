@@ -17,6 +17,7 @@ function initActivity(){
         }else{
             var selectAdd       = document.getElementById("addActivityLocation");
             var selectFilter    = document.getElementById("filterLocation");
+            var selectEdit      = document.getElementById("editActivityLocation");
 
             var allLocations    = document.createElement("option");
             allLocations.text   = "--- TODAS ---";
@@ -29,8 +30,12 @@ function initActivity(){
                 var option2  = document.createElement("option");
                 option2.text = DATA[i].name;
 
+                var option3  = document.createElement("option");
+                option3.text = DATA[i].name;
+
                 selectAdd.add(option1);
                 selectFilter.add(option2);
+                selectEdit.add(option3);
             }
 
             selectAdd.value     = "";
@@ -108,6 +113,7 @@ function ProcessExcel(data){
 };
 
 function LoadActivitiesFromExcel(){
+    $('#loadExcelForm').modal('toggle');
     ShowSpinner();
 
     document.getElementById("loadActivitiesBtn").disabled    = true;
@@ -140,7 +146,7 @@ function LoadActivitiesFromExcel(){
         for(var i=0; i<data.length; i++){
             var j = i + 2;
             if(isValidActivityName(data[i].Nombre, j )){
-                if(CompareTwoDates(data[i].FechaInicio, j )){
+             //   if(CompareTwoDates(data[i].FechaInicio, j )){
                     if(parseStringToDate(data[i].Frecuencia, j) != 0 ){
                         if(isValidLocation(data[i].Ubicacion, j)){
                             if(isValidPriority(data[i].Prioridad, j)){
@@ -174,10 +180,10 @@ function LoadActivitiesFromExcel(){
                         error   = true;
                         break;
                     }
-                }else{
+           /*     }else{
                     error = true;
                     break;    
-                }
+                } */
             }else{
                 error  = true;
                 break;
@@ -200,10 +206,15 @@ function LoadActivitiesFromExcel(){
                 CloseSpinner();
 
                 if(DATA.ERROR){
-                    ModalReportEvent("Precausión", DATA.ERRNO, DATA.MESSAGE);
+                    setTimeout(function(){
+                        ModalReportEvent("Precausión", DATA.ERRNO, DATA.MESSAGE);
+                    }, 500);
+                    
                 }else{
-                    ModalReportEvent("Operación exitosa", "", DATA.MESSAGE);
-                    $('#loadExcelForm').modal('toggle');
+                    setTimeout(function(){
+                        ModalReportEvent("Operación exitosa", "", DATA.MESSAGE);
+                    }, 500);
+                    
                 }
             });
         }
@@ -384,7 +395,6 @@ function parseDateToString(variable){
 
 function filterActivities(){
     $('#filterActivityForm').modal('toggle');
-
     ShowSpinner();
 
     var idCompany       = "empresa" + sessionStorage.getItem("ID_COMPANY");
@@ -406,21 +416,26 @@ function filterActivities(){
 
     var Variables       = "idCompany=" + idCompany +  "&filterLocation=" + filterLocation + "&filterArea=" + filterArea + "&filterPriority=" + filterPriority;
     
-    $.post("backend/getActivities.php", Variables, function(DATA){
+    setTimeout(function(){
+        $.post("backend/getActivities.php", Variables, function(DATA){
 
-        if( DATA.ERROR  === true ){
-            setTimeout(function(){
-                CloseSpinner();
-                ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
-            }, 1000);
+            if( DATA.ERROR  === true ){
+                setTimeout(function(){
+                    CloseSpinner();
+                    ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
+                }, 500);
+    
+            }else{
+                var table, divTable, idTable, idContainer;
+    
+                idTable     = "tableActivities";
+                idContainer = "containerActivities";
+    
+                if( document.getElementById(idContainer) != null ){
+                    document.getElementById(idContainer).remove();
 
-        }else{
-            var table, divTable, idTable, idContainer;
-
-            idTable     = "tableActivities";
-            idContainer = "containerActivities";
-
-            if( document.getElementById(idContainer) == null ){
+                }
+                
                 divTable    = document.createElement("div");
                 divTable.setAttribute("class", "table-modal table-reponsive-xl");
                 divTable.setAttribute("id", idContainer);
@@ -459,95 +474,90 @@ function filterActivities(){
 
                 thead.appendChild(rowHead);
                 table.appendChild(thead);
+
+                var bodyTable   = document.createElement("tbody");
             
-            }else{
-                divTable    = document.getElementById(idContainer);
-                table       = document.getElementById(idTable);
-                ClearTable(idTable);
-
-            }
+                // Create the rows
+                for (var i=0; i<DATA.COUNT; i++){
+    
+                    // Here is created every row
+                    var row         = document.createElement("tr");
+                        row.setAttribute("id", "row:" + DATA[i].id);
             
-            var bodyTable   = document.createElement("tbody");
-        
-            // Create the rows
-            for (var i=0; i<DATA.COUNT; i++){
-
-                // Here is created every row
-                var row         = document.createElement("tr");
-                    row.setAttribute("id", "row:" + DATA[i].id);
-        
-                // Here is created every cell
-                var indexCell   = document.createElement("td");
-                var nameCell    = document.createElement("td");
-                var areaCell    = document.createElement("td");
-                var actionCell  = document.createElement("td");
-        
-                // Here is storaged the content into a node
-                var index       = document.createTextNode( i + 1 );
-                var name        = document.createElement("a");
-                var link        = document.createTextNode( DATA[i].name );
-                var area        = document.createTextNode( DATA[i].area );
-                var btnEdit     = document.createElement("button");
-                var btnDel      = document.createElement("button");
-                var spanEdit    = document.createElement("span");
-                var spanDel     = document.createElement("span");
-                var textEdit    = document.createElement("textNode");
-                var textDel     = document.createElement("textNode");
-
-                // Here we set the attributes
-                name.appendChild(link);
-                name.href = "javascript:aboutActivity(" + DATA[i].id + ");"; 
-
-                spanEdit.setAttribute("class", "icon-edit icon-space");
-                spanDel.setAttribute("class", "icon-circle-with-cross icon-space");
-
-                textEdit.textContent    = "Editar";
-                textDel.textContent     = "Eliminar";
-                
-                btnEdit.style.marginRight   = "1%";
-                btnEdit.style.float         = "left";
-
-                btnEdit.appendChild(spanEdit);
-                btnEdit.appendChild(textEdit);
-
-                btnDel.appendChild(spanDel);
-                btnDel.appendChild(textDel);
-
-                btnEdit.className   = "btn btn-warning sm-btn";
-                btnDel.className    = "btn btn-danger sm-btn";
-
-                btnEdit.setAttribute("onclick", "openModalEditActivity(" + DATA[i].id + "); return false;");
-                btnDel.setAttribute("onclick", "openModalDelActivity(" + DATA[i].id + "); return false;");
-
-                // Here is inserted the content into the cells
-                indexCell.appendChild(index);
-                nameCell.appendChild(name);
-                areaCell.appendChild(area);
-                actionCell.appendChild(btnEdit);
-                actionCell.appendChild(btnDel);
-
-                // Here is inserted the cells into a row
-                row.appendChild(indexCell);
-                row.appendChild(nameCell);
-                row.appendChild(areaCell);
-                row.appendChild(actionCell);
-        
-                // Here is inserted the row into the table´s body
-                bodyTable.appendChild(row);
+                    // Here is created every cell
+                    var indexCell   = document.createElement("td");
+                    var nameCell    = document.createElement("td");
+                    var areaCell    = document.createElement("td");
+                    var actionCell  = document.createElement("td");
+            
+                    // Here is storaged the content into a node
+                    var index       = document.createTextNode( i + 1 );
+                    var name        = document.createElement("a");
+                    var link        = document.createTextNode( DATA[i].name );
+                    var area        = document.createTextNode( DATA[i].area );
+                    var btnEdit     = document.createElement("button");
+                    var btnDel      = document.createElement("button");
+                    var spanEdit    = document.createElement("span");
+                    var spanDel     = document.createElement("span");
+                    var textEdit    = document.createElement("textNode");
+                    var textDel     = document.createElement("textNode");
+    
+                    // Here we set the attributes
+                    name.appendChild(link);
+                    name.href = "javascript:aboutActivity(" + DATA[i].id + ");"; 
+    
+                    spanEdit.setAttribute("class", "icon-edit icon-space");
+                    spanDel.setAttribute("class", "icon-circle-with-cross icon-space");
+    
+                    textEdit.textContent    = "Editar";
+                    textDel.textContent     = "Eliminar";
+                    
+                    btnEdit.style.marginRight   = "1%";
+                    btnEdit.style.float         = "left";
+    
+                    btnEdit.appendChild(spanEdit);
+                    btnEdit.appendChild(textEdit);
+    
+                    btnDel.appendChild(spanDel);
+                    btnDel.appendChild(textDel);
+    
+                    btnEdit.className   = "btn btn-warning sm-btn";
+                    btnDel.className    = "btn btn-danger sm-btn";
+    
+                    btnEdit.setAttribute("onclick", "openModalEditActivity(" + DATA[i].id + "); return false;");
+                    btnDel.setAttribute("onclick", "openModalDelActivity(" + DATA[i].id + "); return false;");
+    
+                    // Here is inserted the content into the cells
+                    indexCell.appendChild(index);
+                    nameCell.appendChild(name);
+                    areaCell.appendChild(area);
+                    actionCell.appendChild(btnEdit);
+                    actionCell.appendChild(btnDel);
+    
+                    // Here is inserted the cells into a row
+                    row.appendChild(indexCell);
+                    row.appendChild(nameCell);
+                    row.appendChild(areaCell);
+                    row.appendChild(actionCell);
+            
+                    // Here is inserted the row into the table´s body
+                    bodyTable.appendChild(row);
+                }
+    
+                // Here is inserted the body´s table into the table
+                table.appendChild(bodyTable);
+                divTable.appendChild(table);
+                document.getElementById("body-container").appendChild(divTable);
+    
+                CloseSpinner();
             }
+        });
 
-            // Here is inserted the body´s table into the table
-            table.appendChild(bodyTable);
-            divTable.appendChild(table);
-            document.getElementById("body-container").appendChild(divTable);
-
-            CloseSpinner();
-        }
-
-        document.getElementById("filterLocation").value = "--- TODAS ---";
-        document.getElementById("filterArea").value     = "--- TODAS ---";
-        document.getElementById("filterPriority").value = "--- TODAS ---";
-    });   
+    }, 500);
+    
+    document.getElementById("filterLocation").value = "--- TODAS ---";
+    document.getElementById("filterArea").value     = "--- TODAS ---";
+    document.getElementById("filterPriority").value = "--- TODAS ---";
 };
 
 function aboutActivity(id){
@@ -615,7 +625,7 @@ function editActivity(){
     if(id == "" || name == "" || dateStart == "" || frecuency == "" || location == "" || priority == "" || area == ""){
         ModalReportEvent("Error", 28, "Debe rellenar todos los campos");
 
-    }else if(CompareTwoDates(dateStart)){
+    }else if(CompareTwoDates(dateStart, -1)){
         
         var Variables   = "idCompany=" + idCompany + "&id=" + id + "&name=" + name + "&dateStart=" + dateStart + "&frecuency=" + frecuency + "&location=" + location + "&priority=" + priority + "&area=" + area + "&comments=" + comments;
 
@@ -678,6 +688,9 @@ function delActivity(id){
 };
 
 function loadCalendar(){
+    $('#loadCalendarForm').modal('toggle');
+    ShowSpinner();
+
     // Parameters to get the calendar
     var idCompany   = "empresa" + sessionStorage.getItem("ID_COMPANY");
     var year        = document.getElementById("filterDateCalendar").value;
@@ -689,9 +702,128 @@ function loadCalendar(){
     $.post("backend/getCalendarActivities.php", Variables, function(DATA){
         console.log(DATA);
         if( DATA.ERROR ){
-            ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
+            setTimeout(function(){
+                CloseSpinner();
+                ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
+            }, 500);
+            
         }else{
-            alert("CREATE CALENDAR");
+            var form, formContainer, idForm, idContainer;
+    
+            idForm      = "activitiesForm";
+            idContainer = "containerActivities";
+
+            if( document.getElementById(idContainer) != null ){
+                document.getElementById(idContainer).remove();
+            }
+
+            formContainer   = document.createElement("div");
+            formContainer.setAttribute("id", idContainer);
+
+            formContainer.style.height      = "300px";
+            formContainer.style.paddingLeft = "5px";
+            formContainer.style.overflow    = "scroll";
+            formContainer.style.background  = "white";
+    
+            form            = document.createElement("form");
+            form.setAttribute("id", idForm);
+            
+            // Create the month´s container
+            for( var i=0; i<12; i++ ){
+
+                var label   = document.createTextNode("");
+
+                switch(i){
+                    case 0:
+                        label.textContent   = "Enero";
+                        break;
+                    case 1:
+                        label.textContent   = "Febrero";
+                        break;
+                    case 2:
+                        label.textContent   = "Marzo";
+                        break;
+                    case 3:
+                        label.textContent   = "Abril";
+                        break;
+                    case 4:
+                        label.textContent   = "Mayo";
+                        break;
+                    case 5:
+                        label.textContent   = "Junio";
+                        break;
+                    case 6:
+                        label.textContent   = "Julio";
+                        break;
+                    case 7:
+                        label.textContent   = "Agosto";
+                        break;
+                    case 8:
+                        label.textContent   = "Septiembre";
+                        break;
+                    case 9:
+                        label.textContent   = "Octubre";
+                        break;
+                    case 10:
+                        label.textContent   = "Noviembre";
+                        break;
+                    case 11:
+                        label.textContent   = "Diciembre";
+                        break;
+                    
+                }
+ 
+                // Here is added every activity belong each month
+                var monthContainer= document.createElement("div");
+                monthContainer.setAttribute("id", "monthContainer:" + i);
+                monthContainer.setAttribute("class", "form-group");
+
+                monthContainer.appendChild(label);
+
+                if( DATA[i].elements == 0 ){
+                    var container       = document.createElement("div");
+                    container.style.marginLeft  = "5%";
+
+                    var textName        = document.createTextNode("No hay actividades en este periodo");
+                    
+                    container.appendChild(textName);
+                    monthContainer.appendChild(container);
+
+                }else{
+                    for(j=0; j<DATA[i].elements; j++){
+                        var container       = document.createElement("div");
+                        container.setAttribute("class", "row");
+                        container.style.marginLeft  = "5%";
+
+                        var check           = document.createElement("input");
+                        check.setAttribute("type", "checkbox");
+                        check.setAttribute("id", "id:" + DATA[i].ids[j]);
+                        check.setAttribute("class", "col-1");
+
+                        var textName        = document.createElement("a");
+                        var textLink        = document.createTextNode( DATA[i].names[j] );
+                        textName.setAttribute("class", "col-11");
+
+                        textName.appendChild( textLink );
+                        textName.href   = "javascript:aboutActivity('" + DATA[i].ids[j] + "')";
+
+                        container.appendChild(check);
+                        container.appendChild(textName);
+                        monthContainer.appendChild(container);
+
+                    }
+                }
+
+                form.appendChild(monthContainer);
+            }
+
+            formContainer.appendChild(form);
+            document.getElementById("body-container").appendChild(formContainer);
+            
+            setTimeout(() => {
+                CloseSpinner();    
+            }, 500);
+            
         }
     });
-}
+};

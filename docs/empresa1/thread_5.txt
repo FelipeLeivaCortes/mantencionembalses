@@ -1,0 +1,4 @@
+E:Felipe Leiva:This is a test message
+E:Felipe Leiva:Esta es otro mensaje de prueba
+E:Patricia Cortés:Yo pienso que puede ser problema de hardware
+A::Tranquilos, el problema es porque la plataforma esta en mantención

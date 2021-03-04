@@ -16,7 +16,7 @@
         <script src="scripts/maintances.js"></script>
         <script src="scripts/records.js"></script>
         <script src="scripts/configuration.js"></script>
-        <script src="scripts/contactUs.js"></script>
+        <script src="scripts/contacts.js"></script>
         <script src="scripts/manuals.js"></script>
     </head>
       

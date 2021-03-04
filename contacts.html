@@ -1,40 +1,90 @@
 <html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    </head>
-  
     <body>
-        <div class="container-fluid w-100">
-            <div>
-                <div class="row container-fluid d-flex justify-content-center">
-                    <p><b>¿Tienes alguna duda?</b></p>
+    </body>
+
+    <style>
+        #contentThread{
+            height: 250px;    
+        }
+    </style>
+
+    <!------------------------------ ADD A NEW USER FORM ---------------------------------------->
+    <!-- Modal -->
+    <div id="contactForm" class="modal fade" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" style="z-index:1100;">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    
+        <!-- Modal content-->
+            <div class="modal-content">
+                
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title"><span class="icon-add-user"></span> Consultar</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
                 </div>
-                <div class="row container-fluid d-flex justify-content-center">
-                    <p>Avisanos a través del siguiente formulario</p>
+            
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <form>
+                        <fieldset enabled>
+                            <div class="form-group">
+                                <label for="topicMessage">Título</label>
+                                <input id="topicMessage" type="text" class="form-control" placeholder="Tema">
+                            </div>
+                          
+                            <div class="form-group">
+                                <label for="bugMessage">Mensaje</label>
+                                <textarea id="bugMessage" type="text" class="form-control" placeholder="Escriba el error con todos los detalles posibles"></textarea>
+                            </div>
+                        </fieldset>
+                    </form>
                 </div>
-                <div class="row container-fluid d-flex justify-content-center">
-                    <p>con gusto la responderemos</p>
+            
+                <!-- Modal footer -->
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-success" onclick="addReport()"><span class="icon-document-landscape"></span> Agregar</button>
+                    <button type="button" class="btn btn-danger" data-toggle="modal" data-dismiss="modal"><span class="icon-circle-with-cross"></span> Cancelar</button>
                 </div>
-            </div>
-            <div class="body-subcontainer">
-                <form>
-                    <div class="form-group row">
-                        <label class="col-sm-2 col-form-label" for="topicMessage">Tema</label>
-                        <div class="col-sm-10">
-                            <input type="text" class="form-control" id="topicMessage">
-                        </div>
-                    </div>
-                    <div class="form-group row">
-                        <label class="col-sm-2 col-form-label" for="bugMessage">Mensaje</label>
-                        <div class="col-sm-10">
-                            <textarea type="password" class="form-control" id="bugMessage"></textarea>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="container-fluid d-flex justify-content-center">
-                <button onclick="javascript:ReportError();" class="btn btn-success"><span class="icon-check"></span> Enviar</button>
             </div>
         </div>
-    </body>
+    </div>
+
+    <!------------------------------ THREAD DETAILS FORM ---------------------------------------->
+    <!-- Modal -->
+    <div id="contentForm" class="modal fade" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" style="z-index:1100;">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    
+        <!-- Modal content-->
+            <div class="modal-content">
+                
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title"><span class="icon-calendar" id="titleThread"></span></h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+            
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <form>
+                        <fieldset enabled>                          
+                            <div class="form-group">
+                                <label for="contentThread">Mensaje</label>
+                                <textarea id="contentThread" type="text" class="form-control" disabled readonly></textarea>
+                            </div>
+
+                            <div class="form-group row">
+                                <input id="messageContent" type="text" class="form-control col-8" style="margin-left: 3%; padding-top: 3%;">
+                                <div class="col-1"></div>
+                                <button id="sendMessage" type="button" class="btn btn-success col-2"><span class="icon-paper-plane"></span> Enviar</button>
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+            
+                <!-- Modal footer -->
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-danger" data-toggle="modal" data-dismiss="modal"><span class="icon-circle-with-cross"></span> Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </html>

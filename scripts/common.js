@@ -93,7 +93,12 @@ function CompareTwoDates(dateAux, index){
     dateAux     = dateAux.split("-");
 
     if( dateAux.length == 3 ){
-        dateRequired    = dateAux[2] + "-" + dateAux[1] + "-" + dateAux[0];
+
+        if( index == -1 ){
+            dateRequired    = dateAux[0] + "-" + dateAux[1] + "-" + dateAux[2];
+        }else{
+            dateRequired    = dateAux[2] + "-" + dateAux[1] + "-" + dateAux[0];
+        }
 
         var date    = new Date( dateRequired );
         date        = date.toISOString().slice(0,10);

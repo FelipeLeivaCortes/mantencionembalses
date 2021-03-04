@@ -39,8 +39,8 @@
 # The default password is the first fours numbers of the rut.
 
     		$password   =   substr($username, 0, 4);
-    		$QUERY 	    =   $LINK -> prepare("INSERT INTO usuario (idEmpresa, rut, clave, permisos, nombre, apellido, correo, telefono) 
-    		                                    VALUES (?, ?, AES_ENCRYPT(?, ?), ?, ?, ?, ?, ?)");
+    		$QUERY 	    =   $LINK -> prepare("INSERT INTO usuario (idEmpresa, rut, clave, permisos, nombre, apellido, correo, telefono, estado) 
+    		                                    VALUES (?, ?, AES_ENCRYPT(?, ?), ?, ?, ?, ?, ?, 1)");
     		$QUERY	    ->	bind_param('iissssssi', $idCompany, $username, $password, $KEY, $permissions, $name, $lastname, $email, $phone);
             	$QUERY      ->  execute();
 

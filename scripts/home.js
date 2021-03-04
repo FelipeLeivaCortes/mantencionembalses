@@ -1,13 +1,12 @@
 function initHome(){
     $('#listActivities').filterByText($('#filterActivities'));
-    var delay = 1000;
 
     setTimeout(function(){
         document.getElementById("areaFilter").value         = "";
         document.getElementById("listActivities").disabled  = true;
 
         CloseSpinner();
-    }, delay);
+    }, 1000);
 
 }
 
@@ -53,7 +52,7 @@ function getActivitesPerArea(){
             setTimeout(function(){
                 CloseSpinner();
                 ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
-            }, 1000);
+            }, 500);
         
         }else{
             $('#listActivities').empty();
@@ -69,15 +68,15 @@ function getActivitesPerArea(){
 
             document.getElementById("listActivities").disabled  = false;
 
-            CloseSpinner();
+            setTimeout(() => {
+                CloseSpinner();
+            }, 500);
         }
 
     });
 }
 
 function getRecordsPerActivity(){
-    $('#historyRecordForm').modal('toggle');
-
     var activityName;
     var activitySelected    = document.getElementById("listActivities").value;
 
@@ -104,10 +103,11 @@ function getRecordsPerActivity(){
             var Variables   = "idCompany=" + idCompany + "&idActivity=" + id;
     
             $.post("backend/getRecordsPerActivity.php", Variables, function(DATA){
+                $('#historyRecordForm').modal('toggle');
+                
                 if( DATA.ERROR ){
                     setTimeout(function(){
                         CloseSpinner();
-
                         ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
 
                         try{
@@ -116,7 +116,7 @@ function getRecordsPerActivity(){
                         }catch(e){                    
                             console.log(e);
                         }
-                    }, 500)
+                    }, 500);
 
                 }else{
 
@@ -275,7 +275,9 @@ function getRecordsPerActivity(){
                         document.getElementById("containerButton").appendChild(buttonPDF);
                     }
 
-                    CloseSpinner();
+                    setTimeout(() => {
+                        CloseSpinner();
+                    }, 500);
                 }
                 
             });

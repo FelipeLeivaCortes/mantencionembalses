@@ -154,7 +154,7 @@ function loadActivities(){
 
     setTimeout(function(){
         initActivity();
-    }, 1000);
+    }, 2000);
     
 }
 
@@ -171,12 +171,12 @@ function loadMaintances(){
     qr.send();
     qr.onload = function(){document.getElementById('body-container').innerHTML = qr.responseText}
 
-    var timeout = 1000;
-    ShowSpinner(1000);
+    ShowSpinner();
     
     setTimeout(function(){
         document.getElementById("idRecord").focus();
-    }, timeout);
+        CloseSpinner();
+    }, 500);
 }
 
 function loadRecords(){
@@ -214,13 +214,25 @@ function loadConfiguration(){
 function loadContacts(){
     document.getElementById("title-page").innerHTML = "Contactos";
 
+    var navbar = new XMLHttpRequest();
+    navbar.open('get', 'nav-contacts.html');
+    navbar.send();
+    navbar.onload = function(){
+        document.getElementById('navbar-container').innerHTML = navbar.responseText
+    }
+
     var qr = new XMLHttpRequest();
     qr.open('get', 'contacts.html');
     qr.send();
     qr.onload = function(){
         document.getElementById('body-container').innerHTML = qr.responseText;
-        document.getElementById('navbar-container').innerHTML = "<div></div>";
     }
+
+    ShowSpinner();
+    
+    setTimeout(() => {
+        initContacts();
+    }, 1000);
 }
 
 function loadManuals(){

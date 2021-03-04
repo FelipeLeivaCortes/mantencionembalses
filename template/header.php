@@ -9,7 +9,10 @@
                     <h2 id="title-page"></h2>
                 </div>
             </div>
-            <div id="navbar-container">
+
+            <div class="container-fluid d-flex justify-content-center">
+                <div id="navbar-container">
+                </div>
             </div>
         </div>
     </body>
