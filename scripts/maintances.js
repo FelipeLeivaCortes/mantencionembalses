@@ -12,9 +12,11 @@ function getRecord(){
 
     }else{
         var idCompany   = sessionStorage.getItem('ID_COMPANY');
-        var Variables   = 'idRecord=' + idRecord + '&idCompany=' + idCompany;
+        var username    = sessionStorage.getItem('USERNAME');
+        var Variables   = 'idRecord=' + idRecord + '&idCompany=' + idCompany + "&username=" + username;
 
         $.post("backend/getRecord.php", Variables, function(DATA){
+
             document.getElementById("idRecord").value   = "";
 
             if( DATA.ERROR ){
@@ -23,6 +25,7 @@ function getRecord(){
             }else{
                 var table;
                 var divTable;
+                var isComplete  = true;
 
                 divTable    = document.createElement("div");
                 divTable.setAttribute("class", "table-modal table-reponsive-xl");
@@ -95,6 +98,7 @@ function getRecord(){
 
                     if( DATA[i].state == "0" ){
                         status.value        = "Pendiente";
+                        isComplete          = false;
 
                     }else{
                         var target  = DATA[i].id;
@@ -142,6 +146,10 @@ function getRecord(){
                 button.setAttribute("class", "btn btn-primary");
                 button.setAttribute("onclick", "javascript:openModalConfirmEvent(" + idRecord + ")");
                 button.setAttribute("data-toggle", "modal");
+
+                if( isComplete ){
+                    button.disabled     = true;
+                }
 
                 button.appendChild(textButton);
                 button.appendChild(span);
@@ -214,6 +222,13 @@ function updateRecord(idRecord, arrayObservations, arrayStates){
             ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
         
         }else{
+            var table   = document.getElementById("tablePendingRecords");
+
+            for(var i=0; i<table.children[1].children.length; i++){
+                table.children[1].children[i].cells[2].children[0].value = "";
+                table.children[1].children[i].cells[3].children[0].value = "Pendiente";
+            }
+
             ModalReportEvent("Operación exitosa", " ", DATA.MESSAGE);
         }
     });

@@ -9,101 +9,63 @@
 	
 	}else{
         $idCompany          = $_POST["idCompany"];
-        $LINK               = new mysqli($URL, $USERNAME, $PASSWORD, $idCompany);
+        $arrayIdActivities  = explode(",", $_POST["arrayIdActivities"]);
 
-        $filterLocation     = $_POST["filterLocation"];
-        $filterArea         = $_POST["filterArea"];
-        $filterPriority     = $_POST["filterPriority"];
-        
-        // If you don´t have any filter
-        if( $filterLocation == "" && $filterArea == "" && $filterPriority == "" ){
-            $QUERY  =   $LINK -> prepare("SELECT id, nombre, area FROM actividad");
+        $LINK   = new mysqli($URL, $USERNAME, $PASSWORD, $idCompany);
+
+        $today  = date('Y-m-d');
+        $error  = false;
+
+        for( $i=0; $i<sizeof($arrayIdActivities); $i++ ){
+            $idActivity     = $arrayIdActivities[$i];
+
+            $QUERY  =   $LINK -> prepare("SELECT nombre, sector, prioridad, observacion FROM actividad WHERE id = ?");
+            $QUERY  ->  bind_param("i", $idActivity);
             $QUERY  ->  execute();
             $QUERY  ->  store_result();
-            $QUERY  ->  bind_result($id, $name, $area);
+//            $QUERY  ->  bind_result($name, $location, $lastMaintance, $priority, $comments);
+            $QUERY  ->  bind_result($name, $location, $priority, $comments);
+            $QUERY  ->  fetch();
 
-        // If only have the location´s filter
-        }else if($filterLocation != "" && $filterArea == "" && $filterPriority == ""){
-            $QUERY  =   $LINK -> prepare("SELECT id, nombre, area FROM actividad WHERE sector = ?");
-            $QUERY  ->  bind_param("s", $filterLocation);
-            $QUERY  ->  execute();
-            $QUERY  ->  store_result();
-            $QUERY  ->  bind_result($id, $name, $area);
+            if( $QUERY->num_rows == 0 ){
+                $DATA["ERRPR"]      = true;
+                $DATA["ERRNO"]      = 8;
+                $DATA["MESSAGE"]    = "No se han encontrado resultados en su búsqueda";
+                $error              = true;
 
-        // If only have the area´s filter
-        }else if($filterLocation == "" && $filterArea != "" && $filterPriority == ""){
-            $QUERY  =   $LINK -> prepare("SELECT id, nombre FROM actividad WHERE area = ?");
-            $QUERY  ->  bind_param("s", $filterArea);
-            $QUERY  ->  execute();
-            $QUERY  ->  store_result();
-            $QUERY  ->  bind_result($id, $name);
+                break;
 
-        // If only have the priority´s filter
-        }else if($filterLocation == "" && $filterArea == "" && $filterPriority != ""){
-            $QUERY  =   $LINK -> prepare("SELECT id, nombre, area FROM actividad WHERE prioridad = ?");
-            $QUERY  ->  bind_param("s", $filterPriority);
-            $QUERY  ->  execute();
-            $QUERY  ->  store_result();
-            $QUERY  ->  bind_result($id, $name, $area);
-
-        // If only have the location and area filter
-        }else if($filterLocation != "" && $filterArea != "" && $filterPriority == ""){
-            $QUERY  =   $LINK -> prepare("SELECT id, nombre FROM actividad WHERE sector = ? AND area = ?");
-            $QUERY  ->  bind_param("ss", $filterLocation, $filterArea);
-            $QUERY  ->  execute();
-            $QUERY  ->  store_result();
-            $QUERY  ->  bind_result($id, $name);
-
-        // If only have the location and priority filter
-        }else if($filterLocation != "" && $filterArea == "" && $filterPriority != ""){
-            $QUERY  =   $LINK -> prepare("SELECT id, nombre, area FROM actividad WHERE sector = ? AND prioridad = ?");
-            $QUERY  ->  bind_param("ss", $filterLocation, $filterPriority);
-            $QUERY  ->  execute();
-            $QUERY  ->  store_result();
-            $QUERY  ->  bind_result($id, $name, $area);
-
-        // If only have the area and priority filter
-        }else if($filterLocation == "" && $filterArea != "" && $filterPriority != ""){
-            $QUERY  =   $LINK -> prepare("SELECT id, nombre FROM actividad WHERE area = ? AND prioridad = ?");
-            $QUERY  ->  bind_param("ss", $filterArea, $filterPriority);
-            $QUERY  ->  execute();
-            $QUERY  ->  store_result();
-            $QUERY  ->  bind_result($id, $name);
-
-        // By default the query include the three filters
-        }else{
-            $QUERY  =   $LINK -> prepare("SELECT id, nombre FROM actividad WHERE sector = ? AND area = ? AND prioridad = ?");
-            $QUERY  ->  bind_param("sss", $filterLocation, $filterArea, $filterPriority);
-            $QUERY  ->  execute();
-            $QUERY  ->  store_result();
-            $QUERY  ->  bind_result($id, $name);
-        }
-        
-
-        if( $QUERY->num_rows == 0 ){
-            $DATA["ERROR"]      = true;
-            $DATA["ERRNO"]      = 8;
-		    $DATA["MESSAGE"]    = "No se han encontrado resultados en su búsqueda";
-
-        }else{
-            $DATA["ERROR"]      = false;
-			$DATA["COUNT"]      = $QUERY->num_rows;
-    
-			while ( $QUERY -> fetch() ){        
-                if($filterArea == ""){
-                    array_push($DATA, [
-                        'id'    => $id,
-                        'name'  => $name,
-                        'area'  => $area,
-                    ]);
+            }else{
+              /*  $daysLate   = "";
+                
+                if( $lastMaintance == $defaultDate){
+                    $lastMaintance  = "Nunca";
+                    $daysLate       = "Nunca";
+                
                 }else{
-                    array_push($DATA, [
-                        'id'    => $id,
-                        'name'  => $name,
-                        'area'  => $filterArea,
-                    ]);
+                    $today      = new DateTime("now");
+                    $dateAux    = new DateTime($lastMaintance);
+                    $daysLate   = date_diff($dateAux, $today)->format('%a');
+        
                 }
-			}
+*/
+                array_push($DATA, [
+                    'id'            => $idActivity,
+                    'name'          => $name,
+                    'location'      => $location,
+//                    'lastMaintance' => $lastMaintance,
+//                    'daysLate'      => $daysLate,
+                    'priority'      => $priority,
+                    'comments'      => $comments,
+                ]);
+
+            }
+
+        }
+
+        if( !$error ){
+            $DATA["ERROR"]  = false;
+            $DATA["COUNT"]  = $i;
         }
 
         $QUERY ->  free_result();
