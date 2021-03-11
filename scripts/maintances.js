@@ -1,4 +1,4 @@
-function getRecord(idRecord){
+function getRecord(idRecord, onlyRead){
     ShowSpinner();
 
     if( document.getElementById("containerTable") != null ){
@@ -98,23 +98,38 @@ function getRecord(idRecord){
                     // Here is storaged the content into a node
                     var index           = document.createTextNode( i + 1 );
                     var activity        = document.createTextNode( DATA[i].name );
-                    var description     = document.createElement( "textarea" );
-                    var status          = document.createElement( "select" );
-                    var option1         = document.createElement( "option" );
-                    var option2         = document.createElement( "option" );
+                    var description, status, option1, option2;
 
-                    // Here we set the attributes
-                    option1.text        = "Pendiente";
-                    option2.text        = "Terminada";
+                    if( onlyRead ){
+                        description     = document.createTextNode("");
+                        status          = document.createTextNode("");
 
-                    status.add(option1);
-                    status.add(option2);
+                        var target  = DATA[i].id;
 
-                    if( DATA[i].state == "0" ){
-                        status.value        = "Pendiente";
-                        isComplete          = false;
+                        for(var j=0; j<DATA.observations.length - 1; j++){
+                            var line    = DATA.observations[j].split("|");
+                            
+                            if( target == line[0] ){
+                                description.textContent   = line[1];
+                                break;
+                            }
+                        }
 
+                        status.textContent  = ( DATA[i].state == '0') ? "Pendiente" : "Terminada";
+                        
                     }else{
+                        description     = document.createElement( "textarea" );
+                        status          = document.createElement( "select" );
+                        option1         = document.createElement( "option" );
+                        option2         = document.createElement( "option" );
+
+                        // Here we set the attributes
+                        option1.text        = "Pendiente";
+                        option2.text        = "Terminada";
+
+                        status.add(option1);
+                        status.add(option2);
+
                         var target  = DATA[i].id;
 
                         for(var j=0; j<DATA.observations.length - 1; j++){
@@ -125,11 +140,20 @@ function getRecord(idRecord){
                                 break;
                             }
                         }
-                        
-                        status.value            = "Terminada";
-                        description.disabled    = true;
-                        status.disabled         = true;
+
+                        if( DATA[i].state == "0" ){
+                            status.value        = "Pendiente";
+                            isComplete          = false;
+
+                        }else{
+                            status.value            = "Terminada";
+                            description.disabled    = true;
+                            status.disabled         = true;
+                        }
+
                     }
+
+                    
                     
                     // Here is inserted the content into the cells
                     indexCell.appendChild(index);
@@ -171,6 +195,10 @@ function getRecord(idRecord){
                     containerButton.appendChild(button);
                 }
                 
+                if( onlyRead ){
+                    document.getElementById("printPdfBtn").setAttribute("onclick", "printRecord(" + idRecord + ")");
+                }
+
                 // Here is inserted the body´s table into the table
                 table.appendChild(bodyTable);
                 divTable.appendChild(table);
