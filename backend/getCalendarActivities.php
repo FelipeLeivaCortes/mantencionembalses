@@ -73,9 +73,29 @@
         }
 
         if( sizeof($workers) > 0 ){
-            $LINK       = new mysqli($URL, $USERNAME, $PASSWORD, $idCompany);
-            $found      = false;
+            $LINK                   = new mysqli($URL, $USERNAME, $PASSWORD, $idCompany);
+            $found                  = false;
+            $activitiesUnavailable  = array();
+            $index                  = 0;
 
+            $QUERY  =   $LINK->prepare("SELECT actividades, estados FROM registro WHERE estado = '0';");
+            $QUERY  ->  execute();
+            $QUERY  ->  store_result();
+            $QUERY  ->  bind_result($idActivities, $stateActivities);
+
+            while( $QUERY->fetch() ){
+                $arrayAuxId         = explode(",", $idActivities);
+                $arrayAuxStates     = explode(",", $stateActivities);
+
+                for( $i=0; $i<sizeof($arrayAuxId); $i++ ){
+                    if( $arrayAuxStates[$i] == '0' ){
+                        $activitiesUnavailable[$index]  = $arrayAuxId[$i];
+                        $index++;
+                    }
+                }
+            }
+
+$DATA["testing"]    = $activitiesUnavailable;
             for($i=1; $i<=12; $i++){
                 $arrayIds           = array();
                 $arrayNames         = array();
@@ -83,35 +103,49 @@
                 $arrayPriorities    = array();
 
                 $SQL        = "";
+                $today      = date('Y-m-d');
 
                 if( $priority == "All" ){
-                    $SQL    = "SELECT id, nombre, proximaMantencion, sector, prioridad FROM actividad WHERE area = ? AND YEAR(proximaMantencion) = ? AND MONTH(proximaMantencion) = ? ORDER BY nombre DESC";
+                    $SQL    = "SELECT id, nombre, proximaMantencion, sector, prioridad FROM actividad WHERE area = ? AND YEAR(proximaMantencion) = ? AND MONTH(proximaMantencion) = ? AND ultimaMantencion <= ? ORDER BY nombre DESC";
                     $QUERY  =   $LINK->prepare($SQL);
-                    $QUERY  ->  bind_param("sii", $area, $year, $i);
+                    $QUERY  ->  bind_param("siis", $area, $year, $i, $today);
 
                 }else{
-                    $SQL    = "SELECT id, nombre, proximaMantencion, sector, prioridad FROM actividad WHERE prioridad = ? AND area = ? AND YEAR(proximaMantencion) = ? AND MONTH(proximaMantencion) = ? ORDER BY nombre DESC";
+                    $SQL    = "SELECT id, nombre, proximaMantencion, sector, prioridad FROM actividad WHERE prioridad = ? AND area = ? AND YEAR(proximaMantencion) = ? AND MONTH(proximaMantencion) = ? AND ultimaMantencion <= ? ORDER BY nombre DESC";
                     $QUERY  =   $LINK->prepare($SQL);
-                    $QUERY  ->  bind_param("ssii", $priority, $area, $year, $i);
+                    $QUERY  ->  bind_param("ssiis", $priority, $area, $year, $i, $today);
                 }
 
                 $QUERY  ->  execute();
                 $QUERY  ->  store_result();
                 $QUERY  ->  bind_result($id, $name, $nextMaintance, $location, $priorityResult);
 
-                $index  = 0;
+                $index      = 0;
+                
 
                 if( $QUERY->num_rows>0 ){
                     $found  = true;
                 }
 
                 while( $QUERY->fetch() ){
-                    $arrayIds[$index]           = $id;
-                    $arrayNames[$index]         = $location.": ".$name;
-                    $arrayDates[$index]         = $nextMaintance;
-                    $arrayPriorities[$index]    = $priorityResult;
+                    $available  = true;
 
-                    $index++;
+                    for( $j=0; $j<sizeof($activitiesUnavailable); $j++ ){
+                        if( $activitiesUnavailable[$j] == $id ){
+                            $available  = false;
+                            break;
+                        }
+                    }
+
+                    if( $available ){
+                        $arrayIds[$index]           = $id;
+                        $arrayNames[$index]         = $location.": ".$name;
+                        $arrayDates[$index]         = $nextMaintance;
+                        $arrayPriorities[$index]    = $priorityResult;
+
+                        $index++;
+                    }
+                    
                 }
 
                 array_push($DATA, [

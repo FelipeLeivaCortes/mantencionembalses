@@ -10,7 +10,7 @@
         <script src="scripts/sidenav.js"></script>
         <script src="scripts/common.js"></script>
         <script src="scripts/base.js"></script>
-        <script src="scripts/home.js"></script>
+        <script src="scripts/stadistics.js"></script>
         <script src="scripts/administration.js"></script>
         <script src="scripts/activities.js"></script>
         <script src="scripts/maintances.js"></script>

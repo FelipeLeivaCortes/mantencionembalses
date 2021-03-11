@@ -75,17 +75,17 @@ window.addEventListener("load", function(event){
                 var text3   = document.createElement("textNode");
                 var text4   = document.createElement("textNode");
         
-                span1.setAttribute("class", "icon-home icon-space");
+                span1.setAttribute("class", "icon-pie-chart icon-space");
                 span2.setAttribute("class", "icon-users icon-space");
                 span3.setAttribute("class", "icon-pencil icon-space");
                 span4.setAttribute("class", "icon-spreadsheet icon-space");
         
-                text1.textContent   = "Menú";
+                text1.textContent   = "Estadísticas";
                 text2.textContent   = "Usuarios";
                 text3.textContent   = "Actividades";
                 text4.textContent   = "Registros";
 
-                link1.setAttribute("href", "javascript:loadHome();");
+                link1.setAttribute("href", "javascript:loadStadistics();");
                 link2.setAttribute("href", "javascript:loadUsers();");
                 link3.setAttribute("href", "javascript:loadActivities();");
                 link4.setAttribute("href", "javascript:loadRecords();");

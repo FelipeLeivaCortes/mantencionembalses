@@ -10,7 +10,8 @@
 	}else{
       $idRecord     	= $_POST["idRecord"];
       $idCompany  	= $_POST["idCompany"];
-      $username      = $_POST["username"];
+      $username      = intval($_POST["username"]);
+      $isAdmin       = boolval($_POST["isAdmin"]);
 
 	   $LINK    = new mysqli($URL, $USERNAME, $PASSWORD, "empresa".$idCompany);
 
@@ -32,7 +33,7 @@
          $DATA["MESSAGE"]    = "Se han encontrado duplicidades en sus datos. Comuníquese con el administrador";
 
       }else{
-         if( $username == $usernameRecorded ){
+         if( $isAdmin || $username == $usernameRecorded ){
             $QUERY   -> free_result();
             
             $arrayStates         = explode(",", $states);

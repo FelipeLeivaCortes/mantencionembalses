@@ -16,15 +16,27 @@
         $QUERY  =   $LINK -> prepare("SELECT id, fechaInicio FROM registro WHERE estado = 0");
         $QUERY  ->  execute();
         $QUERY  ->  store_result();
-        $QUERY  ->  bind_result($id, $startDate);
+        $QUERY  ->  bind_result($id, $dateStart);
 
-        $DATA["COUNT"]  = $QUERY->num_rows;
+        if( $QUERY->num_rows == 0 ){
+            $DATA["ERROR"]      = true;
+            $DATA["ERRNO"]      = 73;
+            $DATA["MESSAGE"]    = "No se han encontrado registros de mantenciones pendientes en el sistema";
+        
+        }else{
+            $DATA["COUNT"]  = $QUERY->num_rows;
 
-        while ( $QUERY -> fetch() ){
-            array_push($DATA, [
-                'id'        => $id,
-                'startDate' => $startDate,
-            ]);
+            while ( $QUERY -> fetch() ){
+                $today      = new DateTime("now");
+                $dateAux    = new DateTime($dateStart);
+                $daysLate   = date_diff($dateAux, $today)->format('%a');
+
+                array_push($DATA, [
+                    'id'        => $id,
+                    'dateStart' => $dateStart,
+                    'daysLate'  => $daysLate,
+                ]);
+            }
         }
 
         $QUERY  ->  free_result();

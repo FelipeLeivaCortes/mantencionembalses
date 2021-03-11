@@ -1,11 +1,22 @@
-function getRecord(){
-    
+function getRecord(idRecord){
+    ShowSpinner();
+
     if( document.getElementById("containerTable") != null ){
         document.getElementById("containerTable").remove();
     }
 
-    var idRecord    = document.getElementById("idRecord").value;
+    idRecord    = ( idRecord == -1 ) ? document.getElementById("idRecord").value : idRecord;
+
     var aux         = isValidIntegerNumber(idRecord);
+    var isAdmin;
+
+    if( document.getElementById("user-role").innerHTML == 'Administrador' ){
+        isAdmin     = "1";
+
+    }else{
+        isAdmin     = "0";
+    
+    }
 
     if( aux == 0 ){
         document.getElementById("idRecord").value   = "";
@@ -13,14 +24,17 @@ function getRecord(){
     }else{
         var idCompany   = sessionStorage.getItem('ID_COMPANY');
         var username    = sessionStorage.getItem('USERNAME');
-        var Variables   = 'idRecord=' + idRecord + '&idCompany=' + idCompany + "&username=" + username;
+        var Variables   = 'idRecord=' + idRecord + '&idCompany=' + idCompany + "&username=" + username + "&isAdmin=" + isAdmin;
 
         $.post("backend/getRecord.php", Variables, function(DATA){
 
             document.getElementById("idRecord").value   = "";
 
             if( DATA.ERROR ){
-                ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
+                setTimeout(function(){
+                    CloseSpinner();
+                    ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
+                }, 500);
             
             }else{
                 var table;
@@ -133,34 +147,51 @@ function getRecord(){
                     bodyTable.appendChild(row);
                 }
 
-                // We create the div that will containts the button to update the changes
-                var containerButton     = document.createElement("div");
-                var button              = document.createElement("button");
-                var span                = document.createElement("span");
-                var textButton          = document.createElement("textNode");
+                if( isAdmin == '0' ){
+                    // We create the div that will containts the button to update the changes
+                    var containerButton     = document.createElement("div");
+                    var button              = document.createElement("button");
+                    var span                = document.createElement("span");
+                    var textButton          = document.createElement("textNode");
 
-                textButton.textContent  = "Guardar";
+                    textButton.textContent  = "Guardar";
 
-                containerButton.setAttribute("class", "container-fluid d-flex justify-content-center");
-                span.setAttribute("class", "icon-edit");
-                button.setAttribute("class", "btn btn-primary");
-                button.setAttribute("onclick", "javascript:openModalConfirmEvent(" + idRecord + ")");
-                button.setAttribute("data-toggle", "modal");
+                    containerButton.setAttribute("class", "container-fluid d-flex justify-content-center");
+                    span.setAttribute("class", "icon-edit");
+                    button.setAttribute("class", "btn btn-primary");
+                    button.setAttribute("onclick", "javascript:openModalConfirmEvent(" + idRecord + ")");
+                    button.setAttribute("data-toggle", "modal");
 
-                if( isComplete ){
-                    button.disabled     = true;
+                    if( isComplete ){
+                        button.disabled     = true;
+                    }
+
+                    button.appendChild(textButton);
+                    button.appendChild(span);
+                    containerButton.appendChild(button);
                 }
-
-                button.appendChild(textButton);
-                button.appendChild(span);
-                containerButton.appendChild(button);
                 
                 // Here is inserted the body´s table into the table
                 table.appendChild(bodyTable);
                 divTable.appendChild(table);
-                divTable.appendChild(containerButton);
 
-                document.getElementById("body-container").appendChild(divTable);
+                if( isAdmin == '0' ){
+                    divTable.appendChild(containerButton);
+                    document.getElementById("body-container").appendChild(divTable);
+                    
+                    setTimeout(() => {
+                        CloseSpinner();
+                    }, 500);
+
+                }else{
+                    document.getElementById("containerResult").appendChild(divTable);
+                    
+                    setTimeout(() => {
+                        CloseSpinner();
+                        $('#searchRecordForm').modal('show');
+                    }, 500);
+                }
+                
             }
         });
     }

@@ -1,28 +1,21 @@
 <html>    
     <body>
-        <div>
-            <form class="form-horizontal" role="form">
-                <div class="form-group">
-                    <div class="table-modal table-reponsive-xl">
-                        <table class="table table-striped" id="pendingTable">    
-                            <thead>
-                                <tr>
-                                    <th scope="col">N°</th>
-                                    <th scope="col">N° de guía</th>
-                                    <th scope="col">Fecha Apertura</th>
-                                </tr>
-                            </thead>
-                        </table>
-                    </div>
-                </div>
-            </form>
-        </div>
     </body>
 
-     <!------------------------------ DETAILS FOR ONE MAINTANCES FORM ---------------------------------------->
+    <style>
+        .my-custom-scrollbar{
+            height: 600px;
+        }
+        .table-reponsive-xl{
+            height: 300px;
+            width: 100%;
+        }
+    </style>
+
+     <!------------------------------ TO SEARCH ANY RECORD ---------------------------------------->
     <!-- Modal -->
-    <div id="detailsRecordForm" class="modal fade" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" style="z-index:1100;">
-        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div id="searchRecordForm" class="modal fade" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" style="z-index:1100;">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
     
             <div class="modal-content">
                 
@@ -34,76 +27,16 @@
             
                 <!-- Modal body -->
                 <div class="modal-body">
-                    <form class="form-horizontal" role="form">
-                        <div class="form-group">
-                            <label for="user" class="col-3 control-label">Encargado</label>
-                            <div class="col-9">
-                                <input id="user" type="text" class="form-control" readonly="readonly">
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="dateStart" class="col-3 control-label">Fecha Inicio</label>
-                            <div class="col-9">
-                                <input id="dateStart" type="date" class="form-control" readonly="readonly">
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="activities" class="col-3 control-label">Actividades</label>
-                            <div class="col-9" id="containerActivities">
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="state" class="col-3 control-label">Estado</label>
-                            <div class="col-9">
-                                <input id="state" type="text" class="form-control" readonly="readonly">
-                            </div>
-                        </div>
-
-                    </form>                    
+                    <div class="form-group" id="containerResult">
+                           
+                    </div>
                 </div>
             
                 <!-- Modal footer -->
                 <div class="modal-footer justify-content-center">
-                    <button id="btn-approve" class="btn btn-success" data-toggle="modal"><span class="icon-check"></span> Aprobar</button>
-                    <button id="btn-openDelete" class="btn btn-danger" data-toggle="modal" href="#rejectMaintanceForm"><span class="icon-circle-with-cross"></span> Eliminar</button>
-                    <button class="btn btn-danger" data-toggle="modal" data-dismiss="modal"><span class="icon-circle-with-cross"></span> Cancelar</button>
+                    <button class="btn btn-danger" data-toggle="modal" data-dismiss="modal"><span class="icon-circle-with-cross"></span> Cerrar</button>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- Modal Report Event -->
-    <div id="rejectMaintanceForm" class="modal fade" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" style="z-index:2000;">
-        <div class="modal-dialog modal-md modal-dialog-scrollable">
-    
-        <!-- Modal content-->
-            <div class="modal-content">
-                
-                <!-- Modal Header -->
-                <div class="modal-header">
-                    <h4 id="headerEvent" class="modal-title"><span class="icon-add-user"></span> Confirmar Acción</h4>
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                </div>
-          
-                <!-- Modal body -->
-                <div class="modal-body">
-                    <div class="d-flex flex-column">
-                        <div class="row">
-                            <div class="col-12"><p id="bodyEvent">¿Estás seguro que desea eliminar la guia de mantención?</p></div>
-                        </div>
-                    </div>    
-                </div>
-          
-                <!-- Modal footer -->
-                <div class="modal-footer justify-content-center">
-                    <button id="btn-delete" type="button" class="btn btn-success" data-toggle="modal" data-dismiss="modal">Confirmar</button>
-                    <button type="button" class="btn btn-danger" data-toggle="modal" data-dismiss="modal"><span class="icon-circle-with-cross"></span> Cancelar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
 </html>

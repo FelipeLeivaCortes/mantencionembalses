@@ -425,7 +425,90 @@ function aboutActivity(id){
 };
 
 function openModalHistoryActivity(id){
-    alert("Show history id: " + id);
+    $('#aboutActivityForm').modal('toggle');
+    ShowSpinner();
+
+    var idCompany   = "empresa" + sessionStorage.getItem('ID_COMPANY');
+    var Variables   = "idCompany=" + idCompany + "&idActivity=" + id;
+
+    $.post("backend/getRecordsPerActivity.php", Variables, function(DATA){
+        if( DATA.ERROR ){
+            setTimeout(() => {
+                CloseSpinner();
+                ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
+            }, 1000);
+
+        }else{
+            var idTable     = "maintanceHistoryTable";
+            var table       = document.getElementById(idTable);
+
+            document.getElementById("activityNameToPrint").value    = DATA.nameActivity;
+            document.getElementById("areaToPrint").value            = DATA.areaActivity;
+
+            ClearTable(idTable);
+            
+            var bodyTable   = document.createElement("tbody");
+        
+            // Create the rows
+            for (var i=0; i<DATA.COUNT; i++){
+
+                // Here is created every row
+                var row         = document.createElement("tr");
+        
+                // Here is created every cell
+                var indexCell       = document.createElement("td");
+                var nameCell        = document.createElement("td");
+                var startDateCell   = document.createElement("td");
+                var endDateCell     = document.createElement("td");
+                var stateCell       = document.createElement("td");
+
+                // Here is storaged the content into a node
+                var index           = document.createTextNode( i + 1 );
+                var name            = document.createTextNode( DATA[i].name + " " + DATA[i].lastname );
+                var startDate       = document.createTextNode( FormatDate(DATA[i].startDate) );
+                var endDate;
+                
+                if( DATA[i].lastMaintance == 'Pendiente' ){
+                    endDate     = document.createTextNode("Pendiente");
+                
+                }else{
+                    endDate     = document.createTextNode( FormatDate(DATA[i].startDate) );
+
+                }
+                
+                var state           = document.createTextNode( DATA[i].statusActivity );
+              
+                document.getElementById("printHistoryMaintanceBtn").setAttribute("onclick", "printHistoryMaintances(" +  +")");
+
+                // Here is inserted the content into the cells
+                indexCell.appendChild(index);
+                nameCell.appendChild(name);
+                startDateCell.appendChild(startDate);
+                endDateCell.appendChild(endDate);
+                stateCell.appendChild(state);
+
+                // Here is inserted the cells into a row
+                row.appendChild(indexCell);
+                row.appendChild(nameCell);
+                row.appendChild(startDateCell);
+                row.appendChild(endDateCell);
+                row.appendChild(stateCell);
+        
+                // Here is inserted the row into the table´s body
+                bodyTable.appendChild(row);
+            }
+
+            // Here is inserted the body´s table into the table
+            table.appendChild(bodyTable);
+
+            setTimeout(() => {
+                CloseSpinner();
+                $('#maintancesHistoryForm').modal('show');    
+            }, 500);
+
+        }
+
+    });
 };
 
 function openModalEditActivity(id){
@@ -568,6 +651,8 @@ function loadCalendar(){
     var Variables   = "idCompany=" + idCompany + "&year=" + year + "&area=" + area + "&priority=" + priority;
 
     $.post("backend/getCalendarActivities.php", Variables, function(DATA){
+        console.log(DATA);
+
         if( DATA.ERROR ){
             setTimeout(function(){
                 CloseSpinner();
@@ -793,6 +878,9 @@ function previewGuide(){
     var Variables   = "idCompany=" + idCompany + "&arrayIdActivities=" + carMaintance;
 
     carMaintance    = [];
+    
+    document.getElementById("areaGuide").value      = "";
+    document.getElementById("mandatedGuide").value  = "";
 
     $.post("backend/getActivities.php", Variables, function(DATA){
         if( DATA.ERROR ){
@@ -862,7 +950,7 @@ function previewGuide(){
     });
 };
 
-function printPDF(){
+function printGuideMaintance(){
 
     var mandated    = document.getElementById("mandatedGuide").value;
 
@@ -956,12 +1044,38 @@ function printPDF(){
                 ModalReportEvent("Operación Exitosa", "", DATA.MESSAGE);
             }
 
+            var containerRow;
+            for( var i=0; i<activities.length; i++ ){
+                containerRow    = document.getElementById("container:" + activities[i]);
+                containerRow.remove();
+
+            }
+
+            for( var i=0; i<12; i++ ){
+                if( document.getElementById("monthContainer:" + i).children.length == 0 ){
+                    var divAux      = document.createElement("div");
+                    var textAux     = document.createTextNode("No hay actividades en este periodo");
+
+                    divAux.setAttribute("style", "margin-left: 5%");
+                    
+                    divAux.appendChild(textAux);
+                    document.getElementById("monthContainer:" + i).appendChild(divAux);
+                }
+            }
+
+            carMaintance    = [];
+            maintancesBtn.remove();
+
             $("#guideMaintanceForm").modal('toggle');
             ClearTable('tableActivities');
 
             document.getElementById("printPdfBtn").disabled = false;
         });
     }
+}
+
+function printHistoryMaintances(){
+    alert("printing pdf...");
 }
 
 //  ********** FUNCTIONS REMOVED **********

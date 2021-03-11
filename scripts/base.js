@@ -23,7 +23,7 @@ window.addEventListener("load", function(){
           }
        });
 
-       loadHome();
+       loadStadistics();
    }else{
       loadMaintances();
    }
@@ -97,23 +97,26 @@ console.log(DATA);
         * Contacts      --> Any user
 */
 
-function loadHome(){
-    document.getElementById("title-page").innerHTML = "Menú Principal";
+function loadStadistics(){
+    document.getElementById("title-page").innerHTML = "Estadisticas Generales";
 
     var navbar = new XMLHttpRequest();
-    navbar.open('get', 'nav-home.html');
+    navbar.open('get', 'nav-stadistics.html');
     navbar.send();
-    navbar.onload = function(){document.getElementById('navbar-container').innerHTML = navbar.responseText}
+   // navbar.onload = function(){document.getElementById('navbar-container').innerHTML = navbar.responseText}
 
     var qr = new XMLHttpRequest();
-    qr.open('get', 'home.html');
+    qr.open('get', 'stadistics.html');
     qr.send();
-    qr.onload = function(){document.getElementById('body-container').innerHTML = qr.responseText}
+    qr.onload = function(){
+        document.getElementById('navbar-container').innerHTML   = "<div></div>";
+        document.getElementById('body-container').innerHTML     = qr.responseText;
+    }
 
     ShowSpinner();
 
     setTimeout(function(){
-        initHome();
+        initStadistics();
     }, 1000);
 }
 
@@ -191,6 +194,12 @@ function loadRecords(){
     qr.open('get', 'records.html');
     qr.send();
     qr.onload = function(){document.getElementById('body-container').innerHTML = qr.responseText}
+
+    ShowSpinner();
+
+    setTimeout(() => {
+        initRecords();
+    }, 500);
 }
 
 function loadConfiguration(){

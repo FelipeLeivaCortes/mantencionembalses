@@ -10,7 +10,7 @@
 		$idCompany 	= $_POST["idCompany"];
 		$username 	= $_POST["username"];
         $activities	= $_POST["activities"];
-		$dateStart	= strval(date('Y-m-d'));
+		$dateStart	= date('Y-m-d');
 
 		$LINK   ->  close();
 		$LINK   =   new mysqli($URL, $USERNAME, $PASSWORD, $idCompany);	
