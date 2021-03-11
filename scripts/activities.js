@@ -207,7 +207,6 @@ function LoadActivitiesFromExcel(){
             var Variables   = "idCompany=" + idCompany + "&names=" + JSON.stringify(arrayNames) + "&dates=" + JSON.stringify(arrayDateStart) + "&frecuencies=" + JSON.stringify(arrayFrecuency) + "&locations=" + JSON.stringify(arrayLocation) + "&priorities=" + JSON.stringify(arrayPriority) + "&areas=" + JSON.stringify(arrayArea) + "&comments=" + JSON.stringify(arrayComments);
 
             $.post("backend/loadActivities.php", Variables, function(DATA){
-                console.log(DATA);
                 CloseSpinner();
 
                 if(DATA.ERROR){
@@ -651,8 +650,6 @@ function loadCalendar(){
     var Variables   = "idCompany=" + idCompany + "&year=" + year + "&area=" + area + "&priority=" + priority;
 
     $.post("backend/getCalendarActivities.php", Variables, function(DATA){
-        console.log(DATA);
-
         if( DATA.ERROR ){
             setTimeout(function(){
                 CloseSpinner();

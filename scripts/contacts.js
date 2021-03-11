@@ -11,6 +11,7 @@ function initContacts(){
     });
 
     $.post("backend/getReports.php", "idCompany=" + sessionStorage.getItem('ID_COMPANY'), function(DATA){
+        console.log(DATA);
         if( DATA.ERROR ){
             setTimeout(() => {
                 CloseSpinner();

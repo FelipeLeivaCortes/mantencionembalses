@@ -56,11 +56,10 @@
                 $count++;
             }
             
-        }
-
-        if( !$error ){
-            $DATA["ERROR"]  = false;
-            $DATA["COUNT"]  = $count;
+            if( !$error ){
+                $DATA["ERROR"]  = false;
+                $DATA["COUNT"]  = $count;
+            }
         }
 
         $QUERY  ->  free_result();
