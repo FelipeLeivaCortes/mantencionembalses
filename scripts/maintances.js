@@ -110,12 +110,12 @@ function getRecord(idRecord, onlyRead){
                             var line    = DATA.observations[j].split("|");
                             
                             if( target == line[0] ){
-                                description.textContent   = line[1];
+                                description.textContent     = line[1];
                                 break;
                             }
                         }
 
-                        status.textContent  = ( DATA[i].state == '0') ? "Pendiente" : "Terminada";
+                        status.textContent  = ( DATA[i].state == '0') ? "Pendiente" : "Realizada";
                         
                     }else{
                         description     = document.createElement( "textarea" );
@@ -125,7 +125,7 @@ function getRecord(idRecord, onlyRead){
 
                         // Here we set the attributes
                         option1.text        = "Pendiente";
-                        option2.text        = "Terminada";
+                        option2.text        = "Realizada";
 
                         status.add(option1);
                         status.add(option2);
@@ -146,14 +146,11 @@ function getRecord(idRecord, onlyRead){
                             isComplete          = false;
 
                         }else{
-                            status.value            = "Terminada";
+                            status.value            = "Realizada";
                             description.disabled    = true;
                             status.disabled         = true;
                         }
-
                     }
-
-                    
                     
                     // Here is inserted the content into the cells
                     indexCell.appendChild(index);
@@ -226,36 +223,29 @@ function getRecord(idRecord, onlyRead){
 };
 
 function openModalConfirmEvent(idRecord){
-    var table   = document.getElementById("tablePendingRecords");
+    var table   = document.getElementById("tablePendingRecords").children[1];
     
     var arrayObservations   = [];
     var arrayStates         = [];
     var error               = false;
 
-    for(var i=0; i<table.children[1].children.length; i++){
-        if( table.children[1].children[i].cells[2].children[0].value == "" ){
-            ModalReportEvent("Error", 62, "La observación de la fila " + (i + 1) + " está en blanco");
+    for(var i=0; i<table.children.length; i++){
+        var observation     = table.children[i].cells[2].children[0].value.replace(/\n/g, "");
+        arrayObservations.push( observation );
+
+        if( table.children[i].cells[3].children[0].value == "Pendiente" ){
+            arrayStates.push( "0" );
+        
+        }else if( table.children[i].cells[3].children[0].value == "Realizada" ){
+            arrayStates.push( "1" );
+        
+        }else{
+            ModalReportEvent("Error", 63, "El estado de la fila " + (i + 1) + " ha sido modificado incorrectamente");
             error   = true;
             
-            break;
-
-        }else{
-            arrayObservations.push( table.children[1].children[i].cells[2].children[0].value );
-
-            if( table.children[1].children[i].cells[3].children[0].value == "Pendiente" ){
-                arrayStates.push( "0" );
-            
-            }else if( table.children[1].children[i].cells[3].children[0].value == "Terminada" ){
-                arrayStates.push( "1" );
-            
-            }else{
-                ModalReportEvent("Error", 63, "El estado de la fila " + (i + 1) + " ha sido modificado incorrectamente");
-                error   = true;
-                
-                break;    
-            }
+            break;    
         }
-
+        
     }
 
     if( !error ){
@@ -264,19 +254,19 @@ function openModalConfirmEvent(idRecord){
 
         document.getElementById("btnConfirm").setAttribute("onclick", "updateRecord(" + idRecord + ", '" + arrayObservations + "', '" + arrayStates + "');");
 
-        $('#ModalConfirmEvent').modal("show");
+        $('#ModalConfirmEvent').modal('show');
     }
 }
 
 function updateRecord(idRecord, arrayObservations, arrayStates){
-    $('#ModalConfirmEvent').modal("toggle");
+    
+
+    $('#ModalConfirmEvent').modal('toggle');
 
     var idCompany   = sessionStorage.getItem("ID_COMPANY");
     var Variables   = "idCompany=" + idCompany + "&idRecord=" + idRecord + "&arrayObservations=" + arrayObservations + "&arrayStates=" + arrayStates;
 
     $.post("backend/updateRecord.php", Variables, function(DATA){
-        console.log(DATA);
-        
         if( DATA.ERROR ){
             ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
         
@@ -284,8 +274,10 @@ function updateRecord(idRecord, arrayObservations, arrayStates){
             var table   = document.getElementById("tablePendingRecords");
 
             for(var i=0; i<table.children[1].children.length; i++){
-                table.children[1].children[i].cells[2].children[0].value = "";
-                table.children[1].children[i].cells[3].children[0].value = "Pendiente";
+                table.children[1].children[i].cells[2].children[0].disabled     = false;
+                table.children[1].children[i].cells[2].children[0].value        = "";
+                table.children[1].children[i].cells[3].children[0].value        = "Pendiente";
+                table.children[1].children[i].cells[3].children[0].disabled     = false;
             }
 
             ModalReportEvent("Operación exitosa", " ", DATA.MESSAGE);

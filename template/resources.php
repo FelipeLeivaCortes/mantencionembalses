@@ -56,7 +56,7 @@
               
                     <!-- Modal footer -->
                     <div id="footerModalReportEvent" class="modal-footer justify-content-center">
-                        <button type="button" class="btn btn-success" data-toggle="modal" data-dismiss="modal">Aceptar</button>
+                        <button type="button" class="btn btn-danger" data-toggle="modal" data-dismiss="modal"><span class="icon-circle-with-cross"></span> Cerrar</button>
                     </div>
                 </div>
             </div>

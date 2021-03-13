@@ -221,7 +221,7 @@ function loadConfiguration(){
 }
 
 function loadContacts(){
-    document.getElementById("title-page").innerHTML = "Contactos";
+    document.getElementById("title-page").innerHTML = "Memoranda";
 
     var navbar = new XMLHttpRequest();
     navbar.open('get', 'nav-contacts.html');

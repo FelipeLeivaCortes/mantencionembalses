@@ -47,7 +47,7 @@
                 </div>
                 
                 <div>
-                    <a href="javascript:loadContacts();"><span class="icon-phone icon-space"></span>Contactos</a>
+                    <a href="javascript:loadContacts();"><span class="icon-spreadsheet icon-space"></span>Memoranda</a>
                 </div>
 
                 <div>
