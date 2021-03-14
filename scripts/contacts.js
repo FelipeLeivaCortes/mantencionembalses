@@ -11,7 +11,6 @@ function initContacts(){
     });
 
     $.post("backend/getReports.php", "idCompany=" + sessionStorage.getItem('ID_COMPANY'), function(DATA){
-        console.log(DATA);
         if( DATA.ERROR ){
             setTimeout(() => {
                 CloseSpinner();
@@ -138,8 +137,8 @@ function openContent(idReport, title, stringType, stringAuthor, stringContent){
         if( arrayType[i] == 'E' ){
             document.getElementById("contentThread").value      += arrayAuthor[i] + " : " + arrayContent[i] + "\n";
         
-        }else{
-            if( arrayContent[i] != "" ){
+        }else if( arrayType[i] == 'A' ){
+            if( arrayContent[i] != null || arrayContent[i] != '' ){
                 document.getElementById("contentThread").value  += "Webmaster : " + arrayContent[i] + "\n";
             }
 
