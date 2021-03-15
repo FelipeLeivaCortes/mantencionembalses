@@ -202,6 +202,26 @@ function loadRecords(){
     }, 500);
 }
 
+function loadReports(){
+    document.getElementById("title-page").innerHTML = "Reportes";
+
+    var navbar = new XMLHttpRequest();
+    navbar.open('get', 'nav-reports.html');
+    navbar.send();
+    navbar.onload = function(){document.getElementById('navbar-container').innerHTML = navbar.responseText}
+
+    var qr = new XMLHttpRequest();
+    qr.open('get', 'reports.html');
+    qr.send();
+    qr.onload = function(){document.getElementById('body-container').innerHTML = qr.responseText}
+
+    ShowSpinner();
+
+    setTimeout(() => {
+        initReports();
+    }, 500);
+}
+
 function loadConfiguration(){
     document.getElementById("title-page").innerHTML = "Configuraciones";
     

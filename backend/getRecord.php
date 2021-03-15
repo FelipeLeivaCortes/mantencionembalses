@@ -44,6 +44,7 @@
             $error              	= false;
             $warning            	= 0;
             $success            	= 0;
+            $piezometria         = false;
 
             for($i=0; $i<sizeof($arrayIds); $i++){
                $QUERY  ->  free_result();
@@ -62,6 +63,10 @@
                   $arrayActivities[$success]    = $nameActivity;
                   $arrayIdsSuccess[$success]    = $arrayIds[$i];
                   $success++;
+
+                  if( $nameActivity == 'realizar piezometría' ){
+                     $piezometria   = true;
+                  }
 
                }else{
                   $DATA["ERROR"]          = true;
@@ -118,6 +123,10 @@
                         'name'      => $arrayActivities[$i],
                         'state'     => $arrayStates[$i],
                      ]);
+                  }
+
+                  if( $piezometria ){
+                     $DATA["piezometria"] = true;
                   }
                }
             }

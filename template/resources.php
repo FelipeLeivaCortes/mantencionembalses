@@ -10,14 +10,19 @@
         <link rel="stylesheet" href="template/iconmoon/style.css">              <!-- Iconmoon´s css -->
         <link rel="stylesheet" href="template/sidenav.css">                     <!-- Sidenav´s css -->
 
+        <script src="scripts/chart.js.min.js"></script>
         <script src="scripts/jquery.min.js"></script>
         <script src="scripts/jspdf.min.js"></script>
         <script src="scripts/jspdf.plugin.autotable.min.js"></script>
-        <script src="scripts/bootstrap.min.js"></script>
-        <script src="scripts/popper.min.js"></script>
-        <script src="scripts/html2canvas.min.js"></script>
         <script src="scripts/xlsx.full.min.js"></script>
+        <script src="scripts/bootstrap.min.js"></script>
+        
+<!--
+<script src="scripts/popper.min.js"></script>
+        <script src="scripts/html2canvas.min.js"></script>
         <script src="scripts/jszip.js"></script>
+-->
+
     </head>
     
     <body>

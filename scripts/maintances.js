@@ -39,7 +39,8 @@ function getRecord(idRecord, onlyRead){
             }else{
                 var table;
                 var divTable;
-                var isComplete  = true;
+                var isComplete      = true;
+                var isPiezometria   = false;
 
                 divTable    = document.createElement("div");
                 divTable.setAttribute("class", "table-modal table-reponsive-xl");
@@ -101,6 +102,7 @@ function getRecord(idRecord, onlyRead){
                     var description, status, option1, option2;
 
                     if( onlyRead ){
+                        activity        = document.createTextNode( DATA[i].name );
                         description     = document.createTextNode("");
                         status          = document.createTextNode("");
 
@@ -141,6 +143,7 @@ function getRecord(idRecord, onlyRead){
                             }
                         }
 
+                    //  If the guide is incomplete
                         if( DATA[i].state == "0" ){
                             status.value        = "Pendiente";
                             isComplete          = false;
@@ -150,6 +153,23 @@ function getRecord(idRecord, onlyRead){
                             description.disabled    = true;
                             status.disabled         = true;
                         }
+
+                        if( DATA[i].name == 'realizar piezometría' ){
+                            isPiezometria   = true;
+
+                            status.setAttribute("id", "selectPiezometria");
+                            status.addEventListener("change", function(){
+                                if( this.value == 'Realizada' ){
+                                    $('#updatePiezometriaForm').modal('show');
+                                }
+                            });
+
+                            $("#updatePiezometriaForm").on('hidden.bs.modal', function (){
+                                document.getElementById("selectPiezometria").value  = "Pendiente";
+                            });
+
+                        }
+
                     }
                     
                     // Here is inserted the content into the cells
@@ -180,7 +200,7 @@ function getRecord(idRecord, onlyRead){
                     containerButton.setAttribute("class", "container-fluid d-flex justify-content-center");
                     span.setAttribute("class", "icon-edit");
                     button.setAttribute("class", "btn btn-primary");
-                    button.setAttribute("onclick", "javascript:openModalConfirmEvent(" + idRecord + ")");
+                    button.setAttribute("onclick", "javascript:openModalConfirmEvent(" + idRecord + ", " + isPiezometria + ")");
                     button.setAttribute("data-toggle", "modal");
 
                     if( isComplete ){
@@ -222,7 +242,7 @@ function getRecord(idRecord, onlyRead){
     }
 };
 
-function openModalConfirmEvent(idRecord){
+function openModalConfirmEvent(idRecord, isPiezometria){
     var table   = document.getElementById("tablePendingRecords").children[1];
     
     var arrayObservations   = [];
@@ -252,35 +272,82 @@ function openModalConfirmEvent(idRecord){
         document.getElementById("headerEvent").innerHTML    = " Actualizar guía de mantención";
         document.getElementById("bodyEvent").innerHTML      = "¿Está seguro que desea guardar los cambios?";
 
-        document.getElementById("btnConfirm").setAttribute("onclick", "updateRecord(" + idRecord + ", '" + arrayObservations + "', '" + arrayStates + "');");
+        document.getElementById("btnConfirm").setAttribute("onclick", "updateRecord(" + idRecord + ", '" + arrayObservations + "', '" + arrayStates + "', " + isPiezometria + ");");
 
         $('#ModalConfirmEvent').modal('show');
     }
 }
 
-function updateRecord(idRecord, arrayObservations, arrayStates){
+function updateRecord(idRecord, arrayObservations, arrayStates, isPiezometria){
     
 
     $('#ModalConfirmEvent').modal('toggle');
 
     var idCompany   = sessionStorage.getItem("ID_COMPANY");
-    var Variables   = "idCompany=" + idCompany + "&idRecord=" + idRecord + "&arrayObservations=" + arrayObservations + "&arrayStates=" + arrayStates;
+    var Variables;
+
+    if( isPiezometria ){
+        Variables   = "idCompany=" + idCompany + "&idRecord=" + idRecord + "&arrayObservations=" +
+        arrayObservations + "&arrayStates=" + arrayStates + "&piezometriaData=" + sessionStorage.getItem("piezometriaData");
+    
+        sessionStorage.removeItem("piezometriaData");
+    }else{
+        Variables   = "idCompany=" + idCompany + "&idRecord=" + idRecord + "&arrayObservations=" +
+        arrayObservations + "&arrayStates=" + arrayStates + "&piezometriaData=" + [];
+
+    }
 
     $.post("backend/updateRecord.php", Variables, function(DATA){
         if( DATA.ERROR ){
             ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
         
         }else{
-            var table   = document.getElementById("tablePendingRecords");
+            document.getElementById("containerTable").remove();
 
-            for(var i=0; i<table.children[1].children.length; i++){
-                table.children[1].children[i].cells[2].children[0].disabled     = false;
-                table.children[1].children[i].cells[2].children[0].value        = "";
-                table.children[1].children[i].cells[3].children[0].value        = "Pendiente";
-                table.children[1].children[i].cells[3].children[0].disabled     = false;
-            }
-
-            ModalReportEvent("Operación exitosa", " ", DATA.MESSAGE);
+            ModalReportEvent("Operación exitosa", "", DATA.MESSAGE);
         }
     });
+};
+
+function updatePiezometria(){
+    var numPit      = 14;
+    var data        = [];
+    var error       = false;
+
+    for( var i=0; i<numPit + 1; i++ ){
+        var valueData   = document.getElementById("pcg" + ( i ) + "Data").value;
+
+        if( valueData == "" ){
+            ModalReportEvent("Error", 28, "Debe rellenar todos los campos");
+            error   = true;
+            break;
+
+        }else{
+            valueData       = valueData.replace(/\,/g, ".");
+            var auxValue    = valueData.split(".");
+
+            if( auxValue.length > 2 ){
+                ModalReportEvent("Error", 29, "El N° ingresado contiene carácteres incorrectos");
+                
+                document.getElementById("pcg" + ( i ) + "Data").value   = "";
+                error   = true;
+                break;
+            
+            }else{
+                data[i] = parseFloat(valueData).toFixed(2);
+
+            }
+        }
+    }
+
+    if( !error ){
+        $('#updatePiezometriaForm').modal('toggle');
+        sessionStorage.setItem('piezometriaData', data);
+
+        ModalReportEvent("Operación exitosa", "", "Se han almacenado los datos de piezometría exitosamente");
+        setTimeout(() => {
+            document.getElementById("selectPiezometria").value  = "Realizada";
+        }, 500);
+        
+    }
 };

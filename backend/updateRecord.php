@@ -11,6 +11,7 @@
         $idRecord           =   $_POST["idRecord"];
         $arrayObservations  =   explode(",", $_POST["arrayObservations"]);
         $arrayStates        =   explode(",", $_POST["arrayStates"]);
+        $arrayPiezometria   =   explode(",", $_POST["piezometriaData"]);
 
         $LINK   =   new mysqli($URL, $USERNAME, $PASSWORD, "empresa".$idCompany);
 
@@ -46,11 +47,11 @@
                     $idActivity = intval($arrayActivities[$i]);
 
                     $QUERY  ->  free_result();
-                    $QUERY  =   $LINK -> prepare("SELECT ultimaMantencion, frecuencia FROM actividad WHERE id = ?");
+                    $QUERY  =   $LINK -> prepare("SELECT nombre, ultimaMantencion, frecuencia FROM actividad WHERE id = ?");
                     $QUERY  ->  bind_param("i", $idActivity);
                     $QUERY  ->  execute();
                     $QUERY  ->  store_result();
-                    $QUERY  ->  bind_result($lastMaintance, $frecuencyActivity);
+                    $QUERY  ->  bind_result($nameActivity, $lastMaintance, $frecuencyActivity);
                     $QUERY  ->  fetch();
 
                     if( $lastMaintance == $today ){
@@ -78,12 +79,50 @@
                         if( $QUERY->affected_rows == 1 ){
                             array_push($DATA, [
                                 'idActivity'        => $idActivity,
-                                'operation'         => 'update',
+                                'operation'         => 'Update',
                                 'statusActivity'    => 'OK',
                             ]);
                             
                             $arrayStatesOriginal[$i]    = "1";
                             $success++;
+
+                            if( $nameActivity == 'realizar piezometría' ){
+                                $cota       =   $arrayPiezometria[0];
+                                $pcg1       =   $arrayPiezometria[1];
+                                $pcg2       =   $arrayPiezometria[2];
+                                $pcg3       =   $arrayPiezometria[3];
+                                $pcg4       =   $arrayPiezometria[4];
+                                $pcg5       =   $arrayPiezometria[5];
+                                $pcg6       =   $arrayPiezometria[6];
+                                $pcg7       =   $arrayPiezometria[7];
+                                $pcg8       =   $arrayPiezometria[8];
+                                $pcg9       =   $arrayPiezometria[9];
+                                $pcg10      =   $arrayPiezometria[10];
+                                $pcg11      =   $arrayPiezometria[11];
+                                $pcg12      =   $arrayPiezometria[12];
+                                $pcg13      =   $arrayPiezometria[13];
+                                $pcg14      =   $arrayPiezometria[14];
+
+                                $QUERY  =   $LINK -> prepare("INSERT INTO piezometria (fecha, cota, pcg1, pcg2, pcg3, pcg4, pcg5, 
+                                            pcg6, pcg7, pcg8, pcg9, pcg10, pcg11, pcg12, pcg13, pcg14) VALUES (?, ?, ?, ?, ?, ?, 
+                                            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
+                                $QUERY  ->  bind_param("sddddddddddddddd", $today, $cota, $pcg1, $pcg2, $pcg3, $pcg4,
+                                            $pcg5, $pcg6, $pcg7, $pcg8, $pcg9, $pcg10, $pcg11, $pcg12, $pcg13, $pcg14);
+                                $QUERY  ->  execute();
+                                
+
+                                if( $QUERY->affected_rows != 1 ){
+                                    array_push($DATA, [
+                                        'idActivity'        => $idActivity,
+                                        'operation'         => 'Update Piezometría',
+                                        'statusActivity'    => 'ERROR',
+                                    ]);
+                                    $error  = true;
+                                    break;
+                                }
+
+                            }
+
 
                             if( file_exists( $PATH_FILES.$idCompany."/record_".$idRecord.".txt" ) ){
                                 $file   = fopen( $PATH_FILES.$idCompany."/record_".$idRecord.".txt", "a");
@@ -99,7 +138,7 @@
                         }else{
                             array_push($DATA, [
                                 'idActivity'        => $idActivity,
-                                'operation'         => 'update',
+                                'operation'         => 'Update',
                                 'statusActivity'    => 'ERROR',
                             ]);
                             $error  = true;

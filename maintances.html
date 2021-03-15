@@ -42,4 +42,132 @@
             </div>
         </div>
     </div>
+
+    <!------------------------------ Modal Report Event ----------------------------------------------->
+    <div id="updatePiezometriaForm" class="modal fade" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" style="z-index:1100;">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    
+        <!-- Modal content-->
+            <div class="modal-content">
+                
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 id="headerEvent" class="modal-title"><span class="icon-add-user"></span> Rellenar Datos de Piezometría</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+          
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <div>
+                        <small>*Nota: Se aceptan 4 dígitos enteros y 2 decimales</small>
+                        <br>
+                    </div>
+
+                    <div class="form-group">
+                        <h5>Cota</h5>
+                        <input id="pcg0Data" type="text" class="form-control" maxlength="7">
+                    </div>
+
+                    <div>
+                        <h5>Casa grande en roca - Ladera Sur</h5>
+                        <form>
+                            <fieldset enabled>
+                                <div>
+                                    <div class="form-group">
+                                        <label for="pcg1Data">PCG - 1</label>
+                                        <input id="pcg1Data" type="text" class="form-control" maxlength="7">
+                                    </div>
+                                
+                                    <div class="form-group">
+                                        <label for="pcg2Data">PCG - 2</label>
+                                        <input id="pcg2Data" type="text" class="form-control" maxlength="7">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="pcg3Data">PCG - 3</label>
+                                        <input id="pcg3Data" type="text" class="form-control" maxlength="7">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="pcg4Data">PCG - 4</label>
+                                        <input id="pcg4Data" type="text" class="form-control" maxlength="7">
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </form>
+                    </div>
+                        
+                    <div>
+                        <h5>Casa grande en roca - Ladera Norte</h5>
+                        <form>
+                            <fieldset enabled>
+                                <div>
+                                    <div class="form-group">
+                                        <label for="pcg5Data">PCG - 5</label>
+                                        <input id="pcg5Data" type="text" class="form-control" maxlength="7">
+                                    </div>
+                                
+                                    <div class="form-group">
+                                        <label for="pcg6Data">PCG - 6</label>
+                                        <input id="pcg6Data" type="text" class="form-control" maxlength="7">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="pcg7Data">PCG - 7</label>
+                                        <input id="pcg7Data" type="text" class="form-control" maxlength="7">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="pcg8Data">PCG - 8</label>
+                                        <input id="pcg8Data" type="text" class="form-control" maxlength="7">
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </form>
+                    </div>
+
+                    <div>
+                        <h5>Casa grande fluvial</h5>
+                        <fieldset enabled>
+                            <div class="form-group">
+                                <label for="pcg9Data">PCG - 1</label>
+                                <input id="pcg9Data" type="text" class="form-control" maxlength="7">
+                            </div>
+                        
+                            <div class="form-group">
+                                <label for="pcg10Data">PCG - 2</label>
+                                <input id="pcg10Data" type="text" class="form-control" maxlength="7">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="pcg11Data">PCG - 3</label>
+                                <input id="pcg11Data" type="text" class="form-control" maxlength="7">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="pcg12Data">PCG - 4</label>
+                                <input id="pcg12Data" type="text" class="form-control" maxlength="7">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="pcg13Data">PCG - 5</label>
+                                <input id="pcg13Data" type="text" class="form-control" maxlength="7">
+                            </div>
+                        
+                            <div class="form-group">
+                                <label for="pcg14Data">PCG - 6</label>
+                                <input id="pcg14Data" type="text" class="form-control" maxlength="7">
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+          
+                <!-- Modal footer -->
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-primary" onclick="javascript:updatePiezometria(); return 0;"><span class="icon-paper-plane"></span> Enviar</button>
+                    <button type="button" class="btn btn-danger" data-toggle="modal" data-dismiss="modal"><span class="icon-circle-with-cross"></span> Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </html>
