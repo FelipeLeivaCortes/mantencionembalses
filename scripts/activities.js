@@ -578,207 +578,215 @@ function loadCalendar(){
     var area        = document.getElementById("filterAreaCalendar").value;
     var priority    = document.getElementById("filterPriorityCalendar").value;
 
-    if( priority == "Todas" ){
-        priority = "All";
-    }
+    if( year == "" ){
+        setTimeout(() => {
+            CloseSpinner();
+            ModalReportEvent("Error", 75, "No se ha seleccionado ningún periodo para la busqueda de actividades");
+        }, 500);
+    
+    }else{
+        if( priority == "Todas" ){
+            priority = "All";
+        }
 
-    var Variables   = "idCompany=" + idCompany + "&year=" + year + "&area=" + area + "&priority=" + priority;
+        var Variables   = "idCompany=" + idCompany + "&year=" + year + "&area=" + area + "&priority=" + priority;
 
-    $.post("backend/getCalendarActivities.php", Variables, function(DATA){
-        if( DATA.ERROR ){
-            setTimeout(function(){
-                CloseSpinner();
-                ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
-            }, 500);
-            
-        }else{
-
-        //  In case that there´s nobody thecnician in the area, the system inform it.
-            if( DATA.WARNING != "" ){
-                ModalReportEvent("Precaución", "", DATA.WARNING);
-
-            }
-
-            var workersList     = document.getElementById("areaGuide");
-            var profession      = "";
-
-            $('#areaGuide').empty();
-
-            for( var i=0; i<DATA.workers.length; i++ ){
-
-                if( DATA.workers[i].permission == '0100' ){
-                    profession  = 'Mecánico';
+        $.post("backend/getCalendarActivities.php", Variables, function(DATA){
+            if( DATA.ERROR ){
+                setTimeout(function(){
+                    CloseSpinner();
+                    ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
+                }, 500);
                 
-                }else if( DATA.workers[i].permission == '0010' ){
-                    profession  = 'Electricista';
-                
-                }else if( DATA.workers[i].permission == '0001' ){
-                    profession  = 'Jardinero';
+            }else{
+
+            //  In case that there´s nobody thecnician in the area, the system inform it.
+                if( DATA.WARNING != "" ){
+                    ModalReportEvent("Precaución", "", DATA.WARNING);
 
                 }
 
-                var option  = document.createElement("option");
+                var workersList     = document.getElementById("areaGuide");
+                var profession      = "";
 
-                option.text = DATA.workers[i].nameUser + " " + DATA.workers[i].lastnameUser + " : " + GenerateRut(DATA.workers[i].username) + " : " + profession;
-                workersList.add(option);
+                $('#areaGuide').empty();
 
-            }
+                for( var i=0; i<DATA.workers.length; i++ ){
 
-            workersList.value   = "";
-
-            workersList.addEventListener("change", function(){
-                document.getElementById("mandatedGuide").value  = this.value;
-            });
-
-
-            var form, formContainer, idForm, idContainer;
-    
-            idForm      = "activitiesForm";
-            idContainer = "containerActivities";
-
-            if( document.getElementById(idContainer) != null ){
-                document.getElementById(idContainer).remove();
-            }
-
-            formContainer   = document.createElement("div");
-            formContainer.setAttribute("id", idContainer);
-
-            formContainer.style.width       = "120%";
-            formContainer.style.height      = "300px";
-            formContainer.style.paddingLeft = "5px";
-            formContainer.style.overflow    = "scroll";
-            formContainer.style.background  = "white";
-    
-            form            = document.createElement("form");
-            form.setAttribute("id", idForm);
-            
-            // Create the month´s container
-            for( var i=0; i<12; i++ ){
-
-                var label   = document.createTextNode("");
-
-                switch(i){
-                    case 0:
-                        label.textContent   = "Enero";
-                        break;
-                    case 1:
-                        label.textContent   = "Febrero";
-                        break;
-                    case 2:
-                        label.textContent   = "Marzo";
-                        break;
-                    case 3:
-                        label.textContent   = "Abril";
-                        break;
-                    case 4:
-                        label.textContent   = "Mayo";
-                        break;
-                    case 5:
-                        label.textContent   = "Junio";
-                        break;
-                    case 6:
-                        label.textContent   = "Julio";
-                        break;
-                    case 7:
-                        label.textContent   = "Agosto";
-                        break;
-                    case 8:
-                        label.textContent   = "Septiembre";
-                        break;
-                    case 9:
-                        label.textContent   = "Octubre";
-                        break;
-                    case 10:
-                        label.textContent   = "Noviembre";
-                        break;
-                    case 11:
-                        label.textContent   = "Diciembre";
-                        break;
+                    if( DATA.workers[i].permission == '0100' ){
+                        profession  = 'Mecánico';
                     
+                    }else if( DATA.workers[i].permission == '0010' ){
+                        profession  = 'Electricista';
+                    
+                    }else if( DATA.workers[i].permission == '0001' ){
+                        profession  = 'Jardinero';
+
+                    }
+
+                    var option  = document.createElement("option");
+
+                    option.text = DATA.workers[i].nameUser + " " + DATA.workers[i].lastnameUser + " : " + GenerateRut(DATA.workers[i].username) + " : " + profession;
+                    workersList.add(option);
+
                 }
- 
-                // Here is added every activity belong each month
-                var monthContainer= document.createElement("div");
-                monthContainer.setAttribute("id", "monthContainer:" + i);
-                monthContainer.setAttribute("class", "form-group");
 
-                monthContainer.appendChild(label);
+                workersList.value   = "";
 
-                if( DATA[i].elements == 0 ){
-                    var container       = document.createElement("div");
-                    container.style.marginLeft  = "5%";
+                workersList.addEventListener("change", function(){
+                    document.getElementById("mandatedGuide").value  = this.value;
+                });
 
-                    var textName        = document.createTextNode("No hay actividades en este periodo");
-                    
-                    container.appendChild(textName);
-                    monthContainer.appendChild(container);
 
-                }else{
-                    for(j=0; j<DATA[i].elements; j++){
+                var form, formContainer, idForm, idContainer;
+        
+                idForm      = "activitiesForm";
+                idContainer = "containerActivities";
+
+                if( document.getElementById(idContainer) != null ){
+                    document.getElementById(idContainer).remove();
+                }
+
+                formContainer   = document.createElement("div");
+                formContainer.setAttribute("id", idContainer);
+
+                formContainer.style.width       = "120%";
+                formContainer.style.height      = "300px";
+                formContainer.style.paddingLeft = "5px";
+                formContainer.style.overflow    = "scroll";
+                formContainer.style.background  = "white";
+        
+                form            = document.createElement("form");
+                form.setAttribute("id", idForm);
+                
+                // Create the month´s container
+                for( var i=0; i<12; i++ ){
+
+                    var label   = document.createTextNode("");
+
+                    switch(i){
+                        case 0:
+                            label.textContent   = "Enero";
+                            break;
+                        case 1:
+                            label.textContent   = "Febrero";
+                            break;
+                        case 2:
+                            label.textContent   = "Marzo";
+                            break;
+                        case 3:
+                            label.textContent   = "Abril";
+                            break;
+                        case 4:
+                            label.textContent   = "Mayo";
+                            break;
+                        case 5:
+                            label.textContent   = "Junio";
+                            break;
+                        case 6:
+                            label.textContent   = "Julio";
+                            break;
+                        case 7:
+                            label.textContent   = "Agosto";
+                            break;
+                        case 8:
+                            label.textContent   = "Septiembre";
+                            break;
+                        case 9:
+                            label.textContent   = "Octubre";
+                            break;
+                        case 10:
+                            label.textContent   = "Noviembre";
+                            break;
+                        case 11:
+                            label.textContent   = "Diciembre";
+                            break;
+                        
+                    }
+    
+                    // Here is added every activity belong each month
+                    var monthContainer= document.createElement("div");
+                    monthContainer.setAttribute("id", "monthContainer:" + i);
+                    monthContainer.setAttribute("class", "form-group");
+
+                    monthContainer.appendChild(label);
+
+                    if( DATA[i].elements == 0 ){
                         var container       = document.createElement("div");
-                        container.setAttribute("class", "row");
-                        container.setAttribute("id", "container:" + DATA[i].ids[j]);
                         container.style.marginLeft  = "5%";
 
-                        var check           = document.createElement("input");
-                        check.setAttribute("type", "checkbox");
-                        check.setAttribute("id", "idCheck:" + DATA[i].ids[j]);
-                        check.setAttribute("class", "col-1");
-
-                        check.setAttribute("onchange", "modifyCar(" + DATA[i].ids[j] + ")")
-
-                        var priorityDiv     = document.createElement("div");
-                        var priorityText    = document.createTextNode("");
-                        var priorityIcon    = document.createElement("i");
-
-                        priorityDiv.setAttribute("class", "col-1");
-                        priorityDiv.style.marginRight   = "2%";
-                        priorityIcon.setAttribute("class", "icon-circle");
-
-                        if( DATA[i].priorities[j] == 'Alta' ){
-                            priorityText.textContent    = "Alta  ";
-                            priorityIcon.style  = "border-radius: 7px; background: red; color: red;";
-
-                        }else if( DATA[i].priorities[j] == 'Media' ){
-                            priorityText.textContent    = "Media ";
-                            priorityIcon.style  = "border-radius: 7px; background: orange; color: orange;";
+                        var textName        = document.createTextNode("No hay actividades en este periodo");
                         
-                        }else if( DATA[i].priorities[j] == 'Baja' ){
-                            priorityText.textContent    = "Baja  ";
-                            priorityIcon.style  = "border-radius: 7px; background: green; color: green;";
-
-                        }
-
-                        priorityDiv.appendChild(priorityIcon);
-                        priorityDiv.appendChild(priorityText);
-
-                        var textName        = document.createElement("a");
-                        var textLink        = document.createTextNode( DATA[i].names[j] );
-                        textName.setAttribute("class", "col-9");
-
-                        textName.appendChild( textLink );
-                        textName.href   = "javascript:aboutActivity('" + DATA[i].ids[j] + "')";
-
-                        container.appendChild(check);
-                        container.appendChild(priorityDiv);
                         container.appendChild(textName);
                         monthContainer.appendChild(container);
 
+                    }else{
+                        for(j=0; j<DATA[i].elements; j++){
+                            var container       = document.createElement("div");
+                            container.setAttribute("class", "row");
+                            container.setAttribute("id", "container:" + DATA[i].ids[j]);
+                            container.style.marginLeft  = "5%";
+
+                            var check           = document.createElement("input");
+                            check.setAttribute("type", "checkbox");
+                            check.setAttribute("id", "idCheck:" + DATA[i].ids[j]);
+                            check.setAttribute("class", "col-1");
+
+                            check.setAttribute("onchange", "modifyCar(" + DATA[i].ids[j] + ")")
+
+                            var priorityDiv     = document.createElement("div");
+                            var priorityText    = document.createTextNode("");
+                            var priorityIcon    = document.createElement("i");
+
+                            priorityDiv.setAttribute("class", "col-1");
+                            priorityDiv.style.marginRight   = "2%";
+                            priorityIcon.setAttribute("class", "icon-circle");
+
+                            if( DATA[i].priorities[j] == 'Alta' ){
+                                priorityText.textContent    = "Alta  ";
+                                priorityIcon.style  = "border-radius: 7px; background: red; color: red;";
+
+                            }else if( DATA[i].priorities[j] == 'Media' ){
+                                priorityText.textContent    = "Media ";
+                                priorityIcon.style  = "border-radius: 7px; background: orange; color: orange;";
+                            
+                            }else if( DATA[i].priorities[j] == 'Baja' ){
+                                priorityText.textContent    = "Baja  ";
+                                priorityIcon.style  = "border-radius: 7px; background: green; color: green;";
+
+                            }
+
+                            priorityDiv.appendChild(priorityIcon);
+                            priorityDiv.appendChild(priorityText);
+
+                            var textName        = document.createElement("a");
+                            var textLink        = document.createTextNode( DATA[i].names[j] );
+                            textName.setAttribute("class", "col-9");
+
+                            textName.appendChild( textLink );
+                            textName.href   = "javascript:aboutActivity('" + DATA[i].ids[j] + "')";
+
+                            container.appendChild(check);
+                            container.appendChild(priorityDiv);
+                            container.appendChild(textName);
+                            monthContainer.appendChild(container);
+
+                        }
                     }
+
+                    form.appendChild(monthContainer);
                 }
 
-                form.appendChild(monthContainer);
+                formContainer.appendChild(form);
+                document.getElementById("body-container").appendChild(formContainer);
+                
+                setTimeout(() => {
+                    CloseSpinner();    
+                }, 500);
+                
             }
-
-            formContainer.appendChild(form);
-            document.getElementById("body-container").appendChild(formContainer);
-            
-            setTimeout(() => {
-                CloseSpinner();    
-            }, 500);
-            
-        }
-    });
+        });
+    }
 };
 
 function modifyCar(idActivity){

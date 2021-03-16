@@ -1,2 +1,0 @@
-E:Felipe Leiva:Al momento de imprimir el historial de una actividad, el sistema no hace nada.
-A::Gracias por comunicarse con nosotros. Nuestros técnicos ya están trabajando para solucionar el problema.

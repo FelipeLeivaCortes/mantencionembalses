@@ -13,8 +13,9 @@ function initContacts(){
     $.post("backend/getReports.php", "idCompany=" + sessionStorage.getItem('ID_COMPANY'), function(DATA){
         if( DATA.ERROR ){
             setTimeout(() => {
+                console.log(DATA);
                 CloseSpinner();
-                ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
+//                ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
             }, 500);
 
         }else{

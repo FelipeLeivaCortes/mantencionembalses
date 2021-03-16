@@ -20,8 +20,8 @@
         
         if( $QUERY->num_rows == 0 ){
             $DATA["ERROR"]      = true;
-            $DATA["ERRNO"]      = 8;
-            $DATA["MESSAGE"]    = "No se han encontrado resultados en su búsqueda";
+            $DATA["ERRNO"]      = 76;
+            $DATA["MESSAGE"]    = "No se han encontrado datos de piezometrías";
         
         }else{
             $DATA["ERROR"]      = false;
