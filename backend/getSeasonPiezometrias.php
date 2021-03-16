@@ -13,7 +13,7 @@
         $LINK   ->  close();
         $LINK   =   new mysqli($URL, $USERNAME, $PASSWORD, $idCompany);
 
-        $QUERY  =   $LINK -> prepare("SELECT DISTINCT year(fecha) FROM piezometria ORDER BY fecha DESC;");
+        $QUERY  =   $LINK -> prepare("SELECT DISTINCT year(fecha) FROM piezometria;");
         $QUERY  ->  execute();
         $QUERY  ->  store_result();
         $QUERY  ->  bind_result($year);
