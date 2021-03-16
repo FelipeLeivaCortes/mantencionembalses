@@ -90,7 +90,7 @@
                             }
 
                             if( $arrayStateActivity[$i] == '1' ){
-                                $stateActivity = 'Terminada';
+                                $stateActivity = 'Realizada';
                                 
                             }else{
                                 $stateActivity = 'Pendiente';

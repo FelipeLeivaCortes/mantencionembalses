@@ -200,7 +200,6 @@ function deleteRecord(id){
 }
 
 function printRecord(idRecord){
-    console.log("Inside the function: " + idRecord);
     $('#searchRecordForm').modal('toggle');
 
     document.getElementById("printPdfBtn").disabled = true;

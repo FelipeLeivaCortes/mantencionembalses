@@ -35,6 +35,7 @@ function initReports(){
                 $(this).val(selectedValue);
             });
             
+            select.value    = "";
             CloseSpinner(); 
         }
     });
