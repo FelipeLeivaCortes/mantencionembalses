@@ -58,34 +58,6 @@ function refillNotifications(data){
     }   
 }
 
-function validateNotifications(){
-    var form    = document.getElementById("formNotifications");
-    var idArray = [];
-
-    for(var i=0; i<form.children.length; i++){
-        idArray.push(form.children[i].id);
-    }
-    
-    var idCompany   = "empresa" + sessionStorage.getItem("ID_COMPANY");
-    var Variables   = "idCompany=" + idCompany + "&idArray=" + idArray;
-
-    $.post("backend/validateNotifications.php", Variables, function(DATA){
-console.log(DATA);       
-        $('#notificationsForm').modal("toggle");
-
-        // To prevent load againt the notifications, we remove the event
-        document.getElementById("validateNotifications").setAttribute("onclick", "");
-        document.getElementById("validateNotifications").setAttribute("data-toggle", "modal");
-        document.getElementById("validateNotifications").setAttribute("data-dismiss", "modal");
-        document.getElementById("validateNotifications").className  = "btn btn-danger";
-        document.getElementById("validateNotifications").children[0].className  = "icon-circle-with-cross";
-
-        document.getElementById("notificationsIcon").children[1].className  = "";
-        document.getElementById("notificationsIcon").children[1].innerHTML  = "";
-
-    });
-}
-
 /*  Depending what button was pressed by the user, this script going to load the content relationated with that file
     At this time, we have the follow contents:
         
@@ -289,3 +261,32 @@ function loadManuals(){
         initManuals();
     }, 500);
 }
+
+/*
+function validateNotifications(){
+    var form    = document.getElementById("formNotifications");
+    var idArray = [];
+
+    for(var i=0; i<form.children.length; i++){
+        idArray.push(form.children[i].id);
+    }
+    
+    var idCompany   = "empresa" + sessionStorage.getItem("ID_COMPANY");
+    var Variables   = "idCompany=" + idCompany + "&idArray=" + idArray;
+
+    $.post("backend/validateNotifications.php", Variables, function(DATA){
+        $('#notificationsForm').modal("toggle");
+
+        // To prevent load againt the notifications, we remove the event
+        document.getElementById("validateNotifications").setAttribute("onclick", "");
+        document.getElementById("validateNotifications").setAttribute("data-toggle", "modal");
+        document.getElementById("validateNotifications").setAttribute("data-dismiss", "modal");
+        document.getElementById("validateNotifications").className  = "btn btn-danger";
+        document.getElementById("validateNotifications").children[0].className  = "icon-circle-with-cross";
+
+        document.getElementById("notificationsIcon").children[1].className  = "";
+        document.getElementById("notificationsIcon").children[1].innerHTML  = "";
+
+    });
+}
+*/

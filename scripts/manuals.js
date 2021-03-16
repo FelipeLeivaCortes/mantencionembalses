@@ -71,7 +71,7 @@ function initManuals(){
 };
 
 function VerifyNameDocument(){
-
+/*
     //Reference the FileUpload element.
     var fileUpload = document.getElementById("documentToUpload");
 
@@ -86,6 +86,8 @@ function VerifyNameDocument(){
         document.getElementById("btnUploadDocument").disabled   = true;
         document.getElementById("documentToUpload").value       = "";
     }
+*/
+    document.getElementById("btnUploadDocument").disabled   = false;
 };
 
 function getManuals(){

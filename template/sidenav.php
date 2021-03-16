@@ -95,13 +95,8 @@
             
                 <!-- Modal footer -->
                 <div class="modal-footer justify-content-center">
-                    <button id="validateNotifications" class="btn btn-primary" data-toggle="modal" onclick="javascript:validateNotifications();"><span class="icon-check"></span> Aceptar</button>
+                    <button type="button" class="btn btn-danger" data-toggle="modal" data-dismiss="modal"><span class="icon-circle-with-cross"></span> Cerrar</button>
                 </div>
-
-                <div>
-                    <small>Nota: Al presionar aceptar, estas notificaciones ya no se podrán ver</small>
-                </div>
-                
             </div>
         </div>
     </div>

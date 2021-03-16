@@ -95,7 +95,6 @@
                 }
             }
 
-$DATA["testing"]    = $activitiesUnavailable;
             for($i=1; $i<=12; $i++){
                 $arrayIds           = array();
                 $arrayNames         = array();

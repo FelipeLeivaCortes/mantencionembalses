@@ -24,6 +24,8 @@ function initActivity(){
     var idCompany   = "empresa" + sessionStorage.getItem("ID_COMPANY");
     var Variables   = "idCompany=" + idCompany;
 
+    getSeasons(Variables);
+
     $.post("backend/getLocations.php", Variables, function(DATA){
         if(DATA.ERROR){
             CloseSpinner();
@@ -50,6 +52,26 @@ function initActivity(){
         }
     });
 };
+
+function getSeasons(Variables){
+    $.post("backend/getSeasonActivities.php", Variables, function(DATA){
+        if( DATA.ERROR ){
+            ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
+        
+        }else{
+            var select  = document.getElementById("filterDateCalendar");
+
+            for( var i=0; i<DATA.COUNT; i++ ){
+                var option  = document.createElement("option");
+                option.text = DATA[i].season;
+                select.add(option);
+            }
+
+            SortSelect("filterDateCalendar");
+            select.value    = "";
+        }
+    });
+}
 
 function handleExcelProject(){
 
