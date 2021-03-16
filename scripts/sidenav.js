@@ -88,7 +88,7 @@ window.addEventListener("load", function(event){
                 text1.textContent   = "Estadísticas";
                 text2.textContent   = "Usuarios";
                 text3.textContent   = "Actividades";
-                text4.textContent   = "Registros";
+                text4.textContent   = "Guías de Mantención";
                 text5.textContent   = "Reportes";
 
                 link1.setAttribute("href", "javascript:loadStadistics();");

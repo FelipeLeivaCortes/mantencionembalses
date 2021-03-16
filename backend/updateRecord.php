@@ -42,10 +42,12 @@
             $success                =   0;
             $today	                =   date('Y-m-d');
 
-            for($i=0; $i<$index; $i++){
-                if( $arrayStates[$i] == "1" ){
-                    $idActivity = intval($arrayActivities[$i]);
+            unlink($PATH_FILES.$idCompany."/record_".$idRecord.".txt");
 
+            for($i=0; $i<$index; $i++){
+                $idActivity = intval($arrayActivities[$i]);
+
+                if( $arrayStates[$i] == "1" ){
                     $QUERY  ->  free_result();
                     $QUERY  =   $LINK -> prepare("SELECT nombre, ultimaMantencion, frecuencia FROM actividad WHERE id = ?");
                     $QUERY  ->  bind_param("i", $idActivity);
@@ -123,18 +125,6 @@
 
                             }
 
-
-                            if( file_exists( $PATH_FILES.$idCompany."/record_".$idRecord.".txt" ) ){
-                                $file   = fopen( $PATH_FILES.$idCompany."/record_".$idRecord.".txt", "a");
-                                fwrite($file, $idActivity."|".$arrayObservations[$i].PHP_EOL);
-                                fclose($file);
-                            
-                            }else{
-                                $file   = fopen( $PATH_FILES.$idCompany."/record_".$idRecord.".txt", "w");
-                                fwrite($file, $idActivity."|".$arrayObservations[$i].PHP_EOL);
-                                fclose($file);
-                            }
-
                         }else{
                             array_push($DATA, [
                                 'idActivity'        => $idActivity,
@@ -145,6 +135,17 @@
                             break;
                         }
                     }
+                }
+
+                if( file_exists( $PATH_FILES.$idCompany."/record_".$idRecord.".txt" ) ){
+                    $file   = fopen( $PATH_FILES.$idCompany."/record_".$idRecord.".txt", "a");
+                    fwrite($file, $idActivity."|".$arrayObservations[$i].PHP_EOL);
+                    fclose($file);
+                
+                }else{
+                    $file   = fopen( $PATH_FILES.$idCompany."/record_".$idRecord.".txt", "w+");
+                    fwrite($file, $idActivity."|".$arrayObservations[$i].PHP_EOL);
+                    fclose($file);
                 }
             }
 

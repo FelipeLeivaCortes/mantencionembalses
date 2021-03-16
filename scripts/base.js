@@ -155,7 +155,7 @@ function loadMaintances(){
 }
 
 function loadRecords(){
-    document.getElementById("title-page").innerHTML = "Registros";
+    document.getElementById("title-page").innerHTML = "Guías de Mantención";
 
     var navbar = new XMLHttpRequest();
     navbar.open('get', 'nav-records.html');

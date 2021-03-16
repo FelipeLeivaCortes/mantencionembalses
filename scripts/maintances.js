@@ -279,8 +279,6 @@ function openModalConfirmEvent(idRecord, isPiezometria){
 }
 
 function updateRecord(idRecord, arrayObservations, arrayStates, isPiezometria){
-    
-
     $('#ModalConfirmEvent').modal('toggle');
 
     var idCompany   = sessionStorage.getItem("ID_COMPANY");
@@ -298,6 +296,7 @@ function updateRecord(idRecord, arrayObservations, arrayStates, isPiezometria){
     }
 
     $.post("backend/updateRecord.php", Variables, function(DATA){
+        console.log(DATA);
         if( DATA.ERROR ){
             ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
         
