@@ -10,21 +10,21 @@
 		$DATA["MESSAGE"]    = "El servidor no responde";
 	
 	}else{
-	/*	$idCompany  = $_POST["idCompany"];
+		$idCompany  = $_POST["idCompany"];
 		$username   = $_POST["username"];
     	$permissions= $_POST["permissions"];
 		$name       = $_POST["name"];
 		$lastname   = $_POST["lastname"];
 		$email      = $_POST["email"];
 		$phone      = $_POST["phone"];
-	*/	 
+/*		 
 	$idCompany  = $_GET["idCompany"];
 	$username   = $_GET["username"];
 	$permissions= $_GET["permissions"];
 	$name       = $_GET["name"];
 	$lastname   = $_GET["lastname"];
 	$email      = $_GET["email"];
-	$phone      = $_GET["phone"];
+	$phone      = $_GET["phone"]; */
 
 		if( ctype_digit($phone) == false ){
         	$phone  = "";
