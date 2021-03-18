@@ -67,7 +67,7 @@ function getSeasons(Variables){
                 select.add(option);
             }
 
-            SortSelect("filterDateCalendar");
+            SortSelect(select);
             select.value    = "";
         }
     });

@@ -45,7 +45,7 @@
                         
                         if( $idActivity == $idActivityAux ){
                             $arrayIdRecord[$index]  = $idRecord;
-                            $arrayIndex[$index]   = $i;
+                            $arrayIndex[$index]     = $i;
 
                             $index++;
                         }
@@ -63,6 +63,7 @@
 
                     for( $i=0; $i<sizeof($arrayIdRecord); $i++ ){
                         $idRecord   = intval($arrayIdRecord[$i]);
+                        $index      = intval($arrayIndex[$i]);
                         
                         $LINK   =   new mysqli($URL, $USERNAME, $PASSWORD, $idCompany);
 
@@ -89,7 +90,7 @@
                                 $lastMaintance    = 'Nunca';
                             }
 
-                            if( $arrayStateActivity[$i] == '1' ){
+                            if( $arrayStateActivity[$index] == '1' ){
                                 $stateActivity = 'Realizada';
                                 
                             }else{

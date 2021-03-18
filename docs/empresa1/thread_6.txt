@@ -1,0 +1,1 @@
+E:Felipe Leiva:Cuando quiero ingresar un usuario al sistema, me dice que el rut no es válido

@@ -261,11 +261,21 @@
                 </div>
             
                 <!-- Modal footer -->
-                <div class="modal-footer justify-content-center">
-                    <button id="historyActivityBtn" type="button" class="btn btn-primary"><span class="icon-edit"></span> Historial de Mantenciones</button>
-                    <button id="editActivityBtn" type="button" class="btn btn-warning"><span class="icon-edit"></span> Editar Actividad</button>
-                    <button id="deleteActivityBtn" type="button" class="btn btn-danger" data-toggle="modal" href="#ModalConfirmEvent"><span class="icon-circle-with-cross"></span> Eliminar Actividad</button>
-                    <button type="button" class="btn btn-danger" data-toggle="modal" data-dismiss="modal"><span class="icon-circle-with-cross"></span> Cerrar</button>
+                <div class="modal-footer row">
+                    <div class="col-12">
+                        <div class="container-fluid d-flex justify-content-center">
+                            <button id="historyActivityBtn" type="button" class="btn btn-primary col-3"><span class="icon-edit"></span> Historial de Mantenciones</button>
+                            <div class="col"></div>
+                            <button id="editActivityBtn" type="button" class="btn btn-warning col-3"><span class="icon-edit"></span> Editar Actividad</button>
+                            <div class="col"></div>
+                            <button id="deleteActivityBtn" type="button" class="btn btn-danger col-3" data-toggle="modal" href="#ModalConfirmEvent"><span class="icon-circle-with-cross"></span> Eliminar Actividad</button>
+                        </div>
+                    </div>
+                    <div class="col-12" style="margin-top: 1%;">
+                        <div class="container-fluid d-flex justify-content-center">
+                            <button type="button" class="btn btn-danger col-3" data-toggle="modal" data-dismiss="modal"><span class="icon-circle-with-cross"></span> Cerrar</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

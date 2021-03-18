@@ -23,8 +23,8 @@ function initReports(){
                 option.text = DATA[i].year;
                 select.add(option);
             }
-            
-            SortSelect("seasonData");
+
+            SortSelect(select);
             select.value    = "";
             CloseSpinner(); 
         }
