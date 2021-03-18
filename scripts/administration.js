@@ -136,7 +136,6 @@ function AddUser(){
                             var Variables   = "idCompany=" + idCompany + "&username=" + username + "&permissions=" + permissions + "&name=" + name + "&lastname=" + lastname + "&email=" + email + "&phone=" + phone;
 
                             $.post("backend/addUser.php", Variables, function(DATA){
-
                                 if( DATA.ERROR  === true ){
                                     ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
 

@@ -6,7 +6,7 @@
     require 'PHPMailer.php';
     require 'SMTP.php';
 
-function SendMail($receiver, $Suject, $Body){
+function sendMail($receiver, $Subject, $Body){
     $mail   = new PHPMailer(true);
 
     try{
@@ -30,7 +30,7 @@ function SendMail($receiver, $Suject, $Body){
 
         return false;
  
-    } catch(Exceptioni$e){
+    } catch(Exception $e){
         return true;
 
     }
