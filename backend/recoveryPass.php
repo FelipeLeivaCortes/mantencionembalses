@@ -1,13 +1,14 @@
 <?php
     
-   include "configuration.php";
+   	include "configuration.php";
+	include "sendMail.php";
 
-   if( empty($LINK) ){
+   	if( empty($LINK) ){
       $DATA["ERROR"]	= true;
       $DATA["ERRNO"]	= 1;
       $DATA["MESSAGE"]	= "El servidor no responde";
 	
-   }else{
+   	}else{
       $username	=   $_POST["username"];
 
       $QUERY	=   $LINK -> prepare("SELECT correo, nombre, apellido FROM usuario WHERE rut = ?");
@@ -21,16 +22,15 @@
 	  $QUERY	->  free_result();
 
 	  $password	=   substr( md5(microtime()), 1, 8);
-#	  $password	=   "asdfg";
 
 	  $QUERY	=   $LINK -> prepare("UPDATE usuario SET clave = AES_ENCRYPT(?, ?) WHERE rut = ?");
 	  $QUERY	->  bind_param('ssi', $password, $KEY, $username);
 	  $QUERY	->  execute();
 
 	  if( $QUERY->affected_rows == 1 ){
-# SENDING AN EMAIL TO EMAIL REGISTERED
-	     $subject	=  "Solicitud cambio de clave";
-	     $message	=  '<html>
+
+	     $Subject	=  "Solicitud cambio de clave";
+	     $Body	=  '<html>
 			      <head>
 				 <title>Solicitud cambio de contraseña</title>
 			      </head>
@@ -39,20 +39,22 @@
 					'Tu clave ha sido cambiada debido a una solicitud reciente.<br>'.
 					'Tu nueva clave de acceso es:<br><br>'.
 					'     <b>'.$password.'</b><br><br>'.
-					'Quedamos atentos a cualquier duda o inquietud que tengas al correo felipe-leiva@hotmail.cl<br><br>'.
+					'Quedamos atentos a cualquier duda o inquietud que tengas al correo mantencionembalses@gmail.com o al número +569 49433578<br><br>'.
 					'Saludos</p>
 			      </body>
 			   </html>';
-	     $headers	= 'MIME-Version: 1.0' . "\r\n";
-	     $headers	.= 'Content-type: text/html; charset=utf-8' . "\r\n";
-	     $headers	.= 'From: admin@bermudez.cl' . "\r\n";
  
-#	     mail($email, $subject, $message, $headers);    
-            
+			$errorSendMail	= sendMail($email, $Subject, $Body);					
+			
+			if( !$errorSendMail ){
+				$DATA["ERROR"]		= false;
+	     		$DATA["MESSAGE"]	= "Se ha enviado tu nueva clave al correo: ".$email;
 
-	     $DATA["ERROR"]	= false;
-	     $DATA["MESSAGE"]	= "Se ha enviado tu nueva clave al correo: ".$email;
-$DATA["password"] = $password;
+			}else{
+				$DATA["ERROR"]		= true;
+	     		$DATA["MESSAGE"]	= "No se ha podido enviar la nueva contraseña al correo ".$email.". Comuníquese con el administrador";
+			}
+            
 	  }else{
 	     $DATA["ERROR"]      = true;
 	     $DATA["ERRNO"]      = 3;

@@ -16,17 +16,25 @@ function RecoveryPass(){
     var status      = isValidRut(rut, "recoveryUname");
     
     if( status === true ){
+        $("#recoveryPass").modal('toggle');
+        ShowSpinner();
+
         var username    = ParseRut(document.getElementById("recoveryUname").value);
         var Variables   = "username="+username
         
         $.post("backend/recoveryPass.php", Variables, function(DATA){
-console.log(DATA);
             if( DATA.ERROR === true ){
-                ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
+                setTimeout(()=>{
+                    CloseSpinner();
+                    ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
+                }, 500);
                 
             }else{
-                ModalReportEvent("Operación Exitosa", "", DATA.MESSAGE);
-                CloseModal("#recoveryPass");
+                setTimeout(()=>{
+                    CloseSpinner();
+                    ModalReportEvent("Operación Exitosa", "", DATA.MESSAGE);
+                }, 500);
+                
             }
         });
     }

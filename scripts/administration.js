@@ -131,17 +131,26 @@ function AddUser(){
                         var permissions   = areValidPermissions("add");
 
                         if( permissions != "0" ){
+                            $('#AddUserForm').modal('toggle');
+                            ShowSpinner();
 
-			    var idCompany 	= sessionStorage.getItem("ID_COMPANY");
+			                var idCompany 	= sessionStorage.getItem("ID_COMPANY");
                             var Variables   = "idCompany=" + idCompany + "&username=" + username + "&permissions=" + permissions + "&name=" + name + "&lastname=" + lastname + "&email=" + email + "&phone=" + phone;
 
                             $.post("backend/addUser.php", Variables, function(DATA){
+                                console.log(DATA);
                                 if( DATA.ERROR  === true ){
-                                    ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
+                                    setTimeout(()=>{
+                                      CloseSpinner();
+                                      ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE); 
+                                    }, 500);
 
                                 }else{
-                                    ModalReportEvent("Operación exitosa", "", DATA.MESSAGE);
-                                    CloseModal('#AddUserForm');
+                                    setTimeout(()=>{
+                                        CloseSpinner();
+                                        ModalReportEvent("Operación exitosa", "", DATA.MESSAGE); 
+                                    }, 500);
+
                                     GetListUsers();
                                 }
 

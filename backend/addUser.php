@@ -17,14 +17,6 @@
 		$lastname   = $_POST["lastname"];
 		$email      = $_POST["email"];
 		$phone      = $_POST["phone"];
-/*		 
-	$idCompany  = $_GET["idCompany"];
-	$username   = $_GET["username"];
-	$permissions= $_GET["permissions"];
-	$name       = $_GET["name"];
-	$lastname   = $_GET["lastname"];
-	$email      = $_GET["email"];
-	$phone      = $_GET["phone"]; */
 
 		if( ctype_digit($phone) == false ){
         	$phone  = "";
@@ -63,8 +55,9 @@
 										<body>
 											<p>Estimado(a): '.$name. ' '.$lastname.'<br><br>'.
 
-												'Te damos la más cordial bienvenida al sistema de integración de procesos de empresas Bermúdez.<br>'.
+												'Te damos la más cordial bienvenida a la plataforma digital para regular mantenciones en estación Puclaro.<br>'.
 												'Para hacer ingreso al sistema debes utilizar tu <b>Rut</b> y tu clave (Los primeros <b>4 dígitos de tu Rut</b>).<br>'.
+												'<br>'.
 												'Ante cualquier duda informanos al correo mantencionembalses@gmail.com o al número +569 4943 3578<br><br>'.
 												
 												'Saludos</p>
