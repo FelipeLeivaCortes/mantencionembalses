@@ -5,28 +5,22 @@
     });
         
 //The arguments are: function, id
-    EventToPressEnter("LoadUser", "searchUname");
-    EventToPressEnter("SearchUser", "deleteUname");
+    EventToPressEnter("searchUser", "searchUname");
 
     FormatRut("addUname");
     FormatRut("searchUname");
-    FormatRut("deleteUname");
 
-    GetListUsers();
+    GetUsers();
     
     filterPermissions("Add", "change");
 
     CloseSpinner();
 }
 
-function GetListUsers(){
-    
+function GetUsers(){
     ClearTable("ListUsers");
-    var idCompany   = sessionStorage.getItem("ID_COMPANY");
-    var Variables   = "idCompany=" + idCompany;
-
-    $.post("backend/listUsers.php", Variables,function(DATA){
-
+    
+    $.post("backend/getUsers.php", "",function(DATA){
         if( DATA.ERROR === true ){
             ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
             CloseModal("#ListUsersForm");
@@ -138,11 +132,10 @@ function AddUser(){
                             var Variables   = "idCompany=" + idCompany + "&username=" + username + "&permissions=" + permissions + "&name=" + name + "&lastname=" + lastname + "&email=" + email + "&phone=" + phone;
 
                             $.post("backend/addUser.php", Variables, function(DATA){
-                                console.log(DATA);
                                 if( DATA.ERROR  === true ){
                                     setTimeout(()=>{
-                                      CloseSpinner();
-                                      ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE); 
+                                        CloseSpinner();
+                                        ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE); 
                                     }, 500);
 
                                 }else{
@@ -151,7 +144,7 @@ function AddUser(){
                                         ModalReportEvent("Operación exitosa", "", DATA.MESSAGE); 
                                     }, 500);
 
-                                    GetListUsers();
+                                    GetUsers();
                                 }
 
                                 $('#addUname').val('');
@@ -165,7 +158,7 @@ function AddUser(){
                                 $("#addElectrician").prop("checked", false);
                                 $("#addGardener").prop("checked", false);
 
-                                var active = true;
+                                var active = false;
 
                                 document.getElementById("addAdministrator").disabled    = active;
                                 document.getElementById("addMechanic").disabled         = active;
@@ -180,75 +173,92 @@ function AddUser(){
     }
 }
 
-function LoadUser(){
+function searchUser(Action){
+    document.getElementById("searchUname").value    = "";
+
+    sessionStorage.setItem('SearchUser', Action);
+    $('#searchUserForm').modal('show');
+}
+
+function getUser(){
+    $('#searchUserForm').modal('toggle');
+
+    var Action  = sessionStorage.getItem('SearchUser');
+    sessionStorage.removeItem('SearchUser');
+
     var rut         = document.getElementById("searchUname").value;
     var status      = isValidRut(rut, "searchUname");
     
     if( status === true ){
         var username    = ParseRut(rut);
         var Variables   = "username=" + username;
-        
-        $.post("backend/loadUser.php", Variables, function(DATA){
 
-            if( DATA.ERROR === true ){ 
+        $.post("backend/getUser.php", Variables, function(DATA){
+            if( DATA.ERROR == true ){ 
                 ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
-                $('#searchUname').val('');
+                document.getElementById("searchUname").value    = "";
             
             }else{
-                $('#searchUname').val('');
-                $('#usernamePrevious').val(rut);
+                if( Action == 'deleteUser' ){
+                    document.getElementById("userToDelete").innerHTML   = DATA.name + " " + DATA.lastname;
+                    $('#deleteUserForm').modal('show');
                 
-                $('#usernamePrevious').attr('readonly', true);
-                $('#usernamePrevious').attr('disabled', true);
-                
-                $('#resultName').val(DATA.nombre);
-                $('#resultLastname').val(DATA.apellido);
-                $('#resultEmail').val(DATA.correo);
+                }else{
+                    document.getElementById("usernamePrevious").value   = rut;
+                    document.getElementById("usernamePrevious").setAttribute('readonly', true);
+                    document.getElementById("usernamePrevious").setAttribute('disabled', true);
+                    document.getElementById("resultName").value         = DATA.name;
+                    document.getElementById("resultLastname").value     = DATA.lastname;
+                    document.getElementById("resultEmail").value        = DATA.email;
 
-		if(DATA.telefono == 0 ){
-		   document.getElementById('resultPhone').value 	= "";
-		}else{
-                   $('#resultPhone').val(DATA.telefono);
+                    if( DATA.phone == 0 ){
+                        document.getElementById('resultPhone').value    = "";
+                    
+                    }else{
+                        document.getElementById('resultPhone').value    = DATA.phone;
+
+                    }
+                   
+                    var aux = DATA.permissions.split("");
+
+                    // We must assign the permissions associated to the uname.
+                    if(aux[0]==0){
+                        document.getElementById("editAdministrator").disabled   = true;
+                    }else if(aux[0]==1){
+                        document.getElementById("editAdministrator").checked    = true;
+                    }
+                    
+                    if(aux[1]==0){
+                        document.getElementById("editMechanic").disabled        = true;
+                    }else if(aux[1]==1){
+                        document.getElementById("editMechanic").checked         = true;
+                    }
+
+                    if(aux[2]==0){
+                        document.getElementById("editElectrician").disabled     = true;
+                    }else if(aux[2]==1){
+                        document.getElementById("editElectrician").checked      = true;
+                    }
+
+                    if(aux[3]==0){
+                        document.getElementById("editGardener").disabled        = true;
+                    }else if(aux[3]==1){
+                        document.getElementById("editGardener").checked         = true;
+                    }
+
+                    filterPermissions("Edit", "change");
+
+                    $('#editUserForm').modal('show');
+                    sessionStorage.setItem("idUsername", DATA.id);
                 }
-
-                var aux = DATA.permisos.split("");
-
-                // We must assign the permissions associated to the uname.
-                if(aux[0]==0){
-                    document.getElementById("editAdministrator").disabled   = true;
-                }else if(aux[0]==1){
-                    document.getElementById("editAdministrator").checked    = true;
-                }
-                
-                if(aux[1]==0){
-                    document.getElementById("editMechanic").disabled        = true;
-                }else if(aux[1]==1){
-                    document.getElementById("editMechanic").checked         = true;
-                }
-
-                if(aux[2]==0){
-                    document.getElementById("editElectrician").disabled     = true;
-                }else if(aux[2]==1){
-                    document.getElementById("editElectrician").checked      = true;
-                }
-
-                if(aux[3]==0){
-                    document.getElementById("editGardener").disabled        = true;
-                }else if(aux[3]==1){
-                    document.getElementById("editGardener").checked         = true;
-                }
-
-                filterPermissions("Edit", "change");
-
-                $('#SearchResultsForm').modal('show');
-                
-                sessionStorage.setItem("idUsername", DATA.id);
             }
         });
     }
 }
 
 function UpdateUser(){
+    $('#editUserForm').modal('toggle');
+
     var id          = sessionStorage.getItem("idUsername");
     var rut         = document.getElementById("usernamePrevious").value;
     var status      = isValidRut(rut, "usernamePrevious");
@@ -282,15 +292,13 @@ function UpdateUser(){
                             var Variables   = "id=" + id + "&username=" + username + "&permissions=" + permissions + "&name=" + name + "&lastname=" + lastname + "&email=" + email + "&phone=" + phone;
     
                             $.post("backend/updateUser.php", Variables, function(DATA){
-                                
                                 if( DATA.ERROR === true ){
                                     ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
     
                                 }else{
                                     ModalReportEvent("Operación Exitosa", "", DATA.MESSAGE);
-                                    CloseModal('#LoadUserForm');
-                                    CloseModal('#SearchResultsForm');
-                                    GetListUsers();
+                                    GetUsers();
+                                    
                                 }
                             });
                         }
@@ -301,31 +309,11 @@ function UpdateUser(){
     }
 }
 
-function SearchUser(){
-    var rut         = document.getElementById("deleteUname").value;
-    let status      = isValidRut(rut, "deleteUname");
-     
-    if( status ){
-        let username    = ParseRut(rut);
-        let Variables   = "username=" + username;
-
-        $.post("backend/getUser.php", Variables, function(DATA){
-            
-            if( DATA.ERROR === true ){
-                ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
-                $('#deleteUname').val('');
-            
-            }else{
-                document.getElementById("userToDelete").innerHTML   = DATA.name + " " + DATA.lastname;
-                $('#ConfirmDeleteUser').modal('show');
-            }
-        });
-    }
-}
-
 function DeleteUser(){
+    $('#deleteUserForm').modal('toggle');
+
     var author      = sessionStorage.getItem("USERNAME");
-    var rut         = document.getElementById("deleteUname").value;
+    var rut         = document.getElementById("searchUname").value;
     var username    = ParseRut(rut);
     var Variables   = "username=" + username;
     
@@ -339,14 +327,14 @@ function DeleteUser(){
             ModalReportEvent("Operación Exitosa", "", DATA.MESSAGE);
             if(author == rut){
                 Logout();
+
             }else{
-                GetListUsers();
+                GetUsers();
+
             }
         }
         
-        CloseModal('#ConfirmDeleteUser');
-        CloseModal('#DeleteUserForm');
-        $('#deleteUname').val('');
+        $('#searchUname').val('');
     });
 }
 

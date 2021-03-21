@@ -18,7 +18,6 @@ function initManuals(){
                 var formData    = new FormData(document.getElementById("formUploadDocument"));
 
                 formData.append('nameFile', document.getElementById("documentToUpload").value.slice(12));
-                formData.append('ID_COMPANY', sessionStorage.getItem('ID_COMPANY'));
                 formData.append('description', description);
                 formData.append('username', sessionStorage.getItem('USERNAME'));
 
@@ -91,10 +90,7 @@ function VerifyNameDocument(){
 };
 
 function getManuals(){
-    var idCompany   = 'empresa' + sessionStorage.getItem('ID_COMPANY');
-    var Variables   = 'idCompany=' + idCompany;
-
-    $.post("backend/getManuals.php", Variables, function(DATA){
+    $.post("backend/getManuals.php", "", function(DATA){
 
         if( DATA.ERROR ){
             setTimeout(function(){
@@ -182,7 +178,7 @@ function getManuals(){
 
                 // Here we set the attributes
                 name.appendChild(linkName);
-                name.href           = "docs/empresa" + sessionStorage.getItem('ID_COMPANY') + "/" + DATA[i].name; 
+                name.href           = "docs/empresa" + DATA[i].idCompany + "/" + DATA[i].name; 
 
                 description.appendChild(linkDescription);
                 description.href    = "javascript:showDescription('" + DATA[i].description + "');";
@@ -271,7 +267,6 @@ function openModalEditDocument(id, oldDescription){
 };
 
 function editDocument(idFile, extension, oldNameFile, oldDescription){
-    var idCompany       = sessionStorage.getItem("ID_COMPANY");
     var newNameFile     = document.getElementById("newNameFile").value + "." + extension;
     var newDescription  = document.getElementById("newDescription").value;
 
@@ -290,7 +285,7 @@ function editDocument(idFile, extension, oldNameFile, oldDescription){
 
         ShowSpinner();
 
-        var Variables   = "idFile=" + idFile + "&idCompany=" + idCompany + "&newNameFile=" + newNameFile + "&newDescription=" + newDescription;
+        var Variables   = "idFile=" + idFile + "&newNameFile=" + newNameFile + "&newDescription=" + newDescription;
 
         $.post("backend/updateDocument.php", Variables, function(DATA){
             if( DATA.ERROR  == true ){
@@ -319,10 +314,7 @@ function openModalDeleteDocument(id){
 };
 
 function deleteDocument(id){
-    var idCompany   = sessionStorage.getItem("ID_COMPANY");
-    var Variables   = "idCompany=" + idCompany + "&id=" + id;
-
-    $.post("backend/deleteDocument.php", Variables, function(DATA){
+    $.post("backend/deleteDocument.php", "id=" + id, function(DATA){
 
         if( DATA.ERROR  == true ){
             ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);

@@ -10,7 +10,11 @@ function initContacts(){
         }
     });
 
-    $.post("backend/getReports.php", "idCompany=" + sessionStorage.getItem('ID_COMPANY'), function(DATA){
+    getThreads();
+};
+
+function getThreads(){
+    $.post("backend/getReports.php", "", function(DATA){
         if( DATA.ERROR ){
             setTimeout(() => {
                 console.log(DATA);
@@ -31,10 +35,12 @@ function initContacts(){
             containerTable    = document.createElement("div");
             containerTable.setAttribute("class", "table-modal table-reponsive-md");
             containerTable.setAttribute("id", "containerTable");
+            containerTable.setAttribute("style", "height: 300px;");
     
             table       = document.createElement("table");
             table.setAttribute("class", "table table-striped");
             table.setAttribute("id", idTable);
+            table.setAttribute("style", "height:80%; overflow: scroll;")
     
             var thead                   = document.createElement("thead");
 
@@ -121,7 +127,7 @@ function initContacts(){
             }, 500);
         }
     });
-};
+}
 
 function openContent(idReport, title, stringType, stringAuthor, stringContent){
     var arrayType       = stringType.split("|");
@@ -150,11 +156,10 @@ function openContent(idReport, title, stringType, stringAuthor, stringContent){
 };
 
 function respondMessage(idReport){
-    var idCompany   = sessionStorage.getItem('ID_COMPANY');
     var author      = sessionStorage.getItem('NAME') + " " + sessionStorage.getItem('LASTNAME');
     var message     = document.getElementById("messageContent").value;
     
-    var Variables   = "idCompany=" + idCompany + "&idReport=" + idReport + "&author=" + author + "&message=" + message;
+    var Variables   = "idReport=" + idReport + "&author=" + author + "&message=" + message;
 
     $.post("backend/updateReport.php", Variables, function(DATA){
         if( DATA.ERROR ){
@@ -182,16 +187,39 @@ function addReport(){
     }else{
         var name        = sessionStorage.getItem("NAME");
         var lastname    = sessionStorage.getItem("LASTNAME");
-        var idCompany   = sessionStorage.getItem("ID_COMPANY");
 
-        var Variables   = "idCompany=" + idCompany + "&name=" + name + "&lastname=" + lastname + "&topic=" + topic + "&message=" + message;
+        var Variables   = "name=" + name + "&lastname=" + lastname + "&topic=" + topic + "&message=" + message;
 
         $.post("backend/addReport.php", Variables, function(DATA){
             if( DATA.ERROR  === true ){
                 ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
 
             }else{
+                var table           = document.getElementById("tableThreads");
+                var index           = table.children[1].children.length;
+                var row             = document.createElement("tr");
+                var indexCell	    = document.createElement("td");
+                var titleCell       = document.createElement("td");
+                var index           = document.createTextNode( index + 1 );
+                var title           = document.createElement("a");
+                var link            = document.createTextNode( topic );
+
+                // Setting the parameters
+                title.appendChild(link);
+                title.href  = "javascript:openContent(" + DATA.idReport + ", '" + title + "', 'E', '" + name + " " + lastname + "', '" + message + "');";  
+                
+                // Here is inserted the content into the cells
+                indexCell.appendChild(index);
+                titleCell.appendChild(title);
+
+                // Here is inserted the cells into a row
+                row.appendChild(indexCell);
+                row.appendChild(titleCell);
+                
+                table.tBodies[0].appendChild(row); 
+
                 ModalReportEvent("Operación exitosa", "", DATA.MESSAGE);
+
             }
 
             //Deleting the data putted in the inputs

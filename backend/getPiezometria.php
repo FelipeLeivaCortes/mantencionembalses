@@ -8,11 +8,23 @@
 		$DATA["MESSAGE"]    = "El servidor no responde";
 	
 	}else{
-        $idCompany  = $_POST["idCompany"];
-        $season     = $_POST["season"];
 
-        $LINK   ->  close();
-        $LINK   =   new mysqli($URL, $USERNAME, $PASSWORD, $idCompany);
+    /***************************************************************************** */
+	/****** ---> DO NOT EDIT THIS UNLESS IT EXTREMELY NECESSARY <--- ************* */
+	/***************************************************************************** */
+
+        $USERNAME   = $_SESSION["userDatabase"];
+        $PASSWORD   = $_SESSION["passDatabase"];
+        $ID_COMPANY = $_SESSION["idCompany"];
+        $DATABASE   = "empresa".$ID_COMPANY;
+        
+        $LINK       ->  close();
+        $LINK       =   new mysqli($URL, $USERNAME, $PASSWORD, $DATABASE);
+
+    /***************************************************************************** */
+    /***************************************************************************** */
+
+        $season     = $_POST["season"];
 
         $QUERY  =   $LINK -> prepare("SELECT COUNT(*) FROM information_schema.columns 
                                         WHERE table_name = 'piezometria';");

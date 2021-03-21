@@ -8,22 +8,35 @@
 		$DATA["MESSAGE"]    = "El servidor no responde";
 	
 	}else{
-        $idCompany          = $_POST["idCompany"];
+
+    /***************************************************************************** */
+	/****** ---> DO NOT EDIT THIS UNLESS IT EXTREMELY NECESSARY <--- ************* */
+	/***************************************************************************** */
+
+        $USERNAME   = $_SESSION["userDatabase"];
+        $PASSWORD   = $_SESSION["passDatabase"];
+        $ID_COMPANY = $_SESSION["idCompany"];
+        $DATABASE   = "empresa".$ID_COMPANY;
+        
+        $LINK       ->  close();
+        $LINK       =   new mysqli($URL, $USERNAME, $PASSWORD, $DATABASE);
+
+    /***************************************************************************** */
+    /***************************************************************************** */
+
         $arrayIdActivities  = explode(",", $_POST["arrayIdActivities"]);
-
-        $LINK   = new mysqli($URL, $USERNAME, $PASSWORD, $idCompany);
-
-        $today  = date('Y-m-d');
-        $error  = false;
+        $today              = date('Y-m-d');
+        $error              = false;
 
         for( $i=0; $i<sizeof($arrayIdActivities); $i++ ){
             $idActivity     = $arrayIdActivities[$i];
 
-            $QUERY  =   $LINK -> prepare("SELECT nombre, sector, prioridad, observacion FROM actividad WHERE id = ?");
+            $QUERY  =   $LINK -> prepare("SELECT nombre, sector, prioridad, observacion FROM 
+                                            actividad WHERE id = ?");
+
             $QUERY  ->  bind_param("i", $idActivity);
             $QUERY  ->  execute();
             $QUERY  ->  store_result();
-//            $QUERY  ->  bind_result($name, $location, $lastMaintance, $priority, $comments);
             $QUERY  ->  bind_result($name, $location, $priority, $comments);
             $QUERY  ->  fetch();
 
@@ -36,25 +49,10 @@
                 break;
 
             }else{
-              /*  $daysLate   = "";
-                
-                if( $lastMaintance == $defaultDate){
-                    $lastMaintance  = "Nunca";
-                    $daysLate       = "Nunca";
-                
-                }else{
-                    $today      = new DateTime("now");
-                    $dateAux    = new DateTime($lastMaintance);
-                    $daysLate   = date_diff($dateAux, $today)->format('%a');
-        
-                }
-*/
                 array_push($DATA, [
                     'id'            => $idActivity,
                     'name'          => $name,
                     'location'      => $location,
-//                    'lastMaintance' => $lastMaintance,
-//                    'daysLate'      => $daysLate,
                     'priority'      => $priority,
                     'comments'      => $comments,
                 ]);

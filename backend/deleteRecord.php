@@ -1,20 +1,34 @@
 <?php
+    session_start();
     include "configuration.php";
 
-	if(empty($LINK) ){
-	   $DATA["ERROR"]      = true;
-           $DATA["ERRNO"]      = 1;
-	   $DATA["MESSAGE"]    = "El servidor no responde";
+	if( empty($LINK) ){
+	    $DATA["ERROR"]      = true;
+        $DATA["ERRNO"]      = 1;
+	    $DATA["MESSAGE"]    = "El servidor no responde";
 	
 	}else{
-           $idCompany  =   $_POST["idCompany"];
-           $id         =   $_POST["id"];
+
+    /***************************************************************************** */
+	/****** ---> DO NOT EDIT THIS UNLESS IT EXTREMELY NECESSARY <--- ************* */
+	/***************************************************************************** */
+
+        $USERNAME   = $_SESSION["userDatabase"];
+        $PASSWORD   = $_SESSION["passDatabase"];
+        $ID_COMPANY = $_SESSION["idCompany"];
+        $DATABASE   = "empresa".$ID_COMPANY;
         
-	   $LINK   ->  close();
-	   $LINK   =   new mysqli($URL, $USERNAME, $PASSWORD, $idCompany);
-           $QUERY  =   $LINK -> prepare("DELETE FROM registro WHERE id = ?");
-	   $QUERY  ->  bind_param('i', $id);
-           $QUERY  ->  execute();
+        $LINK       ->  close();
+        $LINK       =   new mysqli($URL, $USERNAME, $PASSWORD, $DATABASE);
+
+    /***************************************************************************** */
+    /***************************************************************************** */
+
+        $id         =   $_POST["id"];
+        
+	    $QUERY  =   $LINK -> prepare("DELETE FROM registro WHERE id = ?");
+	    $QUERY  ->  bind_param('i', $id);
+        $QUERY  ->  execute();
 
         if( $QUERY->affected_rows == 1 ){
             $DATA["ERROR"] 		= false;

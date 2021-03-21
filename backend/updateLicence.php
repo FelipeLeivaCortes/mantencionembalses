@@ -9,6 +9,21 @@
 	
 	}else{
         
+    /***************************************************************************** */
+	/****** ---> DO NOT EDIT THIS UNLESS IT EXTREMELY NECESSARY <--- ************* */
+	/***************************************************************************** */
+
+        $USERNAME   = $_SESSION["userDatabase"];
+        $PASSWORD   = $_SESSION["passDatabase"];
+        $ID_COMPANY = $_SESSION["idCompany"];
+        $DATABASE   = "empresa".$ID_COMPANY;
+        
+        $LINK       ->  close();
+        $LINK       =   new mysqli($URL, $USERNAME, $PASSWORD, $DATABASE);
+
+    /***************************************************************************** */
+    /***************************************************************************** */
+
         if($_POST){
             $username   = $_POST["username"];
             $hash       = str_replace(' ', '+', $_POST["hash"]);

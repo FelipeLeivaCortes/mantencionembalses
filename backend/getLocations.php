@@ -9,14 +9,25 @@
 	
 	}else{
         
-        $idCompany  = $_POST["idCompany"];
+    /***************************************************************************** */
+	/****** ---> DO NOT EDIT THIS UNLESS IT EXTREMELY NECESSARY <--- ************* */
+	/***************************************************************************** */
 
-        $LINK       = new mysqli($URL, $USERNAME, $PASSWORD, $idCompany);
+        $USERNAME   = $_SESSION["userDatabase"];
+        $PASSWORD   = $_SESSION["passDatabase"];
+        $ID_COMPANY = $_SESSION["idCompany"];
+        $DATABASE   = "empresa".$ID_COMPANY;
+        
+        $LINK       ->  close();
+        $LINK       = new mysqli($URL, $USERNAME, $PASSWORD, $DATABASE);
+
+    /***************************************************************************** */
+    /***************************************************************************** */
 
         $QUERY  =   $LINK -> prepare("SELECT nombre FROM sector ORDER BY nombre ASC");
         $QUERY  ->  execute();
         $QUERY  ->  store_result();
-        $QUERY  ->  bind_result($name);
+        $QUERY  ->  bind_result($location);
         
         if( $QUERY->num_rows == 0 ){
             $DATA["ERROR"]      = true;
@@ -29,7 +40,7 @@
 
             while ( $QUERY -> fetch() ){
 				array_push($DATA, [
-				    'name'  => $name,
+				    'location'  => $location,
 				]);
 			}
         }

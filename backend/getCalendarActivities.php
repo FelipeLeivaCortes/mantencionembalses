@@ -8,7 +8,22 @@
 		$DATA["MESSAGE"]    = "El servidor no responde";
 	
 	}else{
-        $idCompany  = $_POST["idCompany"];
+
+    /***************************************************************************** */
+	/****** ---> DO NOT EDIT THIS UNLESS IT EXTREMELY NECESSARY <--- ************* */
+	/***************************************************************************** */
+
+        $USERNAME   = $_SESSION["userDatabase"];
+        $PASSWORD   = $_SESSION["passDatabase"];
+        $ID_COMPANY = $_SESSION["idCompany"];
+        $DATABASE   = "empresa".$ID_COMPANY;
+        
+        $LINK       ->  close();
+        $LINK       =   new mysqli($URL, $USERNAME, $PASSWORD, $ADMINISTRATION);
+
+    /***************************************************************************** */
+    /***************************************************************************** */
+
         $year       = $_POST["year"];
         $area       = $_POST["area"];
         $priority   = $_POST["priority"];
@@ -73,7 +88,8 @@
         }
 
         if( sizeof($workers) > 0 ){
-            $LINK                   = new mysqli($URL, $USERNAME, $PASSWORD, $idCompany);
+            $LINK                   = new mysqli($URL, $USERNAME, $PASSWORD, $DATABASE);
+
             $found                  = false;
             $activitiesUnavailable  = array();
             $index                  = 0;

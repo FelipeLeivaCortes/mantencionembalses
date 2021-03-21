@@ -1,14 +1,14 @@
 
  window.onload  = StartupConfig;
  
- function StartupConfig(){
-    FocusOn("uname");
-    FormatRut("uname");
-    FormatRut("recoveryUname");
-    EventToPressEnter("Validate", "");
+function StartupConfig(){
+FocusOn("uname");
+FormatRut("uname");
+FormatRut("recoveryUname");
+EventToPressEnter("Validate", "");
 
-    document.getElementById("hash").setAttribute("style", "resize: none;");
- }
+document.getElementById("hash").setAttribute("style", "resize: none;");
+}
 
 function Validate(){
 
@@ -82,22 +82,21 @@ function Validate(){
 
                                 break;
                 
-                    case 49:
-                    ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
-                    break;
+                            case 49:
+                                ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
+                                break;
                         }
 
                     }else{
-
-                        // Storing the data relationated with the user
-                        sessionStorage.setItem("ID_COMPANY", DATA.idEmpresa);
                         sessionStorage.setItem("USERNAME", username);
                         sessionStorage.setItem("NAME", DATA.name);
                         sessionStorage.setItem("LASTNAME", DATA.lastname);
                         sessionStorage.setItem("PERMISSIONS", JSON.stringify(DATA.permissions));
+                        sessionStorage.setItem("ID_COMPANY", JSON.stringify(DATA.idCompany));
                         
                         location.href   = "base.php";
                     }
+                    
                 }, delay);
                 
             });
@@ -119,7 +118,6 @@ function ValidateLicence(){
 
             ShowSpinner(delay);
             setTimeout(function(){
-                console.log(DATA);
                 $('#renovateLicenceModal').modal("toggle");
 
                 if(DATA.ERROR){

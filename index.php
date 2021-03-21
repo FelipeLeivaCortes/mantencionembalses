@@ -47,7 +47,7 @@
 	</div>
 	
     <!-- Modal -->
-    <div id="recoveryPass" class="modal fade" role="dialog" style="z-index:1400;">
+    <div id="recoveryPass" class="modal fade" role="dialog" style="z-index:1100;">
         <div class="modal-dialog">
     
         <!-- Modal content-->

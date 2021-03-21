@@ -1,4 +1,5 @@
-<?php  
+<?php
+	session_start();
     include "configuration.php";
 
 	if( empty($LINK) ){
@@ -7,9 +8,22 @@
 	   $DATA["MESSAGE"]    = "El servidor no responde";
 	
 	}else{
-		$LINK 	-> close();		
+		
+   /***************************************************************************** */
+	/****** ---> DO NOT EDIT THIS UNLESS IT EXTREMELY NECESSARY <--- ************* */
+	/***************************************************************************** */
 
-		$idCompany		= $_POST["idCompany"];
+		$USERNAME   = $_SESSION["userDatabase"];
+		$PASSWORD   = $_SESSION["passDatabase"];
+		$ID_COMPANY = $_SESSION["idCompany"];
+		$DATABASE   = "empresa".$ID_COMPANY;
+		
+		$LINK       ->  close();
+		$LINK       =   new mysqli($URL, $USERNAME, $PASSWORD, $DATABASE);
+
+	/***************************************************************************** */
+	/***************************************************************************** */
+
 		$arrayDate		= json_decode($_POST["dates"]);
 		$arrayCota		= json_decode($_POST["cota"]);
 		$arrayPcg1		= json_decode($_POST["pcg1"]);
@@ -26,9 +40,7 @@
 		$arrayPcg12		= json_decode($_POST["pcg12"]);
 		$arrayPcg13		= json_decode($_POST["pcg13"]);
 		$arrayPcg14		= json_decode($_POST["pcg14"]);
-
-		$LINK	= 	new mysqli($URL, $USERNAME, $PASSWORD, $idCompany);
-
+		
 		$numErrors		= 0;
 		$items			= sizeof($arrayDate);
 

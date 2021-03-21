@@ -10,7 +10,7 @@
    }else{
       $companyName	= 'Junta de Vigilancia del rio Elqui:';
       $seasonStart	= '2021-02-01:';
-      $seasonEnd	= '2022-03-01';
+      $seasonEnd     = '2022-03-01';
 
       $message		= $companyName.$seasonStart.$seasonEnd;
 

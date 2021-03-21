@@ -1,37 +1,60 @@
 <?php
     session_start();
     include "configuration.php";
-    
-    $LINK = new mysqli($URL, $USERNAME, $PASSWORD, $DATABASE);
-
+   
 	if(	empty($LINK) ){
 		$DATA["ERROR"]      = true;
         $DATA["ERRNO"]      = 1;
 		$DATA["MESSAGE"]    = "El servidor no responde";
 	
 	}else{
-	    $username   = $_POST["username"];
-	    
-        $QUERY1 =   $LINK -> prepare("SELECT nombre, apellido FROM usuario WHERE rut = ?");
-        $QUERY1 ->  bind_param("i", $username);
-        $QUERY1 ->  execute();
-        $QUERY1 ->  store_result();
-        $QUERY1 ->  bind_result($name, $lastname);
 
-        if( $QUERY1->num_rows == 1 ){
-            $QUERY1 ->  fetch();
+    /***************************************************************************** */
+	/****** ---> DO NOT EDIT THIS UNLESS IT EXTREMELY NECESSARY <--- ************* */
+	/***************************************************************************** */
+
+        $USERNAME   = $_SESSION["userDatabase"];
+        $PASSWORD   = $_SESSION["passDatabase"];
+        $ID_COMPANY = $_SESSION["idCompany"];
+        $DATABASE   = "empresa".$ID_COMPANY;
+        
+        $LINK       ->  close();
+        $LINK       = new mysqli($URL, $USERNAME, $PASSWORD, $ADMINISTRATION);
+
+    /***************************************************************************** */
+    /***************************************************************************** */
+    
+        $username   = $_POST["username"];
+
+        $QUERY 	    =   $LINK -> prepare("SELECT id, permisos, nombre, apellido, correo, telefono  FROM usuario WHERE rut = ?");
+        $QUERY	    ->	bind_param('i', $username);
+        $QUERY      ->  execute();
+        $QUERY      ->  store_result();
+        $QUERY      ->  bind_result($id, $permissions, $name, $lastname, $email, $phone);
+        
+        if( $QUERY -> num_rows == 1 ){
+            $DATA["ERROR"] 		= false;
+            $DATA["MESSAGE"]	= "";
+
+            $QUERY              -> fetch();
             
-            $DATA["name"]       = $name;
-            $DATA["lastname"]   = $lastname;
+            $DATA["id"]             = $id;
+            $DATA["permissions"] 	= $permissions;
+            $DATA["name"]           = $name;
+            $DATA["lastname"]       = $lastname;
+            $DATA["email"]          = $email;
+            $DATA["phone"]          = $phone;
 
         }else{
             $DATA["ERROR"]      = true;
             $DATA["ERRNO"]      = 4;
-		    $DATA["MESSAGE"]    = "El rut ingresado no está registrado";
+            $DATA["MESSAGE"]    = "El rut ingresado no está registrado";
+            
         }
-
-        $QUERY1 ->  free_result();
-		$LINK   ->  close();
+        
+        $QUERY      -> free_result();
+        $LINK       -> close();
+        
 	}
 
     header('Content-Type: application/json');

@@ -1,14 +1,14 @@
-var numPits = 14;
+/*
+    In future versions, it´s necessary to get the pit´s data according to the amount pits registered
+    in the database of each company.
+*/
+
 
 function initReports(){
     document.getElementById("uploadDataBtn").disabled       = true;
     document.getElementById('inputExcel').addEventListener('change', handleExcelDataPiezometria, false);
 
-
-    var idCompany   = "empresa" + sessionStorage.getItem("ID_COMPANY");
-    var Variables   = "idCompany=" + idCompany;
-
-    $.post("backend/getSeasonPiezometrias.php", Variables, function(DATA){
+    $.post("backend/getSeasonPiezometrias.php", "", function(DATA){
         if( DATA.ERROR ){
             setTimeout(()=>{
                 ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
@@ -35,12 +35,9 @@ function getPiezometrias(){
     $('#getPiezometriaForm').modal('toggle');
     ShowSpinner();
 
-    var idCompany   = "empresa" + sessionStorage.getItem("ID_COMPANY");
     var season      = document.getElementById("seassonData").value;
-    
-    var Variables   = "idCompany=" + idCompany + "&season=" + season;
 
-    $.post("backend/getPiezometria.php", Variables, function(DATA){
+    $.post("backend/getPiezometria.php", "season=" + season, function(DATA){
         if( DATA.ERROR ){
             setTimeout(() => {
                 CloseSpinner();
@@ -48,7 +45,6 @@ function getPiezometrias(){
             }, 500);
 
         }else{
-            console.log(DATA);
             var containerId = "myContainer";
 
             try{
@@ -319,18 +315,16 @@ function uploadPiezometriaFromExcel(){
             }, 1000);
 
         }else{
-            var idCompany   = "empresa" + sessionStorage.getItem("ID_COMPANY");
-            var Variables   = "idCompany=" + idCompany + "&dates=" + JSON.stringify(arrayDate) + 
-                                "&cota=" + JSON.stringify(arrayCota) + "&pcg1=" + JSON.stringify(arrayPcg1) + 
-                                "&pcg2=" + JSON.stringify(arrayPcg2) + "&pcg3=" + JSON.stringify(arrayPcg3) + 
-                                "&pcg4=" + JSON.stringify(arrayPcg4) + "&pcg5=" + JSON.stringify(arrayPcg5) +
-                                "&pcg6=" + JSON.stringify(arrayPcg6) + "&pcg7=" + JSON.stringify(arrayPcg7) + 
-                                "&pcg8=" + JSON.stringify(arrayPcg8) + "&pcg9=" + JSON.stringify(arrayPcg9) +
-                                "&pcg10=" + JSON.stringify(arrayPcg10) + "&pcg11=" + JSON.stringify(arrayPcg11) + 
-                                "&pcg12=" + JSON.stringify(arrayPcg12) + "&pcg13=" + JSON.stringify(arrayPcg13) +
-                                "&pcg14=" + JSON.stringify(arrayPcg14);
+            var Variables   = "dates=" + JSON.stringify(arrayDate) + "&cota=" + JSON.stringify(arrayCota) + 
+                                "&pcg1=" + JSON.stringify(arrayPcg1) + "&pcg2=" + JSON.stringify(arrayPcg2) + 
+                                "&pcg3=" + JSON.stringify(arrayPcg3) + "&pcg4=" + JSON.stringify(arrayPcg4) + 
+                                "&pcg5=" + JSON.stringify(arrayPcg5) + "&pcg6=" + JSON.stringify(arrayPcg6) + 
+                                "&pcg7=" + JSON.stringify(arrayPcg7) + "&pcg8=" + JSON.stringify(arrayPcg8) + 
+                                "&pcg9=" + JSON.stringify(arrayPcg9) + "&pcg10=" + JSON.stringify(arrayPcg10) +
+                                "&pcg11=" + JSON.stringify(arrayPcg11) + "&pcg12=" + JSON.stringify(arrayPcg12) +
+                                "&pcg13=" + JSON.stringify(arrayPcg13) + "&pcg14=" + JSON.stringify(arrayPcg14);
 
-            $.post("backend/uploadPiezometria.php", Variables, function(DATA){
+            $.post("backend/pushPiezometrias.php", Variables, function(DATA){
                 console.log(DATA);
                 CloseSpinner();
 

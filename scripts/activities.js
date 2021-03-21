@@ -21,12 +21,32 @@ function initActivity(){
     document.getElementById("addActivityPriority").value	    = "";
     document.getElementById("addActivityArea").value            = "";
 
-    var idCompany   = "empresa" + sessionStorage.getItem("ID_COMPANY");
-    var Variables   = "idCompany=" + idCompany;
+    getSeasons();
+    getLocations();
+};
 
-    getSeasons(Variables);
+function getSeasons(){
+    $.post("backend/getSeasonActivities.php", "", function(DATA){
+        if( DATA.ERROR ){
+            ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
+        
+        }else{
+            var select  = document.getElementById("filterDateCalendar");
 
-    $.post("backend/getLocations.php", Variables, function(DATA){
+            for( var i=0; i<DATA.COUNT; i++ ){
+                var option  = document.createElement("option");
+                option.text = DATA[i].seasons;
+                select.add(option);
+            }
+
+            SortSelect(select);
+            select.value    = "";
+        }
+    });
+};
+
+function getLocations(){
+    $.post("backend/getLocations.php", "", function(DATA){
         if(DATA.ERROR){
             CloseSpinner();
             ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
@@ -37,38 +57,18 @@ function initActivity(){
 
             for(var i=0; i<DATA.count; i++){
                 var option1  = document.createElement("option");
-                option1.text = DATA[i].name;
+                option1.text = DATA[i].location;
 
-                var option3  = document.createElement("option");
-                option3.text = DATA[i].name;
+                var option2  = document.createElement("option");
+                option2.text = DATA[i].location;
 
                 selectAdd.add(option1);
-                selectEdit.add(option3);
+                selectEdit.add(option2);
             }
 
             selectAdd.value     = "";
 
             CloseSpinner();
-        }
-    });
-};
-
-function getSeasons(Variables){
-    $.post("backend/getSeasonActivities.php", Variables, function(DATA){
-        if( DATA.ERROR ){
-            ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
-        
-        }else{
-            var select  = document.getElementById("filterDateCalendar");
-
-            for( var i=0; i<DATA.COUNT; i++ ){
-                var option  = document.createElement("option");
-                option.text = DATA[i].season;
-                select.add(option);
-            }
-
-            SortSelect(select);
-            select.value    = "";
         }
     });
 }
@@ -225,10 +225,15 @@ function LoadActivitiesFromExcel(){
             }, 500);
 
         }else{
-            var idCompany   = "empresa" + sessionStorage.getItem("ID_COMPANY");
-            var Variables   = "idCompany=" + idCompany + "&names=" + JSON.stringify(arrayNames) + "&dates=" + JSON.stringify(arrayDateStart) + "&frecuencies=" + JSON.stringify(arrayFrecuency) + "&locations=" + JSON.stringify(arrayLocation) + "&priorities=" + JSON.stringify(arrayPriority) + "&areas=" + JSON.stringify(arrayArea) + "&comments=" + JSON.stringify(arrayComments);
+            var Variables   = "names=" + JSON.stringify(arrayNames) + "&dates=" + 
+                                JSON.stringify(arrayDateStart) + "&frecuencies=" + 
+                                JSON.stringify(arrayFrecuency) + "&locations=" + 
+                                JSON.stringify(arrayLocation) + "&priorities=" + 
+                                JSON.stringify(arrayPriority) + "&areas=" + 
+                                JSON.stringify(arrayArea) + "&comments=" + 
+                                JSON.stringify(arrayComments);
 
-            $.post("backend/loadActivities.php", Variables, function(DATA){
+            $.post("backend/pushActivities.php", Variables, function(DATA){
                 CloseSpinner();
 
                 if(DATA.ERROR){
@@ -248,7 +253,6 @@ function LoadActivitiesFromExcel(){
 };
 
 function AddActivity(){
-    var idCompany   = "empresa" + sessionStorage.getItem("ID_COMPANY");
     var name        = document.getElementById("addActivityName").value.toLowerCase();
     var date        = document.getElementById("addActivityDate").value;
     var frecuency   = parseStringToDate(document.getElementById("addActivityFrecuency").value);
@@ -262,7 +266,7 @@ function AddActivity(){
 	if(CompareTwoDates(date, -1)){
     	   if(frecuency != 0){
 
-                var Variables   = "idCompany=" + idCompany + "&name=" + name + "&date=" + date + "&frecuency=" + frecuency + "&location=" + location + "&priority=" + priority + "&area=" + area + "&comments=" + comments;
+                var Variables   = "name=" + name + "&date=" + date + "&frecuency=" + frecuency + "&location=" + location + "&priority=" + priority + "&area=" + area + "&comments=" + comments;
 
                 $.post("backend/addActivity.php", Variables, function(DATA){
                     if( DATA.ERROR  === true ){
@@ -420,10 +424,7 @@ function parseDateToString(variable){
 };
 
 function aboutActivity(id){
-    var idCompany   = "empresa" + sessionStorage.getItem("ID_COMPANY");
-    var Variable    = "idCompany=" + idCompany + "&id=" + id;
-    
-    $.post("backend/getDetailsActivity.php", Variable, function(DATA){
+    $.post("backend/getDetailsActivity.php", "id=" + id, function(DATA){
         if( DATA.ERROR  === true ){
             ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
 
@@ -446,10 +447,7 @@ function aboutActivity(id){
 };
 
 function openModalEditActivity(id){
-    var idCompany   = "empresa" + sessionStorage.getItem("ID_COMPANY");
-    var Variable    = "idCompany=" + idCompany + "&id=" + id;
-    
-    $.post("backend/getDetailsActivity.php", Variable, function(DATA){
+    $.post("backend/getDetailsActivity.php", "id=" + id, function(DATA){
         if( DATA.ERROR  === true ){
             ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
 
@@ -474,8 +472,6 @@ function openModalEditActivity(id){
 function editActivity(id){
     $('#ModalConfirmEvent').modal('toggle');
 
-    var idCompany   = "empresa" + sessionStorage.getItem("ID_COMPANY");
-
     var name        = document.getElementById("editActivityName").value;
     var dateStart   = document.getElementById("editActivityDateStart").value;
     var frecuency   = parseStringToDate(document.getElementById("editActivityFrecuency").value);
@@ -489,11 +485,9 @@ function editActivity(id){
 
   //  }else if(CompareTwoDates(dateStart, -1)){
     }else if(true){
-        
-        var Variables   = "idCompany=" + idCompany + "&id=" + id + "&name=" + name + "&dateStart=" + dateStart + "&frecuency=" + frecuency + "&location=" + location + "&priority=" + priority + "&area=" + area + "&comments=" + comments;
+        var Variables   = "id=" + id + "&name=" + name + "&dateStart=" + dateStart + "&frecuency=" + frecuency + "&location=" + location + "&priority=" + priority + "&area=" + area + "&comments=" + comments;
 
         $.post("backend/updateActivity.php", Variables, function(DATA){
-
             if( DATA.ERROR  === true ){
                 ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
 
@@ -521,16 +515,14 @@ function openModalDelActivity(id){
     document.getElementById("headerEvent").innerHTML    = " Eliminar Actividad";
     document.getElementById("bodyEvent").innerHTML      = "¿Está seguro que desea eliminar esta actividad?";
     document.getElementById("btnConfirm").setAttribute("onclick", "delActivity(" + id + ");");
+    
     $('#ModalConfirmEvent').modal('show');
 };
 
 function delActivity(id){
     $('#ModalConfirmEvent').modal('toggle');
 
-    var idCompany   = "empresa" + sessionStorage.getItem("ID_COMPANY");
-    var Variables   = "idCompany=" + idCompany + "&id=" + id;
-
-    $.post("backend/deleteActivity.php", Variables, function(DATA){
+    $.post("backend/deleteActivity.php", "id=" + id, function(DATA){
         if( DATA.ERROR  === true ){
             ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
         
@@ -539,30 +531,6 @@ function delActivity(id){
             document.getElementById("container:" + id).remove();
 
             ModalReportEvent("Operación Exitosa", "", DATA.MESSAGE);
-            
-
-        /*
-            var table   = document.getElementById("tableActivities");
-            var target  = "row:" + id;
-
-            if( table.children[1].children.length > 1 ){
-                for(var i=0; i<table.children[1].children.length; i++){
-                    if( target == table.children[1].children[i].id ){
-                        table.deleteRow(i + 1);
-
-                        for(var j=i; j<table.children[1].children.length; j++){
-                            table.children[1].children[j].cells[0].textContent  = j + 1;
-                        }
-
-                        break;
-                    }
-                }
-
-            }else{
-                document.getElementById("containerTable").remove();
-            }
-        */
-
         }
     });
 };
@@ -573,7 +541,6 @@ function loadCalendar(){
     ShowSpinner();
 
     // Parameters to get the calendar
-    var idCompany   = "empresa" + sessionStorage.getItem("ID_COMPANY");
     var year        = document.getElementById("filterDateCalendar").value;
     var area        = document.getElementById("filterAreaCalendar").value;
     var priority    = document.getElementById("filterPriorityCalendar").value;
@@ -589,7 +556,7 @@ function loadCalendar(){
             priority = "All";
         }
 
-        var Variables   = "idCompany=" + idCompany + "&year=" + year + "&area=" + area + "&priority=" + priority;
+        var Variables   = "year=" + year + "&area=" + area + "&priority=" + priority;
 
         $.post("backend/getCalendarActivities.php", Variables, function(DATA){
             if( DATA.ERROR ){
@@ -814,15 +781,12 @@ function modifyCar(idActivity){
 };
 
 function previewGuide(){
-    var idCompany   = "empresa" + sessionStorage.getItem("ID_COMPANY");
-    var Variables   = "idCompany=" + idCompany + "&arrayIdActivities=" + carMaintance;
-
-    carMaintance    = [];
-    
     document.getElementById("areaGuide").value      = "";
     document.getElementById("mandatedGuide").value  = "";
 
-    $.post("backend/getActivities.php", Variables, function(DATA){
+    $.post("backend/getActivities.php", "arrayIdActivities=" + carMaintance, function(DATA){
+        carMaintance    = [];
+
         if( DATA.ERROR ){
             ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
         
@@ -908,11 +872,10 @@ function printGuideMaintance(){
             activities.push(idSplited[1]);
         }
 
-        var idCompany       = "empresa" + sessionStorage.getItem("ID_COMPANY");
         var arrayMandated   = mandated.split(" : ");
         var username        = ParseRut(arrayMandated[1]);
         
-        var Variables       = "idCompany=" + idCompany + "&username=" + username + "&activities=" + activities;
+        var Variables       = "username=" + username + "&activities=" + activities;
         
         $.post("backend/addRecord.php", Variables, function(DATA){
             if(DATA.ERROR){
@@ -1018,10 +981,7 @@ function openModalHistoryActivity(id){
     $('#aboutActivityForm').modal('toggle');
     ShowSpinner();
 
-    var idCompany   = "empresa" + sessionStorage.getItem('ID_COMPANY');
-    var Variables   = "idCompany=" + idCompany + "&idActivity=" + id;
-
-    $.post("backend/getRecordsPerActivity.php", Variables, function(DATA){
+    $.post("backend/getRecordsPerActivity.php", "idActivity=" + id, function(DATA){
         if( DATA.ERROR ){
             setTimeout(() => {
                 CloseSpinner();

@@ -1,4 +1,5 @@
-<?php  
+<?php
+	session_start();
     include "configuration.php";
 
 	if( empty($LINK) ){
@@ -7,9 +8,22 @@
 	   $DATA["MESSAGE"]    = "El servidor no responde";
 	
 	}else{
-		$LINK 	-> close();		
+		
+	/***************************************************************************** */
+	/****** ---> DO NOT EDIT THIS UNLESS IT EXTREMELY NECESSARY <--- ************* */
+	/***************************************************************************** */
 
-		$idCompany 			= $_POST["idCompany"];
+		$USERNAME   = $_SESSION["userDatabase"];
+		$PASSWORD   = $_SESSION["passDatabase"];
+		$ID_COMPANY = $_SESSION["idCompany"];
+		$DATABASE   = "empresa".$ID_COMPANY;
+		
+		$LINK       ->  close();
+		$LINK       =	new mysqli($URL, $USERNAME, $PASSWORD, $DATABASE);
+
+	/***************************************************************************** */
+	/***************************************************************************** */
+
 		$arrayNames			= json_decode($_POST["names"]);
 		$arrayDates 		= json_decode($_POST["dates"]);
 		$arrayFrecuencies	= json_decode($_POST["frecuencies"]);
@@ -17,8 +31,6 @@
 		$arrayPriorities 	= json_decode($_POST["priorities"]);
 		$arrayAreas			= json_decode($_POST["areas"]);
 		$arrayComments		= json_decode($_POST["comments"]);
-		
-		$LINK = new mysqli($URL, $USERNAME, $PASSWORD, $idCompany);
 
 		$numErrors			= 0;
 		$items				= sizeof($arrayNames);
@@ -76,10 +88,10 @@
 		   $DATA["MESSAGE"]	= 'Se han omitido '.$numErrors.' actividades, por errores de estructura. Comuníquese con el administrador';
 		}
 
-        	$QUERY  -> free_result();
+        $QUERY  -> free_result();
 		$LINK   -> close();
 	}
 
-    	header('Content-Type: application/json');
+    header('Content-Type: application/json');
 	echo json_encode($DATA);
 ?>

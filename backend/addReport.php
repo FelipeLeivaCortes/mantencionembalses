@@ -1,7 +1,6 @@
-<?php  
+<?php
+	session_start();
     include "configuration.php";
-    
-    $LINK = new mysqli($URL, $USERNAME, $PASSWORD, $DATABASE);
 
 	if(	empty($LINK) ){
         $DATA["ERROR"]      = true;
@@ -9,13 +8,26 @@
 		$DATA["MESSAGE"]    = "El servidor no responde";
 	
 	}else{
-		$idCompany  = $_POST["idCompany"];
+
+    /***************************************************************************** */
+	/****** ---> DO NOT EDIT THIS UNLESS IT EXTREMELY NECESSARY <--- ************* */
+	/***************************************************************************** */
+
+		$USERNAME   = $_SESSION["userDatabase"];
+		$PASSWORD   = $_SESSION["passDatabase"];
+		$ID_COMPANY = $_SESSION["idCompany"];
+		$DATABASE   = "empresa".$ID_COMPANY;
+		
+		$LINK       ->  close();
+		$LINK       =   new mysqli($URL, $USERNAME, $PASSWORD, $DATABASE);
+
+	/***************************************************************************** */
+	/***************************************************************************** */
+
 		$name		= $_POST["name"];
 		$lastname	= $_POST["lastname"];
 		$topic		= $_POST["topic"];
 		$message	= $_POST["message"];
-
-		$LINK	=	new mysqli($URL, $USERNAME, $PASSWORD, "empresa".$idCompany);
 
 		$QUERY	=	$LINK -> prepare("INSERT INTO reporte (titulo, estado) VALUES (?, false)");
 		$QUERY  ->  bind_param('s', $topic);
@@ -34,12 +46,15 @@
 				$DATA["MESSAGE"]	= "No se ha podido determinar el id de la operación anterior. Comuníquese con el administrador";
 			
 			}else{
-				$file		= fopen( $PATH_FILES.$idCompany."/thread_".$idReport.".txt", "w");
+				$directory	= $PATH_FILES.$ID_COMPANY."/thread_".$idReport.".txt";
+
+				$file		= fopen($directory, "w");
 				fwrite($file, 'E:'.$name." ".$lastname.":".$message);
 				fclose($file);
 
 				$DATA["ERROR"] 		= false;
 				$DATA["MESSAGE"]	= "Se ha agregado la consulta exitosamente";
+				$DATA["idReport"]	= $idReport;
 			}
 
 		}else{

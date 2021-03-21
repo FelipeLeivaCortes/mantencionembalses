@@ -8,13 +8,26 @@
 		$DATA["MESSAGE"]    = "El servidor no responde";
 	
 	}else{
+
+    /***************************************************************************** */
+	/****** ---> DO NOT EDIT THIS UNLESS IT EXTREMELY NECESSARY <--- ************* */
+	/***************************************************************************** */
+
+        $USERNAME   = $_SESSION["userDatabase"];
+        $PASSWORD   = $_SESSION["passDatabase"];
+        $ID_COMPANY = $_SESSION["idCompany"];
+        $DATABASE   = "empresa".$ID_COMPANY;
+        
+        $LINK       ->  close();
+        $LINK       =   new mysqli($URL, $USERNAME, $PASSWORD, $DATABASE);
+
+    /***************************************************************************** */
+    /***************************************************************************** */
+
         $idFile         = $_POST["idFile"];
-        $idCompany      = $_POST["idCompany"];
         $newNameFile    = $_POST["newNameFile"];
         $newDescription = $_POST["newDescription"];
 
-        $LINK       = new mysqli($URL, $USERNAME, $PASSWORD, "empresa".$idCompany);
-        
         $QUERY  =   $LINK->prepare("SELECT nombre, descripcion FROM documento WHERE id = ?;");
         $QUERY  ->  bind_param("i", $idFile);
         $QUERY  ->  execute();
@@ -37,8 +50,8 @@
         //  Is necessary detect if the name changed, the description, or both
             $operations     = "";
 
-            $oldDocument    = $PATH_FILES.$idCompany."/".$oldNameFile;
-            $newDocument    = $PATH_FILES.$idCompany."/".$newNameFile;  
+            $oldDocument    = $PATH_FILES.$ID_COMPANY."/".$oldNameFile;
+            $newDocument    = $PATH_FILES.$ID_COMPANY."/".$newNameFile;  
         
             if( $oldNameFile != $newNameFile ){
                 $QUERY  =   $LINK->prepare("UPDATE documento SET nombre = ? WHERE id = ?;");

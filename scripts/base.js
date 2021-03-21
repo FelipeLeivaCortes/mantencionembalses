@@ -5,40 +5,36 @@ window.addEventListener("load", function(){
    var items 	 	= document.getElementById("AdminContainer").children.length;
 
    if( items > 0 ){
-      var idCompany   = "empresa" + sessionStorage.getItem("ID_COMPANY");
-      var Variables   = "idCompany=" + idCompany;
 
-      $.post("backend/getNotifications.php", Variables, function(DATA){
-         if( !DATA.ERROR && DATA.count > 0 ){
-            document.getElementById("notificationsIcon").setAttribute("data-target", "#notificationsForm");
-            document.getElementById("notificationsIcon").setAttribute("data-toggle", "modal");
-            document.getElementById("notificationsIcon").setAttribute("href", "");
+      $.post("backend/getNotifications.php", "", function(DATA){
+            if( !DATA.ERROR && DATA.count > 0 ){
+                document.getElementById("notificationsIcon").setAttribute("data-target", "#notificationsForm");
+                document.getElementById("notificationsIcon").setAttribute("data-toggle", "modal");
+                document.getElementById("notificationsIcon").setAttribute("href", "");
 
-            var spanCount       = document.createElement("span");
-            spanCount.className = "badge badge-pill badge-warning notification";
-            spanCount.innerHTML = DATA.count;
+                var spanCount       = document.createElement("span");
+                spanCount.className = "badge badge-pill badge-warning notification";
+                spanCount.innerHTML = DATA.count;
 
-            document.getElementById("notificationsIcon").appendChild(spanCount);
-            refillNotifications(DATA);
-          }
-       });
+                document.getElementById("notificationsIcon").appendChild(spanCount);
+                refillNotifications(DATA);
+            }
+        });
 
        loadStadistics();
+
    }else{
       loadMaintances();
+
    }
+
 });
 
 function ConfigureSystem(){
    var idCompany	= sessionStorage.getItem("ID_COMPANY");
-   var path		= "img/logoCompany" + idCompany + ".png";
+   var path		    = "img/logoCompany" + idCompany + ".png";
 
    document.getElementById("logoCompany").setAttribute("src", path);
-
-   /*
-    IN THE NEWEST VERSION, IS NECCESARY CHANGE THE USER THAT CONNECT WITH THE DATABASE
-   */
-
 };
 
 function refillNotifications(data){

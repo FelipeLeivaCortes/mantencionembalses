@@ -8,8 +8,22 @@
 		$DATA["MESSAGE"]    = "El servidor no responde";
 	
 	}else{
-        $idCompany  = $_POST["idCompany"];
-        $LINK       = new mysqli($URL, $USERNAME, $PASSWORD, $idCompany);
+
+    /***************************************************************************** */
+	/****** ---> DO NOT EDIT THIS UNLESS IT EXTREMELY NECESSARY <--- ************* */
+	/***************************************************************************** */
+
+        $USERNAME   = $_SESSION["userDatabase"];
+        $PASSWORD   = $_SESSION["passDatabase"];
+        $ID_COMPANY = $_SESSION["idCompany"];
+        $DATABASE   = "empresa".$ID_COMPANY;
+        
+        $LINK       ->  close();
+        $LINK       =   new mysqli($URL, $USERNAME, $PASSWORD, $DATABASE);
+
+    /***************************************************************************** */
+    /***************************************************************************** */
+        
         $id         = $_POST["id"];
         
         $QUERY  =   $LINK -> prepare("SELECT nombre, fechaInicio, frecuencia, sector, prioridad, area, observacion FROM actividad WHERE id = ?");

@@ -38,7 +38,7 @@ function changePassword(){
         var username    = sessionStorage.getItem("USERNAME");
         var Variables   = "username=" + username + "&oldPassword=" + oldPass + "&newPassword=" + newPass;
               
-        $.post("backend/changePassword.php", Variables, function(DATA){
+        $.post("backend/updatePassword.php", Variables, function(DATA){
            
 	    if( DATA.ERROR  === true ){
                 ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);

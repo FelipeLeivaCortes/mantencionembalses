@@ -8,12 +8,25 @@
 	   $DATA["MESSAGE"]    = "El servidor no responde";
 	
 	}else{
+
+   /***************************************************************************** */
+	/****** ---> DO NOT EDIT THIS UNLESS IT EXTREMELY NECESSARY <--- ************* */
+	/***************************************************************************** */
+
+      $USERNAME   = $_SESSION["userDatabase"];
+      $PASSWORD   = $_SESSION["passDatabase"];
+      $ID_COMPANY = $_SESSION["idCompany"];
+      $DATABASE   = "empresa".$ID_COMPANY;
+      
+      $LINK       ->  close();
+      $LINK       =   new mysqli($URL, $USERNAME, $PASSWORD, $DATABASE);
+
+   /***************************************************************************** */
+   /***************************************************************************** */
+
       $idRecord     	= $_POST["idRecord"];
-      $idCompany  	= $_POST["idCompany"];
       $username      = intval($_POST["username"]);
       $isAdmin       = boolval($_POST["isAdmin"]);
-
-	   $LINK    = new mysqli($URL, $USERNAME, $PASSWORD, "empresa".$idCompany);
 
       $QUERY  =   $LINK -> prepare("SELECT encargado, actividades, fechaInicio, estados FROM registro WHERE id = ?");
       $QUERY  ->  bind_param("i", $idRecord);
@@ -97,9 +110,10 @@
 
                }else{
                   $arrayObservations   = array();
+                  $directory           = $PATH_FILES.$ID_COMPANY."/record_".$idRecord.".txt";
 
-                  if( file_exists( $PATH_FILES.$idCompany."/record_".$idRecord.".txt" ) ){
-                     $file    = fopen( $PATH_FILES.$idCompany."/record_".$idRecord.".txt", "r");
+                  if( file_exists($directory) ){
+                     $file    = fopen($directory, "r");
                      $index   = 0;
 
                      while( !feof($file) ){

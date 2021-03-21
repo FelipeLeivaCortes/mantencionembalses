@@ -1,4 +1,5 @@
 <?php
+    session_start();
     include "configuration.php";
 
 	if(	empty($LINK) ){
@@ -7,13 +8,26 @@
 		$DATA["MESSAGE"]    = "El servidor no responde";
 	
 	}else{
-        $idCompany          =   $_POST["idCompany"];
+
+    /***************************************************************************** */
+	/****** ---> DO NOT EDIT THIS UNLESS IT EXTREMELY NECESSARY <--- ************* */
+	/***************************************************************************** */
+
+        $USERNAME   = $_SESSION["userDatabase"];
+        $PASSWORD   = $_SESSION["passDatabase"];
+        $ID_COMPANY = $_SESSION["idCompany"];
+        $DATABASE   = "empresa".$ID_COMPANY;
+        
+        $LINK       ->  close();
+        $LINK       =   new mysqli($URL, $USERNAME, $PASSWORD, $DATABASE);
+
+    /***************************************************************************** */
+    /***************************************************************************** */
+
         $idRecord           =   $_POST["idRecord"];
         $arrayObservations  =   explode(",", $_POST["arrayObservations"]);
         $arrayStates        =   explode(",", $_POST["arrayStates"]);
         $arrayPiezometria   =   explode(",", $_POST["piezometriaData"]);
-
-        $LINK   =   new mysqli($URL, $USERNAME, $PASSWORD, "empresa".$idCompany);
 
         $QUERY  =   $LINK -> prepare("SELECT actividades, estados FROM registro WHERE id = ?");
         $QUERY  ->  bind_param("i", $idRecord);
@@ -42,7 +56,8 @@
             $success                =   0;
             $today	                =   date('Y-m-d');
 
-            unlink($PATH_FILES.$idCompany."/record_".$idRecord.".txt");
+            $directory      = $PATH_FILES.$ID_COMPANY."/record_".$idRecord.".txt";
+            unlink( $directory );
 
             for($i=0; $i<$index; $i++){
                 $idActivity = intval($arrayActivities[$i]);
@@ -135,17 +150,19 @@
                             break;
                         }
                     }
+
                 }
 
-                if( file_exists( $PATH_FILES.$idCompany."/record_".$idRecord.".txt" ) ){
-                    $file   = fopen( $PATH_FILES.$idCompany."/record_".$idRecord.".txt", "a");
-                    fwrite($file, $idActivity."|".$arrayObservations[$i].PHP_EOL);
+                if( file_exists( $directory ) ){
+                    $file   = fopen( $directory, "a");
+                    fwrite($file, PHP_EOL.$idActivity."|".$arrayObservations[$i]);
                     fclose($file);
                 
                 }else{
-                    $file   = fopen( $PATH_FILES.$idCompany."/record_".$idRecord.".txt", "w+");
-                    fwrite($file, $idActivity."|".$arrayObservations[$i].PHP_EOL);
+                    $file   = fopen( $directory, "w");
+                    fwrite($file, $idActivity."|".$arrayObservations[$i]);
                     fclose($file);
+                    
                 }
             }
 
@@ -186,12 +203,17 @@
                 
                 if( $QUERY->affected_rows == 1 ){
                     $DATA["ERROR"] 		= false;
-                    $DATA["MESSAGE"]	= "Se han modificado los datos exitosamente";
+                    $DATA["MESSAGE"]	= "Se han registrado los datos exitosamente";
                 
                 }else{
                     $DATA["ERROR"] 		= true;
                     $DATA["ERRNO"]      = 3;
                     $DATA["MESSAGE"]	= "No se pudo llevar a cabo la operación. Comuníquese con el administrador";
+                }
+
+                if( sizeof($arrayObservations) > 0 ){
+                    $DATA["ERROR"] 		= false;
+                    $DATA["MESSAGE"]	= "Se han registrado los datos exitosamente";
                 }
             }
 

@@ -8,10 +8,23 @@
 		$DATA["MESSAGE"]    = "El servidor no responde";
 	
 	}else{
-        $idCompany  = $_POST["idCompany"];
-        $idActivity = $_POST["idActivity"];
 
-        $LINK       = new mysqli($URL, $USERNAME, $PASSWORD, $idCompany);
+    /***************************************************************************** */
+	/****** ---> DO NOT EDIT THIS UNLESS IT EXTREMELY NECESSARY <--- ************* */
+	/***************************************************************************** */
+
+        $USERNAME   = $_SESSION["userDatabase"];
+        $PASSWORD   = $_SESSION["passDatabase"];
+        $ID_COMPANY = $_SESSION["idCompany"];
+        $DATABASE   = "empresa".$ID_COMPANY;
+        
+        $LINK       ->  close();
+        $LINK       =   new mysqli($URL, $USERNAME, $PASSWORD, $DATABASE);
+
+    /***************************************************************************** */
+    /***************************************************************************** */
+    
+        $idActivity = $_POST["idActivity"];
 
         $QUERY  =   $LINK -> prepare("SELECT nombre, area, ultimaMantencion FROM actividad WHERE id = ?;");
         $QUERY  ->	bind_param('i', $idActivity);
@@ -65,7 +78,8 @@
                         $idRecord   = intval($arrayIdRecord[$i]);
                         $index      = intval($arrayIndex[$i]);
                         
-                        $LINK   =   new mysqli($URL, $USERNAME, $PASSWORD, $idCompany);
+                        $LINK   ->  close();
+                        $LINK   =   new mysqli($URL, $USERNAME, $PASSWORD, $DATABASE);
 
                         $QUERY1  =   $LINK -> prepare("SELECT encargado, fechaInicio, estados FROM registro WHERE id = ?;");
                         $QUERY1  ->  bind_param('i', $idRecord);
@@ -74,7 +88,8 @@
                         $QUERY1  ->  bind_result($username, $startDate, $stateActivity);
                         $QUERY1  ->  fetch();
 
-                        $LINK    =   new mysqli($URL, $USERNAME, $PASSWORD, $DATABASE);
+                        $LINK   ->  close();
+                        $LINK    =  new mysqli($URL, $USERNAME, $PASSWORD, $ADMINISTRATION);
 
                         $QUERY2  =   $LINK -> prepare("SELECT nombre, apellido FROM usuario WHERE rut = ?");
                         $QUERY2  ->  bind_param('i', $username);

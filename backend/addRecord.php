@@ -1,4 +1,5 @@
-<?php  
+<?php
+	session_start();
     include "configuration.php";
 
 	if( empty($LINK) ){
@@ -7,13 +8,25 @@
 		$DATA["MESSAGE"]    = "El servidor no responde";
 	
 	}else{
-		$idCompany 	= $_POST["idCompany"];
+
+    /***************************************************************************** */
+	/****** ---> DO NOT EDIT THIS UNLESS IT EXTREMELY NECESSARY <--- ************* */
+	/***************************************************************************** */
+
+		$USERNAME   = $_SESSION["userDatabase"];
+		$PASSWORD   = $_SESSION["passDatabase"];
+		$ID_COMPANY = $_SESSION["idCompany"];
+		$DATABASE   = "empresa".$ID_COMPANY;
+		
+		$LINK       ->  close();
+		$LINK       =   new mysqli($URL, $USERNAME, $PASSWORD, $DATABASE);
+
+	/***************************************************************************** */
+	/***************************************************************************** */
+	
 		$username 	= $_POST["username"];
         $activities	= $_POST["activities"];
 		$dateStart	= date('Y-m-d');
-
-		$LINK   ->  close();
-		$LINK   =   new mysqli($URL, $USERNAME, $PASSWORD, $idCompany);	
 
 		$arrayAux 	= explode(",", $activities);
 		$stringAux	= "0";

@@ -8,10 +8,21 @@
 		$DATA["MESSAGE"]    = "El servidor no responde";
 	
 	}else{
-        $idCompany  = $_POST["idCompany"];
+    
+    /***************************************************************************** */
+	/****** ---> DO NOT EDIT THIS UNLESS IT EXTREMELY NECESSARY <--- ************* */
+	/***************************************************************************** */
 
-        $LINK   ->  close();
-        $LINK   =   new mysqli($URL, $USERNAME, $PASSWORD, $idCompany);
+        $USERNAME   = $_SESSION["userDatabase"];
+        $PASSWORD   = $_SESSION["passDatabase"];
+        $ID_COMPANY = $_SESSION["idCompany"];
+        $DATABASE   = "empresa".$ID_COMPANY;
+        
+        $LINK       ->  close();
+        $LINK       =   new mysqli($URL, $USERNAME, $PASSWORD, $DATABASE);
+
+    /***************************************************************************** */
+    /***************************************************************************** */
 
         $QUERY  =   $LINK -> prepare("SELECT DISTINCT year(fecha) FROM piezometria;");
         $QUERY  ->  execute();

@@ -1,7 +1,5 @@
 function initRecords(){
-    var idCompany   = "empresa" + sessionStorage.getItem('ID_COMPANY');
-
-    $.post("backend/getPendingRecords.php", "idCompany=" + idCompany, function(DATA){
+    $.post("backend/getPendingRecords.php", "", function(DATA){
         if( DATA.ERROR ){
             setTimeout(function(){
                 CloseSpinner();
@@ -137,12 +135,9 @@ function FormatSerial(id){
 
 }
 
+/*
 function validateRecord(id){
-
-    var idCompany   = "empresa" + sessionStorage.getItem('ID_COMPANY');
-    var Variables   = "idCompany=" + idCompany + "&id=" + id;
-
-    $.post("backend/updateRecord.php", Variables, function(DATA){
+    $.post("backend/updateRecord.php", "id=" + id, function(DATA){
         console.log(DATA);
         if(DATA.ERROR){
             ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
@@ -164,16 +159,15 @@ function validateRecord(id){
 
     });
 }
+*/
 
 function deleteRecord(id){
     $('#rejectMaintanceForm').modal('toggle');
     
-    var idCompany   = "empresa" + sessionStorage.getItem("ID_COMPANY");
-    var Variables   = "idCompany=" + idCompany + "&id=" + id;
-
-    $.post("backend/deleteRecord.php", Variables, function(DATA){
+    $.post("backend/deleteRecord.php", "id=" + id, function(DATA){
         if(DATA.ERROR){
             ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
+            
         }else{
             ModalReportEvent("Operación Exitosa", "", DATA.MESSAGE);
 

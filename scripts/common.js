@@ -23,6 +23,7 @@ function RecoveryPass(){
         var Variables   = "username="+username
         
         $.post("backend/recoveryPass.php", Variables, function(DATA){
+            console.log(DATA);
             if( DATA.ERROR === true ){
                 setTimeout(()=>{
                     CloseSpinner();

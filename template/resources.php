@@ -35,7 +35,7 @@
                     
                     <!-- Modal Header -->
                     <div class="modal-header">
-                        <h4 class="modal-title"><span class="icon-add-user"></span> Reporte de evento</h4>
+                        <h4 class="modal-title"><span class="icon-info"></span> Reporte de evento</h4>
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
                     </div>
               

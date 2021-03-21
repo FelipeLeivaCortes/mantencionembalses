@@ -1,16 +1,30 @@
 <?php
-    
+    session_start();
     include "configuration.php";
     
-    $LINK = new mysqli($URL, $USERNAME, $PASSWORD, $DATABASE);
-
 	if(	empty($LINK) ){
 		$DATA["ERROR"]      = true;
         $DATA["ERRNO"]      = 1;
 		$DATA["MESSAGE"]    = "El servidor no responde";
 	
 	}else{
-        $id         = $_POST["id"];
+		
+	/***************************************************************************** */
+	/****** ---> DO NOT EDIT THIS UNLESS IT EXTREMELY NECESSARY <--- ************* */
+	/***************************************************************************** */
+
+        $USERNAME   = $_SESSION["userDatabase"];
+        $PASSWORD   = $_SESSION["passDatabase"];
+        $ID_COMPANY = $_SESSION["idCompany"];
+        $DATABASE   = "empresa".$ID_COMPANY;
+        
+        $LINK       ->  close();
+        $LINK       = new mysqli($URL, $USERNAME, $PASSWORD, $ADMINISTRATION);
+
+	/***************************************************************************** */
+    /***************************************************************************** */
+        
+		$id         = $_POST["id"];
 		$username   = $_POST["username"];
 		$permissions= $_POST["permissions"];
 		$name       = $_POST["name"];

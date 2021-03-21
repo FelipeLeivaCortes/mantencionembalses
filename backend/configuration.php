@@ -1,10 +1,10 @@
 <?php
 
-	$URL        = "localhost";
-	$USERNAME   = "JVRE";
-	$PASSWORD   = "LtLt1505#";
-	$DATABASE   = "administration";
-  $PATH_FILES = "../docs/empresa";
+  $URL            = "localhost";
+	$USERNAME       = "root";
+	$PASSWORD       = "";
+	$ADMINISTRATION = "administration";
+  $PATH_FILES     = "../docs/empresa";
 
 # The next variable is to assgin by default the last and next maintance of an activity
 	$defaultDate 	= '1900-01-01';
@@ -12,7 +12,7 @@
 	$DATA	= array();
 	$QUERY	= "";
 	$KEY	= "1f4276388ad3214c873428dbef42243f";
-	$LINK	= new mysqli($URL, $USERNAME, $PASSWORD, $DATABASE);
+	$LINK	= new mysqli($URL, $USERNAME, $PASSWORD, $ADMINISTRATION);
 
 	function encrypt($message, $encryption_key){
     $secretKey = hex2bin($encryption_key);

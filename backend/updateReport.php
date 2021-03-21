@@ -8,13 +8,30 @@
 		$DATA["MESSAGE"]    = "El servidor no responde";
 	
 	}else{
-        $idCompany      = $_POST["idCompany"];
+
+    /***************************************************************************** */
+	/****** ---> DO NOT EDIT THIS UNLESS IT EXTREMELY NECESSARY <--- ************* */
+	/***************************************************************************** */
+
+        $USERNAME   = $_SESSION["userDatabase"];
+        $PASSWORD   = $_SESSION["passDatabase"];
+        $ID_COMPANY = $_SESSION["idCompany"];
+        $DATABASE   = "empresa".$ID_COMPANY;
+        
+        $LINK       ->  close();
+        $LINK       =   new mysqli($URL, $USERNAME, $PASSWORD, $DATABASE);
+
+    /***************************************************************************** */
+    /***************************************************************************** */
+
         $idReport       = $_POST["idReport"];
         $author         = $_POST["author"];
         $message        = $_POST["message"];
 
-        if( file_exists( $PATH_FILES.$idCompany."/thread_".$idReport.".txt" ) ){
-            $file   = fopen( $PATH_FILES.$idCompany."/thread_".$idReport.".txt", "a");
+        $directory      = $PATH_FILES.$ID_COMPANY."/thread_".$idReport.".txt";
+
+        if( file_exists($directory) ){
+            $file   = fopen($directory, "a");
             fwrite($file, PHP_EOL."E:".$author.":".$message);
             fclose($file);
 

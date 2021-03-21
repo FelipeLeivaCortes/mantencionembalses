@@ -8,9 +8,22 @@
 		$DATA["MESSAGE"]    = "El servidor no responde";
 	
 	}else{
-        $idCompany  = $_POST["idCompany"];
-        $LINK       = new mysqli($URL, $USERNAME, $PASSWORD, "empresa".$idCompany);
+
+    /***************************************************************************** */
+	/****** ---> DO NOT EDIT THIS UNLESS IT EXTREMELY NECESSARY <--- ************* */
+	/***************************************************************************** */
+
+        $USERNAME   = $_SESSION["userDatabase"];
+        $PASSWORD   = $_SESSION["passDatabase"];
+        $ID_COMPANY = $_SESSION["idCompany"];
+        $DATABASE   = "empresa".$ID_COMPANY;
         
+        $LINK       ->  close();
+        $LINK       =   new mysqli($URL, $USERNAME, $PASSWORD, $DATABASE);
+
+    /***************************************************************************** */
+    /***************************************************************************** */
+
         $QUERY  =   $LINK -> prepare("SELECT id, titulo FROM reporte");
         $QUERY  ->  execute();
         $QUERY  ->  store_result();
@@ -30,7 +43,7 @@
                 $arraySplited   = array();
                 $index          = 0;
 
-                $fileContent    = fopen($PATH_FILES.$idCompany.'/thread_'.$idReport.'.txt', 'r');  
+                $fileContent    = fopen($PATH_FILES.$ID_COMPANY.'/thread_'.$idReport.'.txt', 'r');  
                 
                 while( !feof($fileContent) ){
                     $arraySplited[$index] = fgets($fileContent);

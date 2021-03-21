@@ -2,36 +2,59 @@
     <body>
         <div>
             <form class="form-horizontal" role="form">
-                        
                 <div class="form-group row">
                     <label for="numUsers">Usuarios del Sistema:</label>
-                    <div class="col-5">
+                    <div class="col-7">
                         <input type="text" readonly class="form-control-plaintext" id="numUsers">
                     </div>
                 </div>
 
                 <div class="form-group row">
                     <label for="numActivities">Total Actividades del Sistema:</label>
-                    <div class="col-5">
+                    <div class="col-7">
                         <input type="text" readonly class="form-control-plaintext" id="numActivities">
                     </div>
                 </div>
 
                 <div class="form-group row">
                     <label for="numPendingActivities">Actividades Atrasadas:</label>
-                    <div class="col-5">
+                    <div class="col-7">
                         <input type="text" readonly class="form-control-plaintext" id="numPendingActivities">
                     </div>
                 </div>
 
                 <div class="form-group row">
                     <label for="numPendingRecords">Guías Pendientes:</label>
-                    <div class="col-5">
+                    <div class="col-7">
                         <input type="text" readonly class="form-control-plaintext" id="numPendingRecords">
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label for="periodLicence">Validez de Licencia:</label>
+                    <div class="col-7">
+                        <input type="text" readonly class="form-control-plaintext" id="periodLicence">
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label for="remainingDaysLicence">Días de Licencia Restantes</label>
+                    <div class="col-7">
+                        <input type="text" readonly class="form-control-plaintext" id="remainingDaysLicence">
                     </div>
                 </div>
 
             </form>
         </div>
+
+        <style>
+            form {
+                height: 52%;
+                width: 100%;
+                overflow: scroll;
+                padding-left: 5%;
+            }
+        </style>
     </body>
+
 </html>

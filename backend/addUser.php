@@ -1,8 +1,8 @@
-<?php  
+<?php
+	session_start();
+
     include "configuration.php";
 	include "sendMail.php";
-
-	$LINK = new mysqli($URL, $USERNAME, $PASSWORD, $DATABASE);
 	
 	if( empty($LINK) ){
         $DATA["ERROR"]      = true;
@@ -10,7 +10,22 @@
 		$DATA["MESSAGE"]    = "El servidor no responde";
 	
 	}else{
-		$idCompany  = $_POST["idCompany"];
+
+	/***************************************************************************** */
+	/****** ---> DO NOT EDIT THIS UNLESS IT EXTREMELY NECESSARY <--- ************* */
+	/***************************************************************************** */
+
+        $USERNAME   = $_SESSION["userDatabase"];
+        $PASSWORD   = $_SESSION["passDatabase"];
+        $ID_COMPANY = $_SESSION["idCompany"];
+        $DATABASE   = "empresa".$ID_COMPANY;
+        
+        $LINK       ->  close();
+        $LINK       = new mysqli($URL, $USERNAME, $PASSWORD, $ADMINISTRATION);
+
+	/***************************************************************************** */
+    /***************************************************************************** */
+
 		$username   = $_POST["username"];
     	$permissions= $_POST["permissions"];
 		$name       = $_POST["name"];
@@ -23,7 +38,7 @@
 		}
 	
 		$QUERY   =   $LINK -> prepare("SELECT id FROM usuario WHERE rut = ?");
-		$QUERY   ->	bind_param('i', $username);
+		$QUERY   ->  bind_param('i', $username);
     	$QUERY   ->  execute();
     	$QUERY   ->  store_result();
         $QUERY   ->  bind_result($rut);
@@ -43,7 +58,7 @@
     		$password   =   substr($username, 0, 4);
     		$QUERY 	    =   $LINK -> prepare("INSERT INTO usuario (idEmpresa, rut, clave, permisos, nombre, apellido, correo, telefono, estado) 
     		                                    VALUES (?, ?, AES_ENCRYPT(?, ?), ?, ?, ?, ?, ?, 1)");
-    		$QUERY	    ->	bind_param('iissssssi', $idCompany, $username, $password, $KEY, $permissions, $name, $lastname, $email, $phone);
+    		$QUERY	    ->	bind_param('iissssssi', $ID_COMPANY, $username, $password, $KEY, $permissions, $name, $lastname, $email, $phone);
             $QUERY      ->  execute();
 
 			if( $QUERY->affected_rows == 1 ){

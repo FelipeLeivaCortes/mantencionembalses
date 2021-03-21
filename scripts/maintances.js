@@ -22,12 +22,10 @@ function getRecord(idRecord, onlyRead){
         document.getElementById("idRecord").value   = "";
 
     }else{
-        var idCompany   = sessionStorage.getItem('ID_COMPANY');
         var username    = sessionStorage.getItem('USERNAME');
-        var Variables   = 'idRecord=' + idRecord + '&idCompany=' + idCompany + "&username=" + username + "&isAdmin=" + isAdmin;
+        var Variables   = 'idRecord=' + idRecord + "&username=" + username + "&isAdmin=" + isAdmin;
 
         $.post("backend/getRecord.php", Variables, function(DATA){
-
             document.getElementById("idRecord").value   = "";
 
             if( DATA.ERROR ){
@@ -108,11 +106,12 @@ function getRecord(idRecord, onlyRead){
 
                         var target  = DATA[i].id;
 
-                        for(var j=0; j<DATA.observations.length - 1; j++){
-                            var line    = DATA.observations[j].split("|");
+                        for(var j=0; j<DATA.observations.length; j++){
+                           var fullLine     = DATA.observations[j].replace(/\r\n/g, "");
+                           var lineSplitted = fullLine.split("|");
                             
-                            if( target == line[0] ){
-                                description.textContent     = line[1];
+                            if( target == lineSplitted[0] ){
+                                description.textContent     = lineSplitted[1];
                                 break;
                             }
                         }
@@ -134,14 +133,15 @@ function getRecord(idRecord, onlyRead){
 
                         var target  = DATA[i].id;
 
-                        for(var j=0; j<DATA.observations.length - 1; j++){
-                            var line    = DATA.observations[j].split("|");
-                            
-                            if( target == line[0] ){
-                                description.value   = line[1];
-                                break;
-                            }
-                        }
+                        for(var j=0; j<DATA.observations.length; j++){
+                            var fullLine     = DATA.observations[j].replace(/\r\n/g, "");
+                            var lineSplitted = fullLine.split("|");
+                             
+                             if( target == lineSplitted[0] ){
+                                 description.value  = lineSplitted[1];
+                                 break;
+                             }
+                         }
 
                     //  If the guide is incomplete
                         if( DATA[i].state == "0" ){
@@ -281,22 +281,12 @@ function openModalConfirmEvent(idRecord, isPiezometria){
 function updateRecord(idRecord, arrayObservations, arrayStates, isPiezometria){
     $('#ModalConfirmEvent').modal('toggle');
 
-    var idCompany   = sessionStorage.getItem("ID_COMPANY");
-    var Variables;
+    piezometriaData     = sessionStorage.getItem("piezometriaData") == null ? [] : sessionStorage.removeItem("piezometriaData");
 
-    if( isPiezometria ){
-        Variables   = "idCompany=" + idCompany + "&idRecord=" + idRecord + "&arrayObservations=" +
-        arrayObservations + "&arrayStates=" + arrayStates + "&piezometriaData=" + sessionStorage.getItem("piezometriaData");
-    
-        sessionStorage.removeItem("piezometriaData");
-    }else{
-        Variables   = "idCompany=" + idCompany + "&idRecord=" + idRecord + "&arrayObservations=" +
-        arrayObservations + "&arrayStates=" + arrayStates + "&piezometriaData=" + [];
-
-    }
+    var Variables   = "idRecord=" + idRecord + "&arrayObservations=" + arrayObservations + "&arrayStates=" + 
+                        arrayStates + "&piezometriaData=" + piezometriaData;
 
     $.post("backend/updateRecord.php", Variables, function(DATA){
-        console.log(DATA);
         if( DATA.ERROR ){
             ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
         

@@ -1,6 +1,5 @@
 <?php
 	session_start();
-
     include "configuration.php";
 
 	if( empty($LINK) ){
@@ -9,12 +8,25 @@
 		$DATA["MESSAGE"]    = "El servidor no responde";
 	
 	}else{
+
+    /***************************************************************************** */
+	/****** ---> DO NOT EDIT THIS UNLESS IT EXTREMELY NECESSARY <--- ************* */
+	/***************************************************************************** */
+
+		$USERNAME   = $_SESSION["userDatabase"];
+		$PASSWORD   = $_SESSION["passDatabase"];
+		$ID_COMPANY = $_SESSION["idCompany"];
+		$DATABASE   = "empresa".$ID_COMPANY;
+		
+		$LINK       ->  close();
+		$LINK       =   new mysqli($URL, $USERNAME, $PASSWORD, $DATABASE);
+
+	/***************************************************************************** */
+	/***************************************************************************** */
+
 		$nameFile		= $_POST["nameFile"];
-		$ID_COMPANY		= $_POST["ID_COMPANY"];
 		$description	= $_POST["description"];
 		$username		= $_POST["username"];
-
-		$LINK	=  new mysqli($URL, $USERNAME, $PASSWORD, 'empresa'.$ID_COMPANY);
 
 		$QUERY	=	$LINK->prepare("SELECT id FROM documento WHERE nombre = ?;");
 		$QUERY	->	bind_param("s", $nameFile);

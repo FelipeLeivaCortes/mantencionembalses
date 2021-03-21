@@ -1,5 +1,5 @@
 <?php
-    
+	session_start();
     include "configuration.php";
 
 	if(	empty($LINK) ){
@@ -9,12 +9,24 @@
 	
 	}else{
 
-		$idCompany 	= $_POST["idCompany"];
-		$LINK 		= new mysqli($URL, $USERNAME, $PASSWORD, $DATABASE);
+	/***************************************************************************** */
+	/****** ---> DO NOT EDIT THIS UNLESS IT EXTREMELY NECESSARY <--- ************* */
+	/***************************************************************************** */
+
+		$USERNAME   = $_SESSION["userDatabase"];
+		$PASSWORD   = $_SESSION["passDatabase"];
+		$ID_COMPANY = $_SESSION["idCompany"];
+		$DATABASE   = "empresa".$ID_COMPANY;
+		
+		$LINK       ->  close();
+		$LINK       = new mysqli($URL, $USERNAME, $PASSWORD, $ADMINISTRATION);
+
+	/***************************************************************************** */
+	/***************************************************************************** */
 
 		// PREPARE THE QUERY FOR SEARCH THE LIST OF SYSTEM´S USERS 
 		$QUERY 	    =   $LINK -> prepare("SELECT rut, permisos, nombre, apellido, correo, telefono FROM usuario WHERE idEmpresa = ? ORDER BY nombre ASC");
-		$QUERY 		->	bind_param("i", $idCompany);
+		$QUERY 		->	bind_param("i", $ID_COMPANY);
 		$QUERY      ->  execute();
         $QUERY      ->  store_result();
         $QUERY      ->  bind_result($rut, $permisos, $nombre, $apellido, $correo, $telefono);        

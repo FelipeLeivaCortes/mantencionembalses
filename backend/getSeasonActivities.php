@@ -8,15 +8,26 @@
 		$DATA["MESSAGE"]    = "El servidor no responde";
 	
 	}else{
-        $idCompany  = $_POST["idCompany"];
 
-        $LINK   ->  close();
-        $LINK   =   new mysqli($URL, $USERNAME, $PASSWORD, $idCompany);
+    /***************************************************************************** */
+	/****** ---> DO NOT EDIT THIS UNLESS IT EXTREMELY NECESSARY <--- ************* */
+	/***************************************************************************** */
+
+        $USERNAME   = $_SESSION["userDatabase"];
+        $PASSWORD   = $_SESSION["passDatabase"];
+        $ID_COMPANY = $_SESSION["idCompany"];
+        $DATABASE   = "empresa".$ID_COMPANY;
+        
+        $LINK       ->  close();
+        $LINK       = new mysqli($URL, $USERNAME, $PASSWORD, $DATABASE);
+
+    /***************************************************************************** */
+    /***************************************************************************** */
 
         $QUERY  =   $LINK -> prepare("SELECT DISTINCT year(proximaMantencion) FROM actividad;");
         $QUERY  ->  execute();
         $QUERY  ->  store_result();
-        $QUERY  ->  bind_result($season);
+        $QUERY  ->  bind_result($seasons);
         
         if( $QUERY->num_rows == 0 ){
             $DATA["ERROR"]      = true;
@@ -29,7 +40,7 @@
 
             while ( $QUERY -> fetch() ){
 				array_push($DATA, [
-				    'season'  => $season,
+				    'seasons'  => $seasons,
 				]);
 			}
         }
