@@ -1,4 +1,9 @@
- 
+function removeAllChildNodes(parent) {
+    while (parent.firstChild){
+        parent.removeChild(parent.firstChild);
+    }
+};
+
 function RemoveElement(id){
 var element = document.getElementById(id);
 element.parentNode.removeChild(element);

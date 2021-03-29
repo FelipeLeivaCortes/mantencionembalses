@@ -52,6 +52,7 @@
             $arrayStates         = explode(",", $states);
             $arrayIds           	= explode(",", $activities);
             $arrayActivities    	= array();
+            $arrayLocations      = array();
             $arrayWarning       	= array();
             $arrayIdsSuccess     = array();
             $error              	= false;
@@ -61,11 +62,11 @@
 
             for($i=0; $i<sizeof($arrayIds); $i++){
                $QUERY  ->  free_result();
-               $QUERY  =   $LINK -> prepare("SELECT nombre FROM actividad WHERE id = ?");
+               $QUERY  =   $LINK -> prepare("SELECT nombre, sector FROM actividad WHERE id = ?");
                $QUERY  ->  bind_param("i", $arrayIds[$i]);
                $QUERY  ->  execute();
                $QUERY  ->  store_result();
-               $QUERY  ->  bind_result($nameActivity);
+               $QUERY  ->  bind_result($nameActivity, $locationActivity);
                $QUERY  ->  fetch();
 
                if( $QUERY->num_rows == 0 ){
@@ -74,6 +75,7 @@
 
                }else if( $QUERY->num_rows == 1 ){
                   $arrayActivities[$success]    = $nameActivity;
+                  $arrayLocations[$success]     = $locationActivity;
                   $arrayIdsSuccess[$success]    = $arrayIds[$i];
                   $success++;
 
@@ -110,10 +112,10 @@
 
                }else{
                   $arrayObservations   = array();
-                  $directory           = $PATH_FILES.$ID_COMPANY."/record_".$idRecord.".txt";
+                  $folderRecord        = $PATH_FILES.$ID_COMPANY."/records/record_".$idRecord."/record_".$idRecord.".txt";
 
-                  if( file_exists($directory) ){
-                     $file    = fopen($directory, "r");
+                  if( file_exists($folderRecord) ){
+                     $file    = fopen($folderRecord, "r");
                      $index   = 0;
 
                      while( !feof($file) ){
@@ -135,6 +137,7 @@
                      array_push($DATA, [
                         'id'        => $arrayIdsSuccess[$i],
                         'name'      => $arrayActivities[$i],
+                        'location'  => $arrayLocations[$i],
                         'state'     => $arrayStates[$i],
                      ]);
                   }

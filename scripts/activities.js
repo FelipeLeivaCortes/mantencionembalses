@@ -567,7 +567,7 @@ function loadCalendar(){
                 
             }else{
 
-            //  In case that there´s nobody thecnician in the area, the system inform it.
+            //  In case that there´s nobody tecnician in the area, the system must inform it.
                 if( DATA.WARNING != "" ){
                     ModalReportEvent("Precaución", "", DATA.WARNING);
 
@@ -626,57 +626,35 @@ function loadCalendar(){
                 form            = document.createElement("form");
                 form.setAttribute("id", idForm);
                 
+                months  = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio",
+                            "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+
                 // Create the month´s container
                 for( var i=0; i<12; i++ ){
+                    var containerWeek1      = document.createElement("div");          
+                    var containerWeek2_3    = document.createElement("div");
+                    var containerWeek4      = document.createElement("div");
 
-                    var label   = document.createTextNode("");
+                    containerWeek1.setAttribute("style", "margin-left: 5%;");
+                    containerWeek2_3.setAttribute("style", "margin-left: 5%;");
+                    containerWeek4.setAttribute("style", "margin-left: 5%;");
 
-                    switch(i){
-                        case 0:
-                            label.textContent   = "Enero";
-                            break;
-                        case 1:
-                            label.textContent   = "Febrero";
-                            break;
-                        case 2:
-                            label.textContent   = "Marzo";
-                            break;
-                        case 3:
-                            label.textContent   = "Abril";
-                            break;
-                        case 4:
-                            label.textContent   = "Mayo";
-                            break;
-                        case 5:
-                            label.textContent   = "Junio";
-                            break;
-                        case 6:
-                            label.textContent   = "Julio";
-                            break;
-                        case 7:
-                            label.textContent   = "Agosto";
-                            break;
-                        case 8:
-                            label.textContent   = "Septiembre";
-                            break;
-                        case 9:
-                            label.textContent   = "Octubre";
-                            break;
-                        case 10:
-                            label.textContent   = "Noviembre";
-                            break;
-                        case 11:
-                            label.textContent   = "Diciembre";
-                            break;
-                        
-                    }
-    
+                    var week1               = document.createTextNode("Semana 1");
+                    var week2_3             = document.createTextNode("Semana 2 y 3");
+                    var week4               = document.createTextNode("Semana 4");
+
+                    containerWeek1.appendChild(week1);
+                    containerWeek2_3.appendChild(week2_3);
+                    containerWeek4.appendChild(week4);
+
+                    var month   = document.createTextNode(months[i]);
+
                     // Here is added every activity belong each month
                     var monthContainer= document.createElement("div");
                     monthContainer.setAttribute("id", "monthContainer:" + i);
                     monthContainer.setAttribute("class", "form-group");
 
-                    monthContainer.appendChild(label);
+                    monthContainer.appendChild(month);
 
                     if( DATA[i].elements == 0 ){
                         var container       = document.createElement("div");
@@ -688,57 +666,109 @@ function loadCalendar(){
                         monthContainer.appendChild(container);
 
                     }else{
-                        for(j=0; j<DATA[i].elements; j++){
-                            var container       = document.createElement("div");
-                            container.setAttribute("class", "row");
-                            container.setAttribute("id", "container:" + DATA[i].ids[j]);
-                            container.style.marginLeft  = "5%";
+                        var items   = DATA[i].elements;
 
-                            var check           = document.createElement("input");
+                        for(j=0; j<items; j++){
+                            var containerRow        = document.createElement("div");
+                            var check               = document.createElement("input");
+                            var containerPriority   = document.createElement("div");
+                            var textPriority        = document.createTextNode("");
+                            var iconPriority        = document.createElement("i");
+                            var activityName        = document.createElement("a");
+                            var activityLink        = document.createTextNode( DATA[i].names[j] );
+
+                            containerRow.setAttribute("class", "row");
+                            containerRow.setAttribute("id", "container:" + DATA[i].ids[j]);
+                            containerRow.style.marginLeft  = "5%";
+
                             check.setAttribute("type", "checkbox");
                             check.setAttribute("id", "idCheck:" + DATA[i].ids[j]);
                             check.setAttribute("class", "col-1");
-
                             check.setAttribute("onchange", "modifyCar(" + DATA[i].ids[j] + ")")
 
-                            var priorityDiv     = document.createElement("div");
-                            var priorityText    = document.createTextNode("");
-                            var priorityIcon    = document.createElement("i");
+                            containerPriority.setAttribute("class", "col-1");
+                            containerPriority.style.marginRight   = "2%";
+                            iconPriority.setAttribute("class", "icon-circle");
 
-                            priorityDiv.setAttribute("class", "col-1");
-                            priorityDiv.style.marginRight   = "2%";
-                            priorityIcon.setAttribute("class", "icon-circle");
+                            activityName.setAttribute("class", "col-9");
+                            activityName.appendChild( activityLink );
+                            activityName.href   = "javascript:aboutActivity('" + DATA[i].ids[j] + "')";
+
+                            containerPriority.appendChild(iconPriority);
+                            containerPriority.appendChild(textPriority);
 
                             if( DATA[i].priorities[j] == 'Alta' ){
-                                priorityText.textContent    = "Alta  ";
-                                priorityIcon.style  = "border-radius: 7px; background: red; color: red;";
+                                textPriority.textContent    = "Alta  ";
+                                iconPriority.style  = "border-radius: 7px; background: red; color: red;";
 
                             }else if( DATA[i].priorities[j] == 'Media' ){
-                                priorityText.textContent    = "Media ";
-                                priorityIcon.style  = "border-radius: 7px; background: orange; color: orange;";
+                                textPriority.textContent    = "Media ";
+                                iconPriority.style  = "border-radius: 7px; background: orange; color: orange;";
                             
                             }else if( DATA[i].priorities[j] == 'Baja' ){
-                                priorityText.textContent    = "Baja  ";
-                                priorityIcon.style  = "border-radius: 7px; background: green; color: green;";
+                                textPriority.textContent    = "Baja  ";
+                                iconPriority.style  = "border-radius: 7px; background: green; color: green;";
 
                             }
 
-                            priorityDiv.appendChild(priorityIcon);
-                            priorityDiv.appendChild(priorityText);
+                            containerRow.appendChild(check);
+                            containerRow.appendChild(containerPriority);
+                            containerRow.appendChild(activityName);
 
-                            var textName        = document.createElement("a");
-                            var textLink        = document.createTextNode( DATA[i].names[j] );
-                            textName.setAttribute("class", "col-9");
+                            if( priority == 'All' ){
+                                if( DATA[i].priorities[j] == 'Alta' ){
+                                    containerWeek1.appendChild(containerRow);
 
-                            textName.appendChild( textLink );
-                            textName.href   = "javascript:aboutActivity('" + DATA[i].ids[j] + "')";
+                                }else if( DATA[i].priorities[j] == 'Media' ){
+                                    containerWeek2_3.appendChild(containerRow);
 
-                            container.appendChild(check);
-                            container.appendChild(priorityDiv);
-                            container.appendChild(textName);
-                            monthContainer.appendChild(container);
+                                }else if( DATA[i].priorities[j] == 'Baja' ){
+                                    containerWeek4.appendChild(containerRow);
+
+                                }
+                            
+                            }else{
+                                monthContainer.appendChild(containerRow);
+                            }
+                            
+                        }
+                    }
+
+                    if( priority == 'All' ){
+                        
+                        if( containerWeek1.children.length < 1 ){
+                            var containerEmpty  = document.createElement("div");
+                            var messageEmpty    = document.createTextNode("No hay actividades en esta semana");
+                            
+                            containerEmpty.appendChild(messageEmpty);
+                            containerEmpty.setAttribute("style", "margin-left: 8%;");
+                            containerWeek1.appendChild(containerEmpty);
 
                         }
+
+                        if( containerWeek2_3.children.length < 1 ){
+                            var containerEmpty  = document.createElement("div");
+                            var messageEmpty    = document.createTextNode("No hay actividades en esta semana");
+                            
+                            containerEmpty.appendChild(messageEmpty);
+                            containerEmpty.setAttribute("style", "margin-left: 8%;");
+                            containerWeek2_3.appendChild(containerEmpty);
+
+                        }
+
+                        if( containerWeek4.children.length < 1 ){
+                            var containerEmpty  = document.createElement("div");
+                            var messageEmpty    = document.createTextNode("No hay actividades en esta semana");
+                            
+                            containerEmpty.appendChild(messageEmpty);
+                            containerEmpty.setAttribute("style", "margin-left: 8%;");
+                            containerWeek4.appendChild(containerEmpty);
+
+                        }
+
+                        monthContainer.appendChild(containerWeek1);
+                        monthContainer.appendChild(containerWeek2_3);
+                        monthContainer.appendChild(containerWeek4);
                     }
 
                     form.appendChild(monthContainer);
@@ -1008,42 +1038,43 @@ function openModalHistoryActivity(id){
                 // Here is created every cell
                 var indexCell       = document.createElement("td");
                 var nameCell        = document.createElement("td");
-                var startDateCell   = document.createElement("td");
                 var endDateCell     = document.createElement("td");
                 var stateCell       = document.createElement("td");
+                var imagesCell      = document.createElement("td");
 
                 // Here is storaged the content into a node
                 var index           = document.createTextNode( i + 1 );
                 var name            = document.createTextNode( DATA[i].name + " " + DATA[i].lastname );
-                var startDate       = document.createTextNode( FormatDate(DATA[i].startDate) );
-                var endDate;
-                
-                if( DATA[i].lastMaintance == 'Pendiente' ){
-                    endDate     = document.createTextNode("Pendiente");
-                
-                }else{
-                    endDate     = document.createTextNode( FormatDate(DATA[i].lastMaintance) );
-
-                }
+                var endDate = DATA[i].lastMaintance == 'Pendiente' ? document.createTextNode("Pendiente") : document.createTextNode( FormatDate(DATA[i].lastMaintance) );
                 
                 var state           = document.createTextNode( DATA[i].statusActivity );
+                var btnImages       = document.createElement("button");
+                var iconBtn         = document.createElement("span");
+                var textBtn         = document.createTextNode("Ver Imagenes");
+
+                iconBtn.setAttribute("class", "icon-images icon-space");
+                btnImages.setAttribute("class", "btn btn-primary");
+                btnImages.setAttribute("onclick", "javascript:showImages('" + DATA[i].img + "')");
               
+                btnImages.appendChild(iconBtn);
+                btnImages.appendChild(textBtn);
+
                 document.getElementById("printHistoryMaintanceBtn").setAttribute("onclick", "printHistoryMaintances();");
 
                 // Here is inserted the content into the cells
                 indexCell.appendChild(index);
                 nameCell.appendChild(name);
-                startDateCell.appendChild(startDate);
                 endDateCell.appendChild(endDate);
                 stateCell.appendChild(state);
+                imagesCell.appendChild(btnImages);
 
                 // Here is inserted the cells into a row
                 row.appendChild(indexCell);
                 row.appendChild(nameCell);
-                row.appendChild(startDateCell);
                 row.appendChild(endDateCell);
                 row.appendChild(stateCell);
-        
+                row.appendChild(imagesCell);
+
                 // Here is inserted the row into the table´s body
                 bodyTable.appendChild(row);
             }
@@ -1112,4 +1143,21 @@ function printHistoryMaintances(){
 
     ClearTable('maintanceHistoryTable');
     document.getElementById("printHistoryMaintanceBtn").disabled = false;
-}
+};
+
+function showImages(imagesData){
+    var arrayImages = imagesData.split(",");
+    var container   = document.getElementById("containerImagesRecord");
+    
+    removeAllChildNodes(container);
+
+    for( var i=0; i<arrayImages.length; i++ ){
+        var img             = new Image();
+        img.style.height    = "50%";
+        img.src             = "data:image/jpg;base64," + arrayImages[i];
+
+        container.appendChild(img);
+    }
+
+    $("#ModalImagesRecord").modal("show");
+};

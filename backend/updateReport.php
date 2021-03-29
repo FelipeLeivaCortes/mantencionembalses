@@ -1,6 +1,7 @@
 <?php
     session_start();
     include "configuration.php";
+    include "sendMail.php";
 
 	if(	empty($LINK) ){
 		$DATA["ERROR"]      = true;
@@ -25,6 +26,7 @@
     /***************************************************************************** */
 
         $idReport       = $_POST["idReport"];
+        $title          = $_POST["title"];
         $author         = $_POST["author"];
         $message        = $_POST["message"];
 
@@ -34,6 +36,25 @@
             $file   = fopen($directory, "a");
             fwrite($file, PHP_EOL."E:".$author.":".$message);
             fclose($file);
+
+            $date			= 	date('Y-m-d');
+            $subject		=  "Han respondido la consulta";
+            $body			=  '<html>
+                                    <head>
+                                        <title>'.$title.'</title>
+                                    </head>
+                                    <body>
+                                        <p>Responsable: '.$author.'<br>'.
+
+                                            'Te informamos que con fecha <b>'.$date.'</b> el usuario ha comentado el hilo de conversación con el siguiente mensaje.<br><br>'.
+                                            ''.$message.'.<br>'.
+                                            '<br>'.
+                                            
+                                            'Saludos</p>
+                                    </body>
+                                </html>';
+            
+            $errorSendMail	= sendMail("felipe-leiva@hotmail.cl", $subject, $body);
 
         }else{
             $DATA["ERROR"]      = true;

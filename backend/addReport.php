@@ -1,6 +1,7 @@
 <?php
 	session_start();
     include "configuration.php";
+	include "sendMail.php";
 
 	if(	empty($LINK) ){
         $DATA["ERROR"]      = true;
@@ -51,6 +52,25 @@
 				$file		= fopen($directory, "w");
 				fwrite($file, 'E:'.$name." ".$lastname.":".$message);
 				fclose($file);
+
+				$date			= 	date('Y-m-d');
+				$subject		=  "Tienes una nueva consulta";
+				$body			=  '<html>
+										<head>
+											<title>'.$topic.'</title>
+										</head>
+										<body>
+											<p>Responsable: '.$name.' '.$lastname.'<br>'.
+
+												'Te informamos que con fecha <b>'.$date.'</b> se ha abierto un nuevo hilo de conversación con el siguiente mensaje.<br><br>'.
+												''.$message.'.<br>'.
+												'<br>'.
+												
+												'Saludos</p>
+										</body>
+									</html>';
+				
+				$errorSendMail	= sendMail("felipe-leiva@hotmail.cl", $subject, $body);
 
 				$DATA["ERROR"] 		= false;
 				$DATA["MESSAGE"]	= "Se ha agregado la consulta exitosamente";

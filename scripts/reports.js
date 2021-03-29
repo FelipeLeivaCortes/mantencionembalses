@@ -97,9 +97,10 @@ function getPiezometrias(){
                 arrayPcg14[i]   = DATA[i].pcg14;
             }
 
-            var labelsPits  = ["Cota", "Pozo 1", "Pozo 2", "Pozo 3", "Pozo 4", "Pozo 5",
-                                "Pozo 6", "Pozo 7", "Pozo 8", "Pozo 9", "Pozo 10", "Pozo 11",
-                                "Pozo 12", "Pozo 13", "Pozo 14"];
+            var labelsPits  = ["Cota", "Pozo Roca Ladera Sur 1", "Pozo Roca Ladera Sur 2", "Pozo Roca Ladera Sur 3", 
+                                "Pozo Roca Ladera Sur 4", "Pozo Roca Ladera Norte 5", "Pozo Roca Ladera Norte 6",
+                                "Pozo Roca Ladera Norte 7", "Pozo Roca Ladera Norte 8", "Pozo Fluvial 1", "Pozo Fluvial 2",
+                                "Pozo Fluvial 3", "Pozo Fluvial 4", "Pozo Fluvial 5", "Pozo Fluvial 6"];
 
             for( var i=0; i<DATA.numPits; i++ ){
                 var canvas      = document.createElement("canvas");
@@ -109,27 +110,39 @@ function getPiezometrias(){
                 var ctx         = canvas.getContext('2d');
 
                 var myChart     = new Chart(ctx, {
-                    type: 'line',
+                    type: 'bar',
                     data: {
                         labels: arrayDate,
                         datasets: [{
                             label: labelsPits[i],
                             data: eval("arrayPcg" + i),
                               backgroundColor: [
-                                'rgba(255, 99, 132, 0.2)'
-                            /*    'rgba(54, 162, 235, 0.2)',
+                                'rgba(255, 99, 132, 0.2)',
+                                'rgba(54, 162, 235, 0.2)',
                                 'rgba(255, 206, 86, 0.2)',
                                 'rgba(75, 192, 192, 0.2)',
                                 'rgba(153, 102, 255, 0.2)',
-                                'rgba(255, 159, 64, 0.2)' */
+                                'rgba(255, 159, 64, 0.2)',
+                                'rgba(255, 99, 132, 0.2)',
+                                'rgba(54, 162, 235, 0.2)',
+                                'rgba(255, 206, 86, 0.2)',
+                                'rgba(75, 192, 192, 0.2)',
+                                'rgba(153, 102, 255, 0.2)',
+                                'rgba(255, 159, 64, 0.2)'
                             ],
                             borderColor: [
-                                'rgba(255, 99, 132, 1)'
-                          /*      'rgba(54, 162, 235, 1)',
+                                'rgba(255, 99, 132, 1)',
+                                'rgba(54, 162, 235, 1)',
                                 'rgba(255, 206, 86, 1)',
                                 'rgba(75, 192, 192, 1)',
                                 'rgba(153, 102, 255, 1)',
-                                'rgba(255, 159, 64, 1)' */
+                                'rgba(255, 159, 64, 1)',
+                                'rgba(255, 99, 132, 1)',
+                                'rgba(54, 162, 235, 1)',
+                                'rgba(255, 206, 86, 1)',
+                                'rgba(75, 192, 192, 1)',
+                                'rgba(153, 102, 255, 1)',
+                                'rgba(255, 159, 64, 1)' 
                             ],
                             borderWidth: 1
                         }]

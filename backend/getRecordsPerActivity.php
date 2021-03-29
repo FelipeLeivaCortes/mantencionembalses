@@ -71,8 +71,10 @@
                     $DATA["MESSAGE"]    = "La actividad no tiene asociada ningún registro de mantenimiento";
 
                 }else{
-                    $QUERY  ->  free_result();
-                    $error  =   false;
+                    $QUERY          ->  free_result();
+                    $error          =   false;
+                    $numImages      =   0;
+                    $arrayImages    =   array();
 
                     for( $i=0; $i<sizeof($arrayIdRecord); $i++ ){
                         $idRecord   = intval($arrayIdRecord[$i]);
@@ -81,11 +83,11 @@
                         $LINK   ->  close();
                         $LINK   =   new mysqli($URL, $USERNAME, $PASSWORD, $DATABASE);
 
-                        $QUERY1  =   $LINK -> prepare("SELECT encargado, fechaInicio, estados FROM registro WHERE id = ?;");
+                        $QUERY1  =   $LINK -> prepare("SELECT encargado, estados FROM registro WHERE id = ?;");
                         $QUERY1  ->  bind_param('i', $idRecord);
                         $QUERY1  ->  execute();
                         $QUERY1  ->  store_result();
-                        $QUERY1  ->  bind_result($username, $startDate, $stateActivity);
+                        $QUERY1  ->  bind_result($username, $stateActivity);
                         $QUERY1  ->  fetch();
 
                         $LINK   ->  close();
@@ -99,6 +101,37 @@
                         $QUERY2  ->  fetch();
 
                         if ( $QUERY1->num_rows == 1 && $QUERY2->num_rows == 1 ){
+                            
+                        // Getting al the images associated to the report
+                            $folderRecord   = $PATH_FILES.$ID_COMPANY."/records/record_".$idRecord."/";
+
+                            if(file_exists($folderRecord)){
+                                $fileCount      = 0;
+                                $files          = glob($folderRecord . "imagen_record_*");
+
+                                if($files){
+                                    $fileCount  = count($files);
+
+                                    for( $j=0; $j<$fileCount; $j++ ){
+                                        $pathImages     = $folderRecord."imagen_record_".$j.".txt";
+                        
+                                        if( file_exists( $pathImages ) ){
+                                            $file       = fopen($pathImages, "r");
+                                            $line       = str_replace("\r\n", "", fgets($file));
+
+                                            if( $idActivity == $line ){
+                                                feof($file);
+                                                $arrayImages[$numImages]    = fgets($file);
+                                                $numImages++;
+
+                                            }
+                                                                
+                                            fclose($file);
+                                        }
+                                    }
+                                }
+                            }
+
                             $arrayStateActivity    = explode(",", $stateActivity);
 
                             if( $lastMaintance == $defaultDate ){
@@ -116,9 +149,9 @@
                             array_push($DATA, [
                                 'name'              => $name,
                                 'lastname'          => $lastname,
-                                'startDate'         => $startDate,
                                 'lastMaintance'     => $lastMaintance,
                                 'statusActivity'    => $stateActivity,
+                                'img'               => $arrayImages,
                             ]);
                         
                         }else{

@@ -40,7 +40,7 @@ function getThreads(){
             table       = document.createElement("table");
             table.setAttribute("class", "table table-striped");
             table.setAttribute("id", idTable);
-            table.setAttribute("style", "height:80%; overflow: scroll;")
+            table.setAttribute("style", "overflow: scroll;")
     
             var thead                   = document.createElement("thead");
 
@@ -158,8 +158,9 @@ function openContent(idReport, title, stringType, stringAuthor, stringContent){
 function respondMessage(idReport){
     var author      = sessionStorage.getItem('NAME') + " " + sessionStorage.getItem('LASTNAME');
     var message     = document.getElementById("messageContent").value;
-    
-    var Variables   = "idReport=" + idReport + "&author=" + author + "&message=" + message;
+    var title       = document.getElementById("titleThread").innerHTML;
+
+    var Variables   = "idReport=" + idReport + "&title=" + title + "&author=" + author + "&message=" + message;
 
     $.post("backend/updateReport.php", Variables, function(DATA){
         if( DATA.ERROR ){
@@ -174,6 +175,7 @@ function respondMessage(idReport){
 
 function addReport(){
     $('#contactForm').modal('toggle');
+    ShowSpinner();
 
     var topic   = document.getElementById("topicMessage").value;
     var message = document.getElementById("bugMessage").value;
@@ -192,39 +194,92 @@ function addReport(){
 
         $.post("backend/addReport.php", Variables, function(DATA){
             if( DATA.ERROR  === true ){
-                ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
+                setTimeout(()=>{
+                    CloseSpinner();
+                    ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
+                }, 500);
 
             }else{
-                var table           = document.getElementById("tableThreads");
-                var index           = table.children[1].children.length;
+                var containerTable, table, bodyTable, i;
+
+                var idContainer = "containerThreads";
+                var idTable     = "tableThreads";
+
+                if( document.getElementById(idContainer) != null ){
+                    containerTable  = document.getElementById(idContainer);
+                    table           = document.getElementById(idTable);
+                    bodyTable       = document.getElementById(idTable).tBodies;
+                    i               = document.getElementById(idTable).children[1].length;
+
+                }else{
+                    containerTable  = document.createElement("div");
+                    containerTable.setAttribute("class", "table-modal table-reponsive-md");
+                    containerTable.setAttribute("id", "containerTable");
+                    containerTable.setAttribute("style", "height: 300px;");
+            
+                    table           = document.createElement("table");
+                    table.setAttribute("class", "table table-striped");
+                    table.setAttribute("id", idTable);
+                    table.setAttribute("style", "overflow: scroll;");
+
+                    var thead                   = document.createElement("thead");
+                    var rowHead                 = document.createElement("tr");
+                    var indexHeadCell           = document.createElement("th");
+                    var titleHeadCell           = document.createElement("th");
+
+                    indexHeadCell.setAttribute("scope", "col");
+                    titleHeadCell.setAttribute("scope", "col");
+
+                    var indexHead       = document.createTextNode("N°");
+                    var titleHead       = document.createTextNode("Título");
+
+                    indexHeadCell.appendChild(indexHead);
+                    titleHeadCell.appendChild(titleHead);
+
+                    rowHead.appendChild(indexHeadCell);
+                    rowHead.appendChild(titleHeadCell);
+
+                    thead.appendChild(rowHead);
+                    table.appendChild(thead);
+                
+                    bodyTable   = document.createElement("tbody");
+
+                    i           = 0;
+
+                }
+                
                 var row             = document.createElement("tr");
                 var indexCell	    = document.createElement("td");
                 var titleCell       = document.createElement("td");
-                var index           = document.createTextNode( index + 1 );
+                
+                var index           = document.createTextNode( i + 1 );
                 var title           = document.createElement("a");
                 var link            = document.createTextNode( topic );
 
-                // Setting the parameters
                 title.appendChild(link);
-                title.href  = "javascript:openContent(" + DATA.idReport + ", '" + title + "', 'E', '" + name + " " + lastname + "', '" + message + "');";  
+
+                title.href  = "javascript:openContent(" + DATA.idReport + ", '" + topic + "', 'E', '" + name + " " + lastname+ "', '" + message + "');";  
                 
-                // Here is inserted the content into the cells
                 indexCell.appendChild(index);
                 titleCell.appendChild(title);
 
-                // Here is inserted the cells into a row
                 row.appendChild(indexCell);
                 row.appendChild(titleCell);
                 
-                table.tBodies[0].appendChild(row); 
+                bodyTable.appendChild(row);
 
-                ModalReportEvent("Operación exitosa", "", DATA.MESSAGE);
+                table.appendChild(bodyTable);
+                containerTable.appendChild(table);
+                document.getElementById("body-container").appendChild(containerTable);
 
+                document.getElementById("topicMessage").value   = "";
+                document.getElementById("bugMessage").value     = "";
+
+                setTimeout(() => {
+                    CloseSpinner();
+                    ModalReportEvent("Operación exitosa", "", DATA.MESSAGE);
+                }, 500);
             }
-
-            //Deleting the data putted in the inputs
-            document.getElementById("topicMessage").value   = "";
-            document.getElementById("bugMessage").value     = "";
         });
     }
 };

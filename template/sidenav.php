@@ -89,7 +89,7 @@
             
                 <!-- Modal body -->
                 <div class="modal-body">
-                    <form id="formNotifications" class="form-horizontal" role="form">
+                    <form id="formNotifications" class="form-horizontal" role="form" style="height: 100%;">
                     </form>                    
                 </div>
             

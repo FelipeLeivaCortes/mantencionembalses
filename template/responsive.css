@@ -1,0 +1,27 @@
+@media only screen and (max-device-width: 720px){
+    h2{
+        font-size: 25;
+    }
+
+    .sidebar-header{
+        visibility: hidden;
+    }
+
+    .logoCompany{
+        height: 80%;
+        width: 100%;
+    }
+
+    #rightSideScreen{
+     /*   visibility: hidden;
+    */
+    }
+
+    #mySidenav{
+        width: 50%;
+    }
+
+    #btnBack{
+        visibility: visible;
+    }
+}

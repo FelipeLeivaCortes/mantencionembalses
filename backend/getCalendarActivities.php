@@ -135,12 +135,11 @@
                 $QUERY  ->  store_result();
                 $QUERY  ->  bind_result($id, $name, $nextMaintance, $location, $priorityResult);
 
-                $index      = 0;
-                
-
                 if( $QUERY->num_rows>0 ){
                     $found  = true;
                 }
+
+                $index      = 0;
 
                 while( $QUERY->fetch() ){
                     $available  = true;

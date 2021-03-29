@@ -33,7 +33,7 @@
                 </div>
 
                 <!-- To cover all the remaining space, you must use 7 columns... don´t edit nothing before this -->
-                <div class="col-7">
+                <div id="rightSideScreen" class="col-7">
                     <div class="header-container">
                         <?php
                             include "template/header.php"

@@ -16,12 +16,6 @@
         <script src="scripts/jspdf.plugin.autotable.min.js"></script>
         <script src="scripts/xlsx.full.min.js"></script>
         <script src="scripts/bootstrap.min.js"></script>
-        
-<!--
-<script src="scripts/popper.min.js"></script>
-        <script src="scripts/html2canvas.min.js"></script>
-        <script src="scripts/jszip.js"></script>
--->
 
     </head>
     
