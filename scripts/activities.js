@@ -14,6 +14,10 @@ maintancesBtn.appendChild(iconbtn);
 maintancesBtn.appendChild(textMaintanceBtn);
 
 function initActivity(){
+    $("#ModalImagesRecord").on('hidden.bs.modal', function (){
+        removeAllChildNodes(document.getElementById("containerImagesRecord"));
+    });
+
     document.getElementById('activitiesExcel').addEventListener('change', handleExcelProject, false);
 
     document.getElementById("loadActivitiesBtn").disabled       = true;
@@ -1025,7 +1029,12 @@ function openModalHistoryActivity(id){
             document.getElementById("activityNameToPrint").value    = DATA.nameActivity;
             document.getElementById("areaToPrint").value            = DATA.areaActivity;
 
-            ClearTable(idTable);
+            try{
+                table.children[1].remove();
+
+            }catch(e){
+                console.log(e);
+            }
             
             var bodyTable   = document.createElement("tbody");
         
@@ -1038,6 +1047,7 @@ function openModalHistoryActivity(id){
                 // Here is created every cell
                 var indexCell       = document.createElement("td");
                 var nameCell        = document.createElement("td");
+                var idRecordCell    = document.createElement("td");
                 var endDateCell     = document.createElement("td");
                 var stateCell       = document.createElement("td");
                 var imagesCell      = document.createElement("td");
@@ -1045,6 +1055,7 @@ function openModalHistoryActivity(id){
                 // Here is storaged the content into a node
                 var index           = document.createTextNode( i + 1 );
                 var name            = document.createTextNode( DATA[i].name + " " + DATA[i].lastname );
+                var idRecord        = document.createTextNode( DATA[i].idRecord );
                 var endDate = DATA[i].lastMaintance == 'Pendiente' ? document.createTextNode("Pendiente") : document.createTextNode( FormatDate(DATA[i].lastMaintance) );
                 
                 var state           = document.createTextNode( DATA[i].statusActivity );
@@ -1054,7 +1065,7 @@ function openModalHistoryActivity(id){
 
                 iconBtn.setAttribute("class", "icon-images icon-space");
                 btnImages.setAttribute("class", "btn btn-primary");
-                btnImages.setAttribute("onclick", "javascript:showImages('" + DATA[i].img + "')");
+                btnImages.setAttribute("onclick", "javascript:showImages(" + id + "," + DATA[i].idRecord + ")");
               
                 btnImages.appendChild(iconBtn);
                 btnImages.appendChild(textBtn);
@@ -1064,6 +1075,7 @@ function openModalHistoryActivity(id){
                 // Here is inserted the content into the cells
                 indexCell.appendChild(index);
                 nameCell.appendChild(name);
+                idRecordCell.appendChild(idRecord);
                 endDateCell.appendChild(endDate);
                 stateCell.appendChild(state);
                 imagesCell.appendChild(btnImages);
@@ -1071,6 +1083,7 @@ function openModalHistoryActivity(id){
                 // Here is inserted the cells into a row
                 row.appendChild(indexCell);
                 row.appendChild(nameCell);
+                row.appendChild(idRecordCell);
                 row.appendChild(endDateCell);
                 row.appendChild(stateCell);
                 row.appendChild(imagesCell);
@@ -1134,30 +1147,85 @@ function printHistoryMaintances(){
     doc.text(activityArea , margins.left + 70, finalY);
 
     finalY = finalY + 30;
+    
+    var cloneTable  = document.getElementById("maintanceHistoryTable").cloneNode(true);
+    cloneTable.rows[0].cells[5].remove();
+    
+    for( var i=0; i<cloneTable.children[1].children.length; i++ ){
+        cloneTable.children[1].rows[i].cells[5].remove();
+    }
+
     doc.autoTable({
         startY: finalY,
-        html: '#maintanceHistoryTable',
+        html: cloneTable,
     });
-    
+
     doc.save("Mantenciones_" + activityName + "_" + date + ".pdf");
 
     ClearTable('maintanceHistoryTable');
     document.getElementById("printHistoryMaintanceBtn").disabled = false;
 };
 
-function showImages(imagesData){
-    var arrayImages = imagesData.split(",");
-    var container   = document.getElementById("containerImagesRecord");
-    
-    removeAllChildNodes(container);
+function showImages(idActivity, idRecord){
+    ShowSpinner();
+    var formData    = new FormData();
+    formData.append("idActivity", idActivity);
+    formData.append("idRecord", idRecord);
 
-    for( var i=0; i<arrayImages.length; i++ ){
-        var img             = new Image();
-        img.style.height    = "50%";
-        img.src             = "data:image/jpg;base64," + arrayImages[i];
+    $.ajax({
+        url:            "backend/getImages.php",
+        type:           "POST",
+        data:           formData,
+        contentType:    false,
+        processData:    false,
+        success:        function(DATA){
+            if( DATA.ERROR ){
+                setTimeout(()=>{
+                    CloseSpinner();
+                    ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
+                }, 500);
+            
+            }else{
 
-        container.appendChild(img);
-    }
+                if( DATA.length < 1 ){
+                    setTimeout(()=>{
+                        CloseSpinner();
+                        ModalReportEvent("Advertencia", "", "No se han encontrado imagenes asociadas a la guia de mantención");
+                    }, 500);
+                
+                }else{
+                    var containerImages = document.getElementById("containerImagesRecord");
+                    removeAllChildNodes(containerImages);
 
-    $("#ModalImagesRecord").modal("show");
+                    var subContainer    = document.createElement("div");
+                    subContainer.setAttribute("class", "row");
+
+                    for( var i=0; i<DATA.length; i++ ){
+                        var container   = document.createElement("div");
+                        container.setAttribute("class", "col-12");
+                        container.setAttribute("style", "margin-bottom: 5%;");
+
+                        var img = document.createElement("img");
+                        img.setAttribute("style", "height: 300; width: 250; display: block; margin:auto;");
+                        img.src = DATA[i].img;
+
+                        container.appendChild(img);
+                        subContainer.appendChild(container);
+                    }
+
+                    containerImages.appendChild(subContainer);
+                    
+                    setTimeout(()=>{
+                        CloseSpinner();
+                        $("#ModalImagesRecord").modal("show");
+                    }, 500);
+                }
+                
+            }          
+        },
+        error: function(DATA){
+            console.log(DATA);
+        }
+
+    });
 };

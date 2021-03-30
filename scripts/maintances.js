@@ -1,3 +1,18 @@
+var selDiv = "";
+var storedFiles = [];
+
+function initMaintances(){
+    
+    $("body").on("click", ".selFile", removeFile);
+    $("#inputFiles").on("change", handleInputs);
+    $("#btnStoreimages").on("click", sendImages);
+    selDiv  = $('#selectedFiles');
+
+    setTimeout(()=>{
+        CloseSpinner();
+    }, 500);
+}
+
 function getRecord(idRecord, onlyRead){
     ShowSpinner();
 
@@ -187,6 +202,12 @@ function getRecord(idRecord, onlyRead){
 
                         var target  = DATA[i].id;
 
+                        $(description).keypress(function(event){
+                            if( event.charCode == 124 ){   
+                                return false;
+                            }
+                        });
+
                         for(var j=0; j<DATA.observations.length; j++){
                             var fullLine     = DATA.observations[j].replace(/\r\n/g, "");
                             var lineSplitted = fullLine.split("|");
@@ -206,7 +227,7 @@ function getRecord(idRecord, onlyRead){
                             status.value            = "Realizada";
                             description.disabled    = true;
                             status.disabled         = true;
-//                            imageButton.disabled    = true;
+                            imageButton.disabled    = true;
                         }
 
                         if( DATA[i].name == 'realizar piezometría' ){
@@ -423,55 +444,207 @@ function updatePiezometria(){
 };
 
 function openAttachFile(idActivity){
+    sessionStorage.setItem("ID_ACTIVITY", idActivity);
 
-    // Multiple images preview in browser
-    var imagesPreview = function(input, container) {
-
-        if (input.files){
-            var filesAmount = input.files.length;
-
-            for (i = 0; i < filesAmount; i++) {
-                var reader          = new FileReader();
-                reader.onload = function(event) {
-                    var containerImg    = document.createElement('div');
-                    var button          = document.createElement('button');
-                    
-                    containerImg.setAttribute("class", "row");
-                    containerImg.setAttribute("style", "height: 50%; margin-bottom: 5%;");
-
-                    $($.parseHTML('<img>')).attr({
-                        'src'   : event.target.result,
-                        'class' : 'col-7 col-xs-7',
-                        'style' : 'height: 100%;'
-                    }).appendTo(containerImg);
-                    
-                    button.setAttribute("class", "btn btn-danger");
-                    button.textContent = "Eliminar";
-
-                    $(button).on('click', function(){
-                        this.parentNode.remove();
-                    });
-
-                    containerImg.appendChild(button);
-                    container.appendChild(containerImg);
-                }
-
-                reader.readAsDataURL(input.files[i]);
-            }
-
-              input.value  = "";
-        }
-    };
-
-    $('#inputFiles').on('change', function() {
-        imagesPreview(this, document.getElementById("containerAttachedFiles"));
-
-        document.getElementById("btnStoreimages").setAttribute("onclick", "storeImages(" + idActivity + ");");
-    });
-    
-    removeAllChildNodes( document.getElementById("containerAttachedFiles"));
+    removeAllChildNodes(document.getElementById("selectedFiles"));
     $('#attachFileForm').modal('show');
 };
+
+function handleInputs(e){
+    var files       = e.target.files;
+    var filesArr    = Array.prototype.slice.call(files);
+    
+    filesArr.forEach(function(f) {
+        if(!f.type.match("image.*")){
+            return;
+        }
+
+        storedFiles.push(f);
+        
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            var html = "<div><img style='width: 250; height: 250; margin-bottom: 5%;' src=\"" + e.target.result + "\" data-file='"+f.name+"' class='selFile' title='Click para quitar'>" + f.name + "<br clear=\"left\"/></div>";
+            selDiv.append(html);
+            
+        }
+        reader.readAsDataURL(f); 
+    });
+    
+};
+
+function removeFile(e) {
+    var file = $(this).data("file");
+
+    for(var i=0;i<storedFiles.length;i++) {
+        if(storedFiles[i].name === file) {
+            storedFiles.splice(i,1);
+            break;
+        }
+    }
+
+    $(this).parent().remove();
+};
+
+function sendImages(e){
+    $('#attachFileForm').modal('toggle');
+    ShowSpinner();
+
+    e.preventDefault();
+    var formData    = new FormData();
+    var i           = 0;
+
+    for( i=0; i<storedFiles.length; i++) {
+        formData.append('file_' + i, storedFiles[i]);	
+    }
+
+    formData.append('count', i);
+    formData.append('idRecord', sessionStorage.getItem("ID_RECORD"));
+    formData.append('idActivity', sessionStorage.getItem("ID_ACTIVITY"));
+
+    $.ajax({
+        url:            "backend/addImages.php",
+        type:           "POST",
+        data:           formData,
+        contentType:    false,
+        processData:    false,
+        success:        function(DATA){
+            console.log(DATA);
+
+            if( DATA.ERROR ){
+                setTimeout(()=>{
+                    CloseSpinner();
+                    ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
+                }, 500);
+                
+            }else{
+                setTimeout(()=>{
+                    CloseSpinner();
+                    ModalReportEvent("Operación exitosa", DATA.ERRNO, DATA.MESSAGE);
+                    document.getElementById("inputFiles").value = "";
+                    storedFiles = [];
+                }, 500);
+
+            }
+
+        },
+        error:          function(DATA){
+            console.log(DATA);
+        }
+    });
+
+};
+
+
+
+/*
+function openAttachFile(idActivity){
+    $("#inputFiles").on("change", function(){
+        ShowSpinner();
+
+// Cleanning the preview div
+        
+
+        var files       = document.getElementById('inputFiles').files;
+        var navegador   = window.URL || window.webkitURL;
+        
+// Verifing all the input files
+        for( var x=0; x<files.length; x++){
+
+// Getting the size, type and name file
+            var size    = 1024*1024*5;
+            var types   = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+            var name    = files[x].name;
+
+            if( files[x].size > size ){
+                $("#containerAttachedFiles").append("<p style='color: red'>El archivo "+name+" supera el máximo permitido 1MB</p>");
+            
+            }else if( files[x].type != types[0] && files[x].type != types[1] && files[x].type != types[2] && files[x].type != types[3] ){
+                $("#containerAttachedFiles").append("<p style='color: red'>El archivo "+name+" no es del tipo de imagen permitida.</p>");
+            
+            }else{
+                var objeto_url          = navegador.createObjectURL(files[x]);
+                var containerGallery    = document.getElementById("containerAttachedFiles");
+                var containerImagen     = document.createElement("div");
+                var button              = document.createElement("button");
+                var iconButton          = document.createElement("span");
+                var textButton          = document.createTextNode("Eliminar");
+
+                containerImagen.setAttribute("class", "row");
+                iconButton.setAttribute("class", "icon-circle-with-cross icon-space");
+                button.setAttribute("class", "btn btn-danger");
+                button.setAttribute("style", "margin-left: 5%;");
+                button.appendChild(iconButton);
+                button.appendChild(textButton);
+                button.addEventListener("click", function(event){
+                    alert("Deleting ...");
+                });
+
+                var img                 = document.createElement("img");
+                img.setAttribute("src", objeto_url);
+                img.setAttribute("style", "width: 250; height: 250; margin-bottom: 5%;");
+                img.setAttribute("class", "col-7");
+
+                containerImagen.appendChild(img);
+                containerImagen.appendChild(button);
+
+                containerGallery.appendChild(containerImagen);
+
+            }
+        }
+
+        setTimeout(()=>{
+            var test    = files;
+            sessionStorage.setItem('Files', test);
+            document.getElementById('inputFiles').value = "";
+            
+            CloseSpinner();
+        }, 1000);
+    });
+    
+    $("#btnStoreimages").on("click", function(){
+        ShowSpinner();
+        document.getElementById('inputFiles').value = sessionStorage.getItem('Files');
+        var formData    = new FormData($("#formImages")[0]);        
+        formData.append('idRecord', sessionStorage.getItem("ID_RECORD"));
+/*
+        $.ajax({
+            url:            "backend/addImages.php",
+            type:           "POST",
+            data:           formData,
+            contentType:    false,
+            processData:    false,
+            success:        function(DATA){
+                console.log(DATA);
+
+                if( DATA.ERROR ){
+                    setTimeout(()=>{
+                        ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
+                        CloseSpinner();
+                    }, 500);
+                    
+                }else{
+                    setTimeout(()=>{
+                        ModalReportEvent("Operación exitosa", DATA.ERRNO, DATA.MESSAGE);
+                        CloseSpinner();
+                    }, 500);
+
+                }
+
+            }
+        });
+    });
+    
+    $('#attachFileForm').modal('show');
+};
+
+
+
+
+
+
+
+/*
+
 
 function storeImages(idActivity){
     $('#attachFileForm').modal('toggle');
@@ -517,4 +690,4 @@ function storeImages(idActivity){
 
     });
 
-};
+}; */

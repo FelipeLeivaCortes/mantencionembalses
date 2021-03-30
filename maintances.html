@@ -194,15 +194,15 @@
             
                 <!-- Modal body -->
                 <div class="modal-body">
-                    <form class="form-horizontal" role="form">
+                    <form method="post" id="formImages" enctype="multipart/form-data" class="form-horizontal" role="form">
                         <div class="form-group">
                             <label for="inputFiles">Seleccionar Imágenes</label>
                             <div class="file-field">
-                                <input type="file" id="inputFiles" multiple="true" accept="image/*" style="background:linear-gradient(to top, #847e86, #c3c0c4);">
+                                <input type="file" id="inputFiles" multiple="true" name="file[]" accept="image/*" style="background:linear-gradient(to top, #847e86, #c3c0c4);">
                            </div>
                         </div>
                     </form>
-                    <div id="containerAttachedFiles">
+                    <div id="selectedFiles">
                     </div>
                 </div>
             

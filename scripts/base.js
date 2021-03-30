@@ -146,8 +146,8 @@ function loadMaintances(){
     
     setTimeout(function(){
         document.getElementById("idRecord").focus();
-        CloseSpinner();
-    }, 1000);
+        initMaintances();
+    }, 500);
 }
 
 function loadRecords(){

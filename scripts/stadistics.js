@@ -14,11 +14,14 @@ function initStadistics(){
             document.getElementById("periodLicence").value          = periodLicence;
             document.getElementById("remainingDaysLicence").value   = DATA.remainingDaysLicense;
 
-            CloseSpinner();
+            setTimeout(()=>{
+                CloseSpinner();
             
-            if( DATA.remainingDaysLicense <= 30 ){
-                ModalReportEvent("Advertencia", "", "Su licencia expirará dentro de " + DATA.remainingDaysLicense + " días");
-            }
+                if( DATA.remainingDaysLicense <= 30 ){
+                    ModalReportEvent("Advertencia", "", "Su licencia expirará dentro de " + DATA.remainingDaysLicense + " días");
+                }
+            }, 500);
+            
         }
     });
 }

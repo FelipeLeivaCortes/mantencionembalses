@@ -73,8 +73,6 @@
                 }else{
                     $QUERY          ->  free_result();
                     $error          =   false;
-                    $numImages      =   0;
-                    $arrayImages    =   array();
 
                     for( $i=0; $i<sizeof($arrayIdRecord); $i++ ){
                         $idRecord   = intval($arrayIdRecord[$i]);
@@ -100,38 +98,7 @@
                         $QUERY2  ->  bind_result($name, $lastname);
                         $QUERY2  ->  fetch();
 
-                        if ( $QUERY1->num_rows == 1 && $QUERY2->num_rows == 1 ){
-                            
-                        // Getting al the images associated to the report
-                            $folderRecord   = $PATH_FILES.$ID_COMPANY."/records/record_".$idRecord."/";
-
-                            if(file_exists($folderRecord)){
-                                $fileCount      = 0;
-                                $files          = glob($folderRecord . "imagen_record_*");
-
-                                if($files){
-                                    $fileCount  = count($files);
-
-                                    for( $j=0; $j<$fileCount; $j++ ){
-                                        $pathImages     = $folderRecord."imagen_record_".$j.".txt";
-                        
-                                        if( file_exists( $pathImages ) ){
-                                            $file       = fopen($pathImages, "r");
-                                            $line       = str_replace("\r\n", "", fgets($file));
-
-                                            if( $idActivity == $line ){
-                                                feof($file);
-                                                $arrayImages[$numImages]    = fgets($file);
-                                                $numImages++;
-
-                                            }
-                                                                
-                                            fclose($file);
-                                        }
-                                    }
-                                }
-                            }
-
+                        if ( $QUERY1->num_rows == 1 && $QUERY2->num_rows == 1 ){                            
                             $arrayStateActivity    = explode(",", $stateActivity);
 
                             if( $lastMaintance == $defaultDate ){
@@ -147,11 +114,11 @@
                             }
 
                             array_push($DATA, [
+                                'idRecord'          => $idRecord,
                                 'name'              => $name,
                                 'lastname'          => $lastname,
                                 'lastMaintance'     => $lastMaintance,
                                 'statusActivity'    => $stateActivity,
-                                'img'               => $arrayImages,
                             ]);
                         
                         }else{
