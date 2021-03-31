@@ -80,6 +80,7 @@ function getRecord(idRecord, onlyRead){
                 activityHeadCell.setAttribute("scope", "col");
                 activityHeadCell.setAttribute("style", "width: 25%;");
                 descriptionHeadCell.setAttribute("scope", "col3");
+                descriptionHeadCell.setAttribute("style", "width: 30%;");
                 locationHeadCell.setAttribute("scope", "col");
                 statusHeadCell.setAttribute("scope", "col");
                 imagesHeadCell.setAttribute("scope", "col");
