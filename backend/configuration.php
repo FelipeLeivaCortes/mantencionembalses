@@ -5,6 +5,7 @@
 	$PASSWORD       = "";
 	$ADMINISTRATION = "administration";
   $PATH_FILES     = "../docs/empresa";
+  date_default_timezone_set("America/Santiago");
 
 # The next variable is to assgin by default the last and next maintance of an activity
 	$defaultDate 	= '1900-01-01';
@@ -14,7 +15,7 @@
 	$KEY	= "1f4276388ad3214c873428dbef42243f";
 	$LINK	= new mysqli($URL, $USERNAME, $PASSWORD, $ADMINISTRATION);
 
-	function encrypt($message, $encryption_key){
+	function encrypt($message, $encryption_key){  
     $secretKey = hex2bin($encryption_key);
     $nonceSize = openssl_cipher_iv_length('aes-256-ctr');
     $nonce = openssl_random_pseudo_bytes($nonceSize);

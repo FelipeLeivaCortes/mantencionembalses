@@ -23,8 +23,8 @@ function sendMail($receiver, $Subject, $Body){
         $mail->addAddress($receiver);
 
         $mail->isHTML(true);
-        $mail->Subject  = $Subject;
-        $mail->Body     = $Body;
+        $mail->Subject  = utf8_decode($Subject);
+        $mail->Body     = utf8_decode($Body);
 
         $mail->send();
 
