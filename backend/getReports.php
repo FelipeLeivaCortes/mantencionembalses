@@ -43,7 +43,7 @@
                 $arraySplited   = array();
                 $index          = 0;
 
-                $fileContent    = fopen($PATH_FILES.$ID_COMPANY.'/thread_'.$idReport.'.txt', 'r');  
+                $fileContent    = fopen($PATH_FILES.$ID_COMPANY.'/threads/thread_'.$idReport.'.txt', 'r');  
                 
                 while( !feof($fileContent) ){
                     $arraySplited[$index] = fgets($fileContent);

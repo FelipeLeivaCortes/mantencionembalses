@@ -47,13 +47,18 @@
 				$DATA["MESSAGE"]	= "No se ha podido determinar el id de la operación anterior. Comuníquese con el administrador";
 			
 			}else{
-				$directory	= $PATH_FILES.$ID_COMPANY."/thread_".$idReport.".txt";
-
-				$file		= fopen($directory, "w");
+				$pathFolder	= $PATH_FILES.$ID_COMPANY."/threads";
+				
+				if( !file_exists( $pathFolder ) ){
+					mkdir($pathFolder);
+				}
+				
+				$pathFile	= $pathFolder."/thread_".$idReport.".txt";
+				$file		= fopen($pathFile, "w");
 				fwrite($file, 'E:'.$name." ".$lastname.":".$message);
 				fclose($file);
 
-				$date			= 	date('Y-m-d');
+				$date			= 	date('d')."/".date('m')."/".date('Y');
 				$subject		=  "Tienes una nueva consulta";
 				$body			=  '<html>
 										<head>

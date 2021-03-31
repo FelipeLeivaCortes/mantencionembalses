@@ -30,14 +30,15 @@
         $author         = $_POST["author"];
         $message        = $_POST["message"];
 
-        $directory      = $PATH_FILES.$ID_COMPANY."/thread_".$idReport.".txt";
+        $pathFolder	    = $PATH_FILES.$ID_COMPANY."/threads/thread_".$idReport.".txt";
 
-        if( file_exists($directory) ){
-            $file   = fopen($directory, "a");
+        if( file_exists($pathFolder) ){
+            $file   = fopen($pathFolder, "a");
+            
             fwrite($file, PHP_EOL."E:".$author.":".$message);
             fclose($file);
 
-            $date			= 	date('Y-m-d');
+            $date			= 	date('d')."/".date('m')."/".date('Y');
             $subject		=  "Han respondido la consulta";
             $body			=  '<html>
                                     <head>
@@ -57,9 +58,23 @@
             $errorSendMail	= sendMail("felipe-leiva@hotmail.cl", $subject, $body);
 
         }else{
-            $DATA["ERROR"]      = true;
-            $DATA["ERRNO"]      = 67;
-            $DATA["MESSAGE"]    = "Se ha eliminado el registro de conversación con id: ".$idReport;
+            $QUERY  =   $LINK->prepare("DELETE FROM reporte WHERE id = ?");
+            $QUERY  ->  bind_param("i", $idReport);
+            $QUERY  ->  execute();
+
+            if( $QUERY->affected_rows == 1 ){
+                $DATA["ERROR"]      = true;
+                $DATA["ERRNO"]      = 67;
+                $DATA["MESSAGE"]    = "No se ha encontrado el respaldo físico de la conversición, por lo tanto se ha eliminado el registro de conversación con id: ".$idReport;
+            
+            }else{
+                $DATA["ERROR"]      = true;
+                $DATA["ERRNO"]      = 85;
+                $DATA["MESSAGE"]    = "No se ha encontrado el respaldo físico de la conversición, se intento eliminar el registro de conversación con id: ".$idReport." pero hubo un error. Comuníquese con el administrador";
+
+            }
+
+            
         }
 	}
 
