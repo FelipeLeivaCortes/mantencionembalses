@@ -42,8 +42,8 @@
         
         }
 
-        $QUERY  =   $LINK->prepare("SELECT rut, nombre, apellido FROM usuario WHERE permisos = ?;");
-        $QUERY  ->  bind_param("s", $codeArea);
+        $QUERY  =   $LINK->prepare("SELECT rut, nombre, apellido FROM usuario WHERE permisos = ? AND idEmpresa = ?;");
+        $QUERY  ->  bind_param("si", $codeArea, $ID_COMPANY);
         $QUERY  ->  execute();
         $QUERY  ->  store_result();
         $QUERY  ->  bind_result($username, $nameUser, $lastnameUser);
@@ -52,7 +52,8 @@
             $DATA["WARNING"]    = "No se han encontrado especialistas del área ".$area.". Puede derivar la actividad a otro profesional, aunque por temas de seguridad no se recomienda";
 
             $QUERY  ->  free_result();
-            $QUERY  =   $LINK->prepare("SELECT rut, nombre, apellido, permisos FROM usuario WHERE permisos != '1000';");
+            $QUERY  =   $LINK->prepare("SELECT rut, nombre, apellido, permisos FROM usuario WHERE permisos != '1000' AND idEmpresa = ?;");
+            $QUERY  ->  bind_param("i", $ID_COMPANY);
             $QUERY  ->  execute();
             $QUERY  ->  store_result();
             $QUERY  ->  bind_result($username, $nameUser, $lastnameUser, $permission);
