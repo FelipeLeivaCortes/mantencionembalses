@@ -229,6 +229,13 @@ function printRecord(idRecord){
     doc.autoTable({
         startY: finalY,
         html: '#tablePendingRecords',
+        columnStyles: {
+            0: {columnWidth: 5},
+            1: {columnWidth: 25},
+            2: {columnWidth: 20},
+            3: {columnWidth: 40},
+            1: {columnWidth: 10},
+        }
     });
     
     doc.save("Guía_" + idRecord + "_" + date + ".pdf");
