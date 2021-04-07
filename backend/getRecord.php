@@ -1,6 +1,7 @@
 <?php
     session_start();
     include "configuration.php";
+    require_once "Mobile_Detect.php";
     
    if( empty($LINK) ){
 	   $DATA["ERROR"]      = true;
@@ -13,18 +14,29 @@
 	/****** ---> DO NOT EDIT THIS UNLESS IT EXTREMELY NECESSARY <--- ************* */
 	/***************************************************************************** */
 
-      $USERNAME   = $_SESSION["userDatabase"];
-      $PASSWORD   = $_SESSION["passDatabase"];
-      $ID_COMPANY = $_SESSION["idCompany"];
-      $DATABASE   = "empresa".$ID_COMPANY;
-      
+      $detect     = new Mobile_Detect();
+
+      if( $detect->isMobile() || $detect->isTablet() ){
+         $USERNAME   = $_POST["userDatabase"];
+         $PASSWORD   = $_POST["passDatabase"];
+         $ID_COMPANY = $_POST["idCompany"];
+         $DATABASE   = "empresa".$ID_COMPANY;
+         
+      }else{
+         $USERNAME   = $_SESSION["userDatabase"];
+         $PASSWORD   = $_SESSION["passDatabase"];
+         $ID_COMPANY = $_SESSION["idCompany"];
+         $DATABASE   = "empresa".$ID_COMPANY;
+         
+      }
+
       $LINK       ->  close();
       $LINK       =   new mysqli($URL, $USERNAME, $PASSWORD, $DATABASE);
 
    /***************************************************************************** */
    /***************************************************************************** */
 
-      $idRecord     	= $_POST["idRecord"];
+      $idRecord     	= intval($_POST["idRecord"]);
       $username      = intval($_POST["username"]);
       $isAdmin       = boolval($_POST["isAdmin"]);
 

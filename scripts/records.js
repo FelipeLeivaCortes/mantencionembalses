@@ -28,26 +28,31 @@ function initRecords(){
             var idHeadCell              = document.createElement("th");
             var dateStartHeadCell       = document.createElement("th");
             var daysLateHeadCell        = document.createElement("th");
+            var stateHeadCell           = document.createElement("th");
 
             indexHeadCell.setAttribute("scope", "col");
             idHeadCell.setAttribute("scope", "col");
             dateStartHeadCell.setAttribute("scope", "col3");
             daysLateHeadCell.setAttribute("scope", "col");
+            stateHeadCell.setAttribute("scope", "col");
 
             var indexHead       = document.createTextNode("N°");
             var idHead          = document.createTextNode("N° Guía");
             var dateStartHead   = document.createTextNode("Fecha de Inicio");
             var daysLateHead    = document.createTextNode("Días de Atraso");
+            var stateHead       = document.createTextNode("Estado");
 
             indexHeadCell.appendChild(indexHead);
             idHeadCell.appendChild(idHead);
             dateStartHeadCell.appendChild(dateStartHead);
             daysLateHeadCell.appendChild(daysLateHead);
+            stateHeadCell.appendChild(stateHead);
 
             rowHead.appendChild(indexHeadCell);
             rowHead.appendChild(idHeadCell);
             rowHead.appendChild(dateStartHeadCell);
             rowHead.appendChild(daysLateHeadCell);
+            rowHead.appendChild(stateHeadCell);
 
             thead.appendChild(rowHead);
             table.appendChild(thead);
@@ -65,6 +70,7 @@ function initRecords(){
                 var idCell          = document.createElement("td");
                 var dateStartCell   = document.createElement("td");
                 var daysLateCell    = document.createElement("td");
+                var stateCell       = document.createElement("td");
                 
                 // Here is storaged the content into a node
                 var index           = document.createTextNode( i + 1 );
@@ -72,7 +78,19 @@ function initRecords(){
                 var link            = document.createTextNode( DATA[i].id );
                 var dateStart       = document.createTextNode( FormatDate( DATA[i].dateStart ) );
                 var daysLate        = document.createTextNode( DATA[i].daysLate );
+                var iconState       = document.createElement("span");
+                var textState       = document.createTextNode("");
                 
+                if( DATA[i].state == 0 ){
+                    iconState.setAttribute("class", "icon-warning icon-space");
+                    textState.textContent   = "Pendiente";
+                
+                }else{
+                    iconState.setAttribute("class", "icon-check icon-space");
+                    textState.textContent   = "Realizada";
+
+                }
+
                 // Setting the cells to show the details
                 id.appendChild(link);
                 id.href     = "javascript:getRecord(" + DATA[i].id + "," + true + ")";
@@ -82,12 +100,15 @@ function initRecords(){
                 idCell.appendChild(id);
                 dateStartCell.appendChild(dateStart);
                 daysLateCell.appendChild(daysLate);
+                stateCell.appendChild(iconState);
+                stateCell.appendChild(textState);
 
                 // Here is inserted the cells into a row
                 row.appendChild(indexCell);
                 row.appendChild(idCell);
                 row.appendChild(dateStartCell);
                 row.appendChild(daysLateCell);
+                row.appendChild(stateCell);
                 
                 // Here is inserted the row into the table´s body
                 bodyTable.appendChild(row);

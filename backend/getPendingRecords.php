@@ -24,10 +24,10 @@
     /***************************************************************************** */
     /***************************************************************************** */
 
-        $QUERY  =   $LINK -> prepare("SELECT id, fechaInicio FROM registro WHERE estado = 0");
+        $QUERY  =   $LINK -> prepare("SELECT id, fechaInicio, estado FROM registro ORDER BY id DESC LIMIT 20;");
         $QUERY  ->  execute();
         $QUERY  ->  store_result();
-        $QUERY  ->  bind_result($id, $dateStart);
+        $QUERY  ->  bind_result($id, $dateStart, $state);
 
         if( $QUERY->num_rows == 0 ){
             $DATA["ERROR"]      = true;
@@ -44,6 +44,7 @@
 
                 array_push($DATA, [
                     'id'        => $id,
+                    'state'     => $state,
                     'dateStart' => $dateStart,
                     'daysLate'  => $daysLate,
                 ]);

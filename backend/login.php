@@ -1,6 +1,7 @@
 <?php
     session_start();
     include "configuration.php";
+	require_once "Mobile_Detect.php";
     
 	if( empty($LINK) ){
 		$DATA["ERROR"]      = true;
@@ -10,7 +11,7 @@
 	}else{
 		$username	=   $_POST["username"];
 		$password	=   $_POST["password"];
-
+		
 		$QUERY	=   $LINK->prepare("SELECT idEmpresa, estado, AES_DECRYPT(clave,?), permisos, nombre, apellido FROM usuario WHERE rut = ?;");
 		$QUERY	->  bind_param('si', $KEY, $username);
 		$QUERY	->  execute();
@@ -42,7 +43,7 @@
 						$DATA["MESSAGE"]	= "Se han encontrado duplicidades en sus datos. Comuníquese con el administrador";
 							
 					}else{
-						$today 	= date('Y-m-d');
+						$today 			= date('Y-m-d');
 						$expiration 	= explode(":", $licenseDecoded);
 
 						if($today <= $expiration[2]){
@@ -51,7 +52,14 @@
 							$DATA["name"]				= $nombre;
 							$DATA["lastname"]			= $apellido;
 							$DATA["idCompany"]			= $idEmpresa;
-							
+
+							$detect	= new Mobile_Detect();
+
+							if( $detect->isMobile() || $detect->isTablet() ){
+								$DATA["userDatabase"]		= $userDatabase;
+								$DATA["passDatabase"]		= $passDatabase;
+							}
+
 							$_SESSION['idCompany']		= $idEmpresa;
 							$_SESSION['userDatabase']	= $userDatabase;
 							$_SESSION['passDatabase']	= $passDatabase;
@@ -93,4 +101,5 @@
 
     header('Content-Type: application/json');
     echo json_encode($DATA);
+	
 ?>
