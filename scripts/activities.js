@@ -5,6 +5,8 @@ var iconbtn             = document.createElement("span");
 var textMaintanceBtn    = document.createTextNode("Previsualizar guía");
 var maintancesBtn       = document.createElement("button");
 
+$('body').on("click", ".downloadFile", downloadFile);
+
 iconbtn.setAttribute("class", "icon-cog icon-space");
 maintancesBtn.setAttribute("class", "btn btn-primary");
 maintancesBtn.setAttribute("id", "maintancesBtn");
@@ -1011,11 +1013,11 @@ function printGuideMaintance(){
     }
 };
 
-function openModalHistoryActivity(id){
+function openModalHistoryActivity(idActivity){
     $('#aboutActivityForm').modal('toggle');
     ShowSpinner();
 
-    $.post("backend/getRecordsPerActivity.php", "idActivity=" + id, function(DATA){
+    $.post("backend/getRecordsPerActivity.php", "idActivity=" + idActivity, function(DATA){
         if( DATA.ERROR ){
             setTimeout(() => {
                 CloseSpinner();
@@ -1050,7 +1052,7 @@ function openModalHistoryActivity(id){
                 var idRecordCell    = document.createElement("td");
                 var endDateCell     = document.createElement("td");
                 var stateCell       = document.createElement("td");
-                var imagesCell      = document.createElement("td");
+                var annexesCell     = document.createElement("td");
 
                 // Here is storaged the content into a node
                 var index           = document.createTextNode( i + 1 );
@@ -1059,16 +1061,20 @@ function openModalHistoryActivity(id){
                 var endDate = DATA[i].lastMaintance == 'Pendiente' ? document.createTextNode("Pendiente") : document.createTextNode( FormatDate(DATA[i].lastMaintance) );
                 
                 var state           = document.createTextNode( DATA[i].statusActivity );
-                var btnImages       = document.createElement("button");
-                var iconBtn         = document.createElement("span");
-                var textBtn         = document.createTextNode("Ver Imagenes");
+                var annexeLink     = document.createElement("a");
+                var annexeText     = document.createTextNode("Ver Anexos");
 
-                iconBtn.setAttribute("class", "icon-images icon-space");
-                btnImages.setAttribute("class", "btn btn-primary");
-                btnImages.setAttribute("onclick", "javascript:showImages(" + id + "," + DATA[i].idRecord + ")");
-              
-                btnImages.appendChild(iconBtn);
-                btnImages.appendChild(textBtn);
+                if( DATA[i].annexes ){
+                    // The function GetAnnexes is in records.js file
+                    annexeLink.href     = "javascript:showImages(" + idActivity + ", " + DATA[i].idRecord + ")";
+                    annexeLink.appendChild(annexeText);
+                    
+                }else{
+                    annexeText.textContent  = "No Presenta";
+                    annexeLink.appendChild(annexeText);
+
+                }
+
 
                 document.getElementById("printHistoryMaintanceBtn").setAttribute("onclick", "printHistoryMaintances();");
 
@@ -1078,7 +1084,7 @@ function openModalHistoryActivity(id){
                 idRecordCell.appendChild(idRecord);
                 endDateCell.appendChild(endDate);
                 stateCell.appendChild(state);
-                imagesCell.appendChild(btnImages);
+                annexesCell.appendChild(annexeLink);
 
                 // Here is inserted the cells into a row
                 row.appendChild(indexCell);
@@ -1086,7 +1092,7 @@ function openModalHistoryActivity(id){
                 row.appendChild(idRecordCell);
                 row.appendChild(endDateCell);
                 row.appendChild(stateCell);
-                row.appendChild(imagesCell);
+                row.appendChild(annexesCell);
 
                 // Here is inserted the row into the table´s body
                 bodyTable.appendChild(row);
@@ -1173,7 +1179,7 @@ function showImages(idActivity, idRecord){
     formData.append("idRecord", idRecord);
 
     $.ajax({
-        url:            "backend/getImages.php",
+        url:            "backend/getAnnexes.php",
         type:           "POST",
         data:           formData,
         contentType:    false,
@@ -1195,6 +1201,7 @@ function showImages(idActivity, idRecord){
                 
                 }else{
                     var containerImages = document.getElementById("containerImagesRecord");
+                    
                     removeAllChildNodes(containerImages);
 
                     var subContainer    = document.createElement("div");
@@ -1206,8 +1213,19 @@ function showImages(idActivity, idRecord){
                         container.setAttribute("style", "margin-bottom: 5%;");
 
                         var img = document.createElement("img");
-                        img.setAttribute("style", "height: 300; width: 250; display: block; margin:auto;");
-                        img.src = DATA[i].img;
+
+                        if( DATA[i].type == "pdf" ){
+                            img.setAttribute("style", "height: 100; width: 100; display: block; margin:auto;");
+                            img.setAttribute("class", "downloadFile");
+                            img.setAttribute("name", DATA[i].data);
+                            img.setAttribute("title", "Haga click para descargar");
+                            img.src = "img/logo_pdf.svg";
+
+                        }else{
+                            img.setAttribute("style", "height: 300; width: 250; display: block; margin:auto;");
+                            img.src = DATA[i].data;
+
+                        }
 
                         container.appendChild(img);
                         subContainer.appendChild(container);
@@ -1221,7 +1239,9 @@ function showImages(idActivity, idRecord){
                     }, 500);
                 }
                 
-            }          
+            }
+
+            DATA    = "";      
         },
         error: function(DATA){
             console.log(DATA);
@@ -1229,3 +1249,7 @@ function showImages(idActivity, idRecord){
 
     });
 };
+
+function downloadFile(e){
+    location.href   = "mantencionembalses/" + this.name;
+}

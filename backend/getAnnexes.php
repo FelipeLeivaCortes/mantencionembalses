@@ -29,14 +29,23 @@
 
         $folderRecord   = $PATH_FILES.$ID_COMPANY."/records/record_".$idRecord;
 
-        foreach( glob($folderRecord."/activity_{$idActivity}_*.{jpg,jpeg,png}", GLOB_BRACE) as $file ){
+        foreach( glob($folderRecord."/activity_{$idActivity}_*.{pdf,jpg,jpeg,png}", GLOB_BRACE) as $file ){
             $type   = pathinfo($file, PATHINFO_EXTENSION);
-            $data   = file_get_contents($file);
-            $base64 = 'data:image/'.$type.';base64,'.base64_encode($data);            
+
+            if( $type == 'pdf' ){
+                $data   = $file;
+
+            }else{
+                $content    = file_get_contents($file);
+                $data       = 'data:image/'.$type.';base64,'.base64_encode($content); 
             
+            }
+
             array_push($DATA,[
-                'img'   => $base64,
+                'type'  => $type,
+                'data'  => $data,
             ]);
+            
         }
 
   		$LINK   ->  close();

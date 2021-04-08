@@ -136,6 +136,8 @@
 
                }else{
                   $arrayObservations   = array();
+                  $arrayAnnexes        = array();
+
                   $folderRecord        = $PATH_FILES.$ID_COMPANY."/records/record_".$idRecord."/record_".$idRecord.".txt";
 
                   if( file_exists($folderRecord) ){
@@ -143,7 +145,16 @@
                      $index   = 0;
 
                      while( !feof($file) ){
-                        $arrayObservations[$index] = fgets($file);
+                        $line          = fgets($file);
+                        
+                        $arrayObservations[$index] = $line;
+                        
+                        $lineSplitted  = explode("|", $line);
+                        $idActivity    = $lineSplitted[0];
+                        
+                        $folderAnnexes          = $PATH_FILES.$ID_COMPANY."/records/record_".$idRecord."/activity_".$idActivity."_*";
+                        $arrayAnnexes[$index]   = glob($folderAnnexes, GLOB_BRACE)? true : false;
+
                         $index++;
                      }
                      
@@ -155,6 +166,7 @@
                   $DATA["warnings"]          = $arrayWarning;
                   $DATA["dateStart"]         = $dateStart;
                   $DATA["observations"]      = $arrayObservations;
+                  $DATA["annexes"]           = $arrayAnnexes;
                   $DATA["name_mandated"]     = $name_mandated;
                   $DATA["lastname_mandated"] = $lastname_mandated;
                   $DATA["COUNT"]             = sizeof($arrayActivities);

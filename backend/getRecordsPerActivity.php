@@ -113,12 +113,16 @@
 
                             }
 
+                            $folderAnnexes  = $PATH_FILES.$ID_COMPANY."/records/record_".$idRecord."/activity_".$idActivity."_*";
+                            $annexes        = glob($folderAnnexes, GLOB_BRACE)? true : false;
+
                             array_push($DATA, [
                                 'idRecord'          => $idRecord,
                                 'name'              => $name,
                                 'lastname'          => $lastname,
                                 'lastMaintance'     => $lastMaintance,
                                 'statusActivity'    => $stateActivity,
+                                'annexes'           => $annexes,
                             ]);
                         
                         }else{

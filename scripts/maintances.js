@@ -5,7 +5,7 @@ function initMaintances(){
     
     $("body").on("click", ".selFile", removeFile);
     $("#inputFiles").on("change", handleInputs);
-    $("#btnStoreimages").on("click", sendImages);
+    $("#btnStoreimages").on("click", sendDocuments);
     selDiv  = $('#selectedFiles');
 
     setTimeout(()=>{
@@ -44,7 +44,6 @@ function getRecord(idRecord, onlyRead){
 
         $.post("backend/getRecord.php", Variables, function(DATA){
             document.getElementById("idRecord").value   = "";
-
             if( DATA.ERROR ){
                 setTimeout(function(){
                     CloseSpinner();
@@ -90,7 +89,7 @@ function getRecord(idRecord, onlyRead){
                 var descriptionHead = document.createTextNode("Observación");
                 var locationHead    = document.createTextNode("Ubicación");
                 var statusHead      = document.createTextNode("Estado");
-                var imagesHead      = document.createTextNode("Imágenes");
+                var imagesHead      = document.createTextNode("Anexos");
 
                 if( onlyRead ){
                     indexHeadCell.appendChild(indexHead);
@@ -98,12 +97,14 @@ function getRecord(idRecord, onlyRead){
                     locationHeadCell.appendChild(locationHead);
                     descriptionHeadCell.appendChild(descriptionHead);
                     statusHeadCell.appendChild(statusHead);
+                    imagesHeadCell.appendChild(imagesHead);
 
                     rowHead.appendChild(indexHeadCell);
                     rowHead.appendChild(activityHeadCell);
                     rowHead.appendChild(locationHeadCell);
                     rowHead.appendChild(descriptionHeadCell);
                     rowHead.appendChild(statusHeadCell);
+                    rowHead.appendChild(imagesHeadCell);
 
                 }else{
                     indexHeadCell.appendChild(indexHead);
@@ -137,6 +138,7 @@ function getRecord(idRecord, onlyRead){
                     var locationCell    = document.createElement("td");
                     var descriptionCell = document.createElement("td");
                     var statusCell      = document.createElement("td");
+                    var annexesCell     = document.createElement("td");
                     
                     // Here is storaged the content into a node
                     var index           = document.createTextNode( i + 1 );
@@ -144,6 +146,8 @@ function getRecord(idRecord, onlyRead){
                     var description, status, option1, option2;
 
                     if( onlyRead ){
+                        var annexeLink  = document.createElement("a");
+                        var annexeText  = document.createTextNode("Ver Anexos");
                         var location    = document.createTextNode( DATA[i].location );
                         description     = document.createTextNode("");
                         status          = document.createTextNode("");
@@ -160,6 +164,17 @@ function getRecord(idRecord, onlyRead){
                             }
                         }
 
+                        if( DATA.annexes[i] ){
+                        // The function GetAnnexes is in records.js file
+                            annexeLink.href     = "javascript:showImages(" + DATA[i].id + ", " + idRecord + ")";
+                            annexeLink.appendChild(annexeText);
+                        
+                        }else{
+                            annexeText.textContent  = "No Presenta";
+                            annexeLink.appendChild(annexeText);
+
+                        }
+
                         status.textContent  = ( DATA[i].state == '0') ? "Pendiente" : "Realizada";
 
                         // Here is inserted the content into the cells
@@ -168,6 +183,7 @@ function getRecord(idRecord, onlyRead){
                         locationCell.appendChild(location);
                         descriptionCell.appendChild(description);
                         statusCell.appendChild(status);
+                        annexesCell.appendChild(annexeLink);
 
                         // Here is inserted the cells into a row
                         row.appendChild(indexCell);
@@ -175,12 +191,12 @@ function getRecord(idRecord, onlyRead){
                         row.appendChild(locationCell);
                         row.appendChild(descriptionCell);
                         row.appendChild(statusCell);
+                        row.appendChild(annexesCell);
                         
                     }else{
-                        var imageCell       = document.createElement("td");
                         var imageButton     = document.createElement("button");
                         var imageIcon       = document.createElement("span");
-                        var textButton      = document.createTextNode("Adjuntar Imágenes");
+                        var textButton      = document.createTextNode("Adjuntar Documentos");
 
                         imageIcon.setAttribute("class", "icon-image icon-space");
                         imageButton.setAttribute("class", "btn btn-primary");
@@ -251,14 +267,14 @@ function getRecord(idRecord, onlyRead){
                         activityCell.appendChild(activity);
                         descriptionCell.appendChild(description);
                         statusCell.appendChild(status);
-                        imageCell.appendChild(imageButton);
+                        annexesCell.appendChild(imageButton);
 
                         // Here is inserted the cells into a row
                         row.appendChild(indexCell);
                         row.appendChild(activityCell);
                         row.appendChild(descriptionCell);
                         row.appendChild(statusCell);
-                        row.appendChild(imageCell);
+                        row.appendChild(annexesCell);
 
                     }
                     
@@ -460,7 +476,8 @@ function handleInputs(e){
     var filesArr    = Array.prototype.slice.call(files);
     
     filesArr.forEach(function(f) {
-        if(!f.type.match("image.*")){
+        if(!f.type.match("image.*") && !f.type.match(".pdf")){
+            ModalReportEvent("Error", 86, "Se ha ingresado un documento incorrecto");
             return;
         }
 
@@ -468,8 +485,15 @@ function handleInputs(e){
         
         var reader = new FileReader();
         reader.onload = function (e) {
-            var html = "<div><img style='width: 250; height: 250; margin-bottom: 5%;' src=\"" + e.target.result + "\" data-file='"+f.name+"' class='selFile' title='Click para quitar'>" + f.name + "<br clear=\"left\"/></div>";
-            selDiv.append(html);
+            if( f.type.match("image.*") ){
+                var html = "<div><img style='width: 250; height: 250; margin-bottom: 5%;' src=\"" + e.target.result + "\" data-file='"+f.name+"' class='selFile' title='Click para quitar'>" + f.name + "<br clear=\"left\"/></div>";
+                selDiv.append(html);
+            
+            }else{
+                var html = "<div><img style='width: 100; height: 100; margin-bottom: 5%;' src='img/logo_pdf.svg' data-file='"+f.name+"' class='selFile' title='Click para quitar'>" + f.name + "<br clear=\"left\"/></div>";
+                selDiv.append(html);
+
+            }
             
         }
         reader.readAsDataURL(f); 
@@ -490,7 +514,7 @@ function removeFile(e) {
     $(this).parent().remove();
 };
 
-function sendImages(e){
+function sendDocuments(e){
     $('#attachFileForm').modal('toggle');
     ShowSpinner();
 
@@ -499,7 +523,8 @@ function sendImages(e){
     var i           = 0;
 
     for( i=0; i<storedFiles.length; i++) {
-        formData.append('file_' + i, storedFiles[i]);	
+        formData.append('file_' + i, storedFiles[i]);
+        console.log(storedFiles[i]);
     }
 
     formData.append('count', i);
@@ -507,7 +532,7 @@ function sendImages(e){
     formData.append('idActivity', sessionStorage.getItem("ID_ACTIVITY"));
 
     $.ajax({
-        url:            "backend/addImages.php",
+        url:            "backend/addAnnexes.php",
         type:           "POST",
         data:           formData,
         contentType:    false,

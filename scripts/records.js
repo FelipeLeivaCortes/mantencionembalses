@@ -209,9 +209,16 @@ function printRecord(idRecord){
 
     finalY = finalY + spaceDouble;
 
+    var cloneTable  = document.getElementById("tablePendingRecords").cloneNode(true);
+    cloneTable.rows[0].cells[5].remove();
+    
+    for( var i=0; i<cloneTable.children[1].children.length; i++ ){
+        cloneTable.children[1].rows[i].cells[5].remove();
+    }
+
     doc.autoTable({
         startY: finalY,
-        html: '#tablePendingRecords',
+        html: cloneTable,
         columnStyles: {
             0: {columnWidth: 5},
             1: {columnWidth: 25},
@@ -226,7 +233,6 @@ function printRecord(idRecord){
     ClearTable('tablePendingRecords');
     document.getElementById("printPdfBtn").disabled = false;
 }
-
 
 /*              TRASH
 
