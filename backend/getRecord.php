@@ -58,9 +58,7 @@
          $DATA["MESSAGE"]    = "Se han encontrado duplicidades en sus datos. Comuníquese con el administrador";
 
       }else{
-         if( $isAdmin || $username == $usernameRecorded ){
-            $QUERY   -> free_result();
-            
+         if( $isAdmin || $username == $usernameRecorded ){   
             $arrayStates         = explode(",", $states);
             $arrayIds           	= explode(",", $activities);
             $arrayActivities    	= array();
@@ -71,6 +69,20 @@
             $warning            	= 0;
             $success            	= 0;
             $piezometria         = false;
+
+            $LINK       ->  close();
+            $LINK       =   new mysqli($URL, $USERNAME, $PASSWORD, $ADMINISTRATION);
+
+            $QUERY  ->  free_result();
+            $QUERY  =   $LINK -> prepare("SELECT nombre, apellido FROM usuario WHERE rut = ?");
+            $QUERY  ->  bind_param("i", $usernameRecorded);
+            $QUERY  ->  execute();
+            $QUERY  ->  store_result();
+            $QUERY  ->  bind_result($name_mandated, $lastname_mandated);
+            $QUERY  ->  fetch();
+
+            $LINK       ->  close();
+            $LINK       =   new mysqli($URL, $USERNAME, $PASSWORD, $DATABASE);
 
             for($i=0; $i<sizeof($arrayIds); $i++){
                $QUERY  ->  free_result();
@@ -138,12 +150,14 @@
                      fclose($file);
                   }
 
-                  $DATA["ERROR"]          = false;
+                  $DATA["ERROR"]             = false;
 
-                  $DATA["warnings"]       = $arrayWarning;
-                  $DATA["dateStart"]      = $dateStart;
-                  $DATA["observations"]   = $arrayObservations;
-                  $DATA["COUNT"]          = sizeof($arrayActivities);
+                  $DATA["warnings"]          = $arrayWarning;
+                  $DATA["dateStart"]         = $dateStart;
+                  $DATA["observations"]      = $arrayObservations;
+                  $DATA["name_mandated"]     = $name_mandated;
+                  $DATA["lastname_mandated"] = $lastname_mandated;
+                  $DATA["COUNT"]             = sizeof($arrayActivities);
 
                   for($i=0; $i<sizeof($arrayActivities); $i++){
                      array_push($DATA, [

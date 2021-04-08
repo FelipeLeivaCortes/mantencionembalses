@@ -104,7 +104,7 @@ function getRecord(idRecord, onlyRead){
                     rowHead.appendChild(locationHeadCell);
                     rowHead.appendChild(descriptionHeadCell);
                     rowHead.appendChild(statusHeadCell);
-                
+
                 }else{
                     indexHeadCell.appendChild(indexHead);
                     activityHeadCell.appendChild(activityHead);
@@ -310,6 +310,10 @@ function getRecord(idRecord, onlyRead){
                 }else{
                     document.getElementById("containerResult").appendChild(divTable);
                     
+                // Adding the mandated associated to the guide, and the date of this.
+                    document.getElementById("userMandated").value   = DATA.name_mandated + " " + DATA.lastname_mandated;
+                    document.getElementById("dateStart").value      = FormatDate(DATA.dateStart);
+               
                     setTimeout(() => {
                         CloseSpinner();
                         $('#searchRecordForm').modal('show');
