@@ -85,4 +85,27 @@
         </div>
     </div>
 
+    <!------------------------------ CONFIRM DELETE USER ---------------------------------------->
+    <div id="deleteGuideForm" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- Header Modal -->
+                <div class="modal-header">
+                    <h5><span class="icon-warning"></span> Confirmar Eliminación</h5>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                
+                <!-- Modal Body -->
+                <div class="modal-body">
+                    <p id="id_to_delete"></p>
+                </div>
+                
+                <div class="modal-footer justify-content-center">
+                    <button id="btnDeleteRecord" type="button" class="btn btn-success"><span class="icon-check"></span> Eliminar</button>
+                    <button type="button" class="btn btn-danger" data-toggle="modal" data-dismiss="modal"><span class="icon-circle-with-cross"></span> Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </html>

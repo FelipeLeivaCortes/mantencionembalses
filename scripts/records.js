@@ -29,30 +29,35 @@ function initRecords(){
             var dateStartHeadCell       = document.createElement("th");
             var daysLateHeadCell        = document.createElement("th");
             var stateHeadCell           = document.createElement("th");
+            var actionHeadCell          = document.createElement("th");
 
             indexHeadCell.setAttribute("scope", "col");
             idHeadCell.setAttribute("scope", "col");
             dateStartHeadCell.setAttribute("scope", "col3");
             daysLateHeadCell.setAttribute("scope", "col");
             stateHeadCell.setAttribute("scope", "col");
+            actionHeadCell.setAttribute("scope", "col");
 
             var indexHead       = document.createTextNode("N°");
             var idHead          = document.createTextNode("N° Guía");
             var dateStartHead   = document.createTextNode("Fecha de Inicio");
             var daysLateHead    = document.createTextNode("Días de Atraso");
             var stateHead       = document.createTextNode("Estado");
+            var actionHead      = document.createTextNode("Acción");
 
             indexHeadCell.appendChild(indexHead);
             idHeadCell.appendChild(idHead);
             dateStartHeadCell.appendChild(dateStartHead);
             daysLateHeadCell.appendChild(daysLateHead);
             stateHeadCell.appendChild(stateHead);
+            actionHeadCell.appendChild(actionHead);
 
             rowHead.appendChild(indexHeadCell);
             rowHead.appendChild(idHeadCell);
             rowHead.appendChild(dateStartHeadCell);
             rowHead.appendChild(daysLateHeadCell);
             rowHead.appendChild(stateHeadCell);
+            rowHead.appendChild(actionHeadCell);
 
             thead.appendChild(rowHead);
             table.appendChild(thead);
@@ -71,6 +76,7 @@ function initRecords(){
                 var dateStartCell   = document.createElement("td");
                 var daysLateCell    = document.createElement("td");
                 var stateCell       = document.createElement("td");
+                var actionCell      = document.createElement("td");
                 
                 // Here is storaged the content into a node
                 var index           = document.createTextNode( i + 1 );
@@ -80,18 +86,36 @@ function initRecords(){
                 var daysLate        = document.createTextNode("");
                 var iconState       = document.createElement("span");
                 var textState       = document.createTextNode("");
+                var textAction      = document.createTextNode("");
+               
                 
                 if( DATA[i].state == 0 ){
+                    var iconButton      = document.createElement("span");
+                    var deleteButton    = document.createElement("button");
+
+                    textAction.textContent  = "Anular";
+                    iconButton.setAttribute("class", "icon-circle-with-cross icon-space");
+                    deleteButton.setAttribute("class", "btn btn-danger");
+                    deleteButton.setAttribute("style", "margin-top: 5%; margin-bottom: 5%;");
+                    deleteButton.setAttribute("onclick", "javascript:openModalDeleteRecord(" + DATA[i].id + ");");
+
+                    deleteButton.appendChild(iconButton);
+                    deleteButton.appendChild(textAction);
+
                     daysLate.textContent    = DATA[i].daysLate;
                     iconState.setAttribute("class", "icon-warning icon-space");
                     textState.textContent   = "Pendiente";
 
+                    actionCell.appendChild(deleteButton);
 
                 }else{
+                    textAction.textContent  = "No Aplica";
+
                     daysLate.textContent    = "Realizada";
                     iconState.setAttribute("class", "icon-check icon-space");
                     textState.textContent   = "Realizada";
 
+                    actionCell.appendChild(textAction);
                 }
 
                 // Setting the cells to show the details
@@ -112,6 +136,7 @@ function initRecords(){
                 row.appendChild(dateStartCell);
                 row.appendChild(daysLateCell);
                 row.appendChild(stateCell);
+                row.appendChild(actionCell);
                 
                 // Here is inserted the row into the table´s body
                 bodyTable.appendChild(row);
@@ -125,6 +150,54 @@ function initRecords(){
             setTimeout(() => {
                 CloseSpinner();
             }, 500);
+        }
+    });
+}
+
+function openModalDeleteRecord(idRecord){
+    document.getElementById("id_to_delete").innerHTML   = "Está seguro que desea anular la guía n°: <b>" + idRecord + "</b>";
+    document.getElementById("btnDeleteRecord").setAttribute("onclick", "DeleteRecord(" + idRecord + ")")
+    $('#deleteGuideForm').modal('show');
+}
+
+function DeleteRecord(idRecord){
+    $("#deleteGuideForm").modal("toggle");
+
+    var formData    = new FormData();
+    formData.append("idRecord", idRecord);
+
+    $.ajax({
+        url:            "backend/deleteRecord.php",
+        type:           "POST",
+        data:           formData,
+        contentType:    false,
+        processData:    false,
+        success:        function(DATA){
+            if( DATA.ERROR ){
+                ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
+            
+            }else{
+                var table           = document.getElementById("pendingRecordTable");
+                var index           = 0;
+
+                for(var i=0; i<table.children[1].children.length; i++){
+                    var targetId    = parseInt(table.children[1].children[i].cells[1].textContent);
+
+                    if(targetId == idRecord){
+                        table.children[1].children[i].remove();
+                        index = i;
+                    }
+                }
+
+                for(var j=index; j<table.children[1].children.length; j++){
+                    table.children[1].children[j].cells[0].textContent = j + 1;
+                }
+                
+                ModalReportEvent("Operación exitosa", "", DATA.MESSAGE);
+            }
+        },
+        error:          function(DATA){
+            console.log(DATA);
         }
     });
 }
@@ -246,23 +319,7 @@ function deleteRecord(id){
         }else{
             ModalReportEvent("Operación Exitosa", "", DATA.MESSAGE);
 
-            var table           = document.getElementById("pendingTable");
-            var index           = 0;
-
-            for(var i=1; i<table.rows.length; i++){
-                var targetId    = parseInt(table.rows[i].cells[1].textContent);
-
-                if(targetId == id){
-                    table.rows[i].remove();
-                    index = i;
-                }
-            }
-
-            for(var j=index; j<table.rows.length; j++){
-                table.rows[j].cells[0].textContent = j;
-            }
-
-            $('#detailsRecordForm').modal('toggle');
+            
         }
         
     });

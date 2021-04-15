@@ -24,20 +24,45 @@
     /***************************************************************************** */
     /***************************************************************************** */
 
-        $id         =   $_POST["id"];
+        $idRecord   =   $_POST["idRecord"];
         
-	    $QUERY  =   $LINK -> prepare("DELETE FROM registro WHERE id = ?");
-	    $QUERY  ->  bind_param('i', $id);
+        $QUERY  =   $LINK -> prepare("SELECT estados FROM registro WHERE id = ?;");
+        $QUERY  ->  bind_param("i", $idRecord);
         $QUERY  ->  execute();
+        $QUERY  ->  store_result();
+        $QUERY  ->  bind_result($states);
+        $QUERY  ->  fetch();
 
-        if( $QUERY->affected_rows == 1 ){
-            $DATA["ERROR"] 		= false;
-	        $DATA["MESSAGE"]	= "Se ha eliminado el registro exitosamente";
-    
-        }else{
+        $array_states   = explode(",", $states);
+        $found          = false;
+
+        for($i=0; $i<sizeof($array_states); $i++){
+            if( $array_states[$i] == "1" ){
+                $found  = true;
+                break;
+            }
+        }
+
+        if($found){
             $DATA["ERROR"]      = true;
-            $DATA["ERRNO"]      = 3;
-            $DATA["MESSAGE"]    = "No se pudo llevar a cabo la operación. Comuníquese con el administrador";
+            $DATA["ERRNO"]      = 87;
+            $DATA["MESSAGE"]    = "No se puede eliminar la guía porque ya actividades con mantenciones realizadas";
+
+        }else{
+            $QUERY  ->  free_result();
+            $QUERY  =   $LINK -> prepare("DELETE FROM registro WHERE id = ?");
+            $QUERY  ->  bind_param('i', $idRecord);
+            $QUERY  ->  execute();
+
+            if( $QUERY->affected_rows == 1 ){
+                $DATA["ERROR"] 		= false;
+                $DATA["MESSAGE"]	= "Se ha eliminado el registro exitosamente";
+        
+            }else{
+                $DATA["ERROR"]      = true;
+                $DATA["ERRNO"]      = 3;
+                $DATA["MESSAGE"]    = "No se pudo llevar a cabo la operación. Comuníquese con el administrador";
+            }
         }
 
         $QUERY      -> free_result();
