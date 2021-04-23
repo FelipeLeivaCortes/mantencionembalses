@@ -44,7 +44,8 @@
         
         if( $QUERY->affected_rows == 1 ){
             $DATA["ERROR"]      = false;
-            $DATA["MESSAGE"]    = "Se ha archivado el documento exitosamente";
+
+            $DATA["MESSAGE"]    =  $action == 0 ? "Se ha habilitado el documento exitosamente" : "Se ha archivado el documento exitosamente";
       
         }else{
             $DATA["ERROR"]      = true;

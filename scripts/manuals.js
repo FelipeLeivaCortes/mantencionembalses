@@ -261,13 +261,56 @@ function editDocument(idFile, extension, oldName, oldDescription, type){
                             getManuals();
 
                         }else if( type == "Event" ){
-                            document.getElementById("aboutDocumentName").value          = newName;
-                            document.getElementById("aboutDocumentDescription").value   = newDescription;
+                            var table   = document.getElementById("myTable");
+                            var target  = "row:" + idFile;
+        
+                            for(var i=0; i<table.children[1].children.length; i++){
+                                if( target == table.children[1].children[i].id ){
+            
+                                    // Updating the icon and value in the state cell
+                                    var documentCell        = table.children[1].children[i].cells[1].children[0];
+                                    var arrayParameters     = documentCell.href.split(",");
+                                    var linkCell            = table.children[1].children[i].cells[1].children[0];
+        
+                                    var attrbuteName    = "";
+                                    var attrDescription = "";
 
-                            getDocumentEvent();
+                                    linkCell.href       = "";
+
+                                    // If the user changed the name
+                                    if( oldName != newName ){
+                                        document.getElementById("aboutDocumentName").value  = newName;
+                                        attrbuteName                = newName;
+
+                                        documentCell.textContent    = newName;
+                                    }else{
+                                        attrbuteName                = oldName;
+
+                                    }
+
+                                        // If the user changed the description
+                                    if( oldDescription != newDescription ){
+                                        document.getElementById("aboutDocumentDescription").value   = newDescription;
+                                        attrDescription = newDescription;
+
+                                    }else{
+                                        attrDescription = oldDescription;
+
+                                    }
+
+                                    linkCell.href   = "javascript:openModalAboutDocument(" + idFile + "," + arrayParameters[1] +
+                                        "," + arrayParameters[2] + ",'" + attrbuteName + "','" + attrDescription + "', 'Event');";           
+        
+                                    
+
+                                    break;
+                                }
+
+                            }
 
                         }
 
+                        CloseSpinner();
                         ModalReportEvent("Operación Exitosa", "", DATA.MESSAGE);
 
                     }, 500);
@@ -413,6 +456,7 @@ function addDocument(type){
                 contentType:    false,
                 processData:    false,
                 success:        function(DATA){
+                    console.log(DATA);
                     document.getElementById("inputFile").value              = "";
                     document.getElementById("descriptionDocument").value    = "";
     

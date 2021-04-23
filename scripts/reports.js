@@ -644,57 +644,45 @@ function archiveDocument(id, action, type, fakepath, description){
     
                 var table   = document.getElementById("myTable");
                 var target  = "row:" + id;
-                var index   = 0;
 
-           //     if( table.children[1].children.length > 1 ){
-                    for(var i=0; i<table.children[1].children.length; i++){
-                        if( target == table.children[1].children[i].id ){
-                        /*    table.children[1].children[i].remove();
-                            index   = i;*/
+                for(var i=0; i<table.children[1].children.length; i++){
+                    if( target == table.children[1].children[i].id ){
+                        
+                        // Updating the icon and value in the state cell
+                        var name        = table.children[1].children[i].cells[1].textContent;
+                        var linkCell    = table.children[1].children[i].cells[1].children[0];
+                        var stateCell   = table.children[1].children[i].cells[5];
+                        var iconState   = document.createElement("span");
+                        var textState   = document.createTextNode("");
 
-                            // Updating the icon and value in the state cell
-                            var name        = table.children[1].children[i].cells[1].textContent;
-                            var linkCell    = table.children[1].children[i].cells[1].children[0];
-                            var stateCell   = table.children[1].children[i].cells[5];
-                            var iconState   = document.createElement("span");
-                            var textState   = document.createTextNode("");
+                        removeAllChildNodes(stateCell);
 
-                            removeAllChildNodes(stateCell);
+                        if( action == 0 ){
+                            iconState.setAttribute("class", "icon-lock-open icon-space");
+                            textState.textContent   = "Disponible";
 
-                            if( action == 0 ){
-                                iconState.setAttribute("class", "icon-lock-open icon-space");
-                                textState.textContent   = "Disponible";
-
-                                stateCell.appendChild(iconState);
-                                stateCell.appendChild(textState);
-                                linkCell.href = "";
-                                linkCell.href   = "javascript:openModalAboutDocument(" + id + "," + 0 + 
-                                    ",'" + fakepath + "','" + name + "','" + description  + "', 'Event');";
-
-                            }else if( action == 1 ){
-                                iconState.setAttribute("class", "icon-lock icon-space");
-                                textState.textContent   = "Archivado";
-
-                                stateCell.appendChild(iconState);
-                                stateCell.appendChild(textState);
-                                linkCell.href = "";
-                                linkCell.href   = "javascript:openModalAboutDocument(" + id + "," + 1 + 
+                            stateCell.appendChild(iconState);
+                            stateCell.appendChild(textState);
+                            linkCell.href = "";
+                            linkCell.href   = "javascript:openModalAboutDocument(" + id + "," + 0 + 
                                 ",'" + fakepath + "','" + name + "','" + description  + "', 'Event');";
 
-                            }
+                        }else if( action == 1 ){
+                            iconState.setAttribute("class", "icon-lock icon-space");
+                            textState.textContent   = "Archivado";
 
-                            break;
-                            
+                            stateCell.appendChild(iconState);
+                            stateCell.appendChild(textState);
+                            linkCell.href = "";
+                            linkCell.href   = "javascript:openModalAboutDocument(" + id + "," + 1 + 
+                            ",'" + fakepath + "','" + name + "','" + description  + "', 'Event');";
+
                         }
-                    }
 
-                   /* for(var j=index; j<table.children[1].children.length; j++){
-                        table.children[1].children[j].cells[0].textContent  = j + 1;
+                        break;
+                        
                     }
-    
-                }else{
-                    document.getElementById("myContainer").remove();
-                } */
+                }
                 
             }
 
@@ -724,7 +712,8 @@ function openModalAboutDocument(id, state, path, name, description, type){
     }
 
     // Setting the buttons to ejecute the functions respectives
-    document.getElementById("downloadDocumentBtn").addEventListener("onclick", (url, name) => { window.href = url + name; });
+    document.getElementById("downloadDocumentBtn").setAttribute("onclick", "javascript:printDocument('"
+        + url + "','" + name + "');");
     
     if( state == 0 ){
         iconArchiveBtn.setAttribute("class", "icon-lock icon-space");
@@ -765,3 +754,7 @@ function openModalAboutDocument(id, state, path, name, description, type){
 
     $('#aboutDocumentForm').modal('show');
 };
+
+function printDocument(url, name){
+    window.location     = url + name;
+}
