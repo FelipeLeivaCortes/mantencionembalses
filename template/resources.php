@@ -61,6 +61,44 @@
             </div>
         </div>
 
+        <!-- Modal Report Event -->
+        <div id="ModalNewFeatures" class="modal fade" role="dialog" aria-labelledby="myLargeModalLabel" style="z-index:1400;">
+            <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        
+                <!-- Modal content-->
+                <div class="modal-content">
+                    
+                    <!-- Modal Header -->
+                    <div class="modal-header">
+                        <h4 class="modal-title"><span class="icon-info" id="versionSystem"></span></h4>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+              
+                    <!-- Modal body -->
+                    <div id="bodyModalReportEvent" class="modal-body">
+                        <div class="d-flex flex-column">
+                            <div class="row">
+                                <div class="col-12"><p id="newFeatureHeader"></p></div>
+                            </div>
+                            <div class="row">
+                                <div class="col-1"></div>
+                                <div class="col-11"><p id="newFeatureBody"></p></div>
+                            </div>
+                        </div>
+                        <div>
+                            <br>
+                            <small>*Nota: Este mensaje desaparecerá automáticamente luego de 3 días, a contar desde la fecha de implementación.</small>
+                        </div>  
+                    </div>
+              
+                    <!-- Modal footer -->
+                    <div id="footerModalReportEvent" class="modal-footer justify-content-center">
+                        <button type="button" class="btn btn-danger" data-toggle="modal" data-dismiss="modal"><span class="icon-circle-with-cross"></span> Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Modal Loading -->
         <div class="modal fade" id="modalSpinner" style="z-index:1400;" role="dialog" aria-labelledby="modalSpinnerLabel">
             <div class="modal-dialog modal-sm" role="document">

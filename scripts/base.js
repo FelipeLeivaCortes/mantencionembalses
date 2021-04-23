@@ -4,9 +4,9 @@ window.addEventListener("load", function(){
 
    var items 	 	= document.getElementById("AdminContainer").children.length;
 
-   if( items > 0 ){
+    if( items > 0 ){
 
-      $.post("backend/getNotifications.php", "", function(DATA){
+        $.post("backend/getNotifications.php", "", function(DATA){
             if( !DATA.ERROR && DATA.count > 0 ){
                 document.getElementById("notificationsIcon").setAttribute("data-target", "#notificationsForm");
                 document.getElementById("notificationsIcon").setAttribute("data-toggle", "modal");
@@ -21,14 +21,49 @@ window.addEventListener("load", function(){
             }
         });
 
-       loadStadistics();
+        loadStadistics();
 
-   }else{
-      loadMaintances();
+    }else{
+        loadMaintances();
 
-   }
+    }
 
+    setTimeout(()=>{
+        ShowNewFeatures();
+    }, 3000);
+   
 });
+
+function ShowNewFeatures(){
+    
+    var dayUpdate       = 20;
+    var monthUpdate     = "04";
+    var yearUpdate      = "2021";
+    var dateUpdate      = dayUpdate + "/" + monthUpdate + "/" + yearUpdate;
+
+    var version         = "1.3";
+    
+    var versionSystem   = " Actualización del sistema: Versión " + version;
+
+    var headerFeature   = "Informamos a nuestros usuarios que en la fecha <b>" + dateUpdate + "</b> se ha " + 
+        "implementado la nueva versión <b>" + version + "</b>, en la cúal destacan las siguientes " +
+        "características:"
+    
+    var bodyFeature     = "<b>* Memoranda:</b> Ahora es posible agregar documentos de eventualidades desde el botón <i>'Informar eventualidad'</i>.<br><br>" +
+    "<b>* Reportes:</b> Puedes descargar, editar, eliminar o archivar los reportes de eventualidades desde" +
+    " el botón <i>'Informes de eventualidades'</i>.";
+
+    $('#versionSystem').html(versionSystem);
+    $('#newFeatureHeader').html(headerFeature);
+    $('#newFeatureBody').html(bodyFeature);
+
+    var today       = new Date();
+
+    if( (today.getDate() - dayUpdate) <= 2 && (today.getDate() - dayUpdate) >= 0 ){
+        $("#ModalNewFeatures").modal("show");
+    }
+
+}
 
 function ConfigureSystem(){
    var idCompany	= sessionStorage.getItem("ID_COMPANY");

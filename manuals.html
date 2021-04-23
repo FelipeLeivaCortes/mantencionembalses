@@ -4,7 +4,7 @@
 
     <!------------------------------ FORM TO UPLOAD A MANUAL ---------------------------------------->
     <!-- Modal -->
-    <div id="uploadDocumentForm" class="modal fade" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" style="z-index:1100;">
+    <div id="addDocumentForm" class="modal fade" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" style="z-index:1100;">
         <div class="modal-dialog modal-md modal-dialog-scrollable">
     
             <div class="modal-content">
@@ -21,7 +21,7 @@
                         <div class="form-group">
                             <p for="documentToUpload">Seleccione el documento</p>
                             <div class="file-field">
-                                <input name="subir_archivo" type="file" id="documentToUpload" style="background:linear-gradient(to top, #847e86, #c3c0c4);">
+                                <input name="file" type="file" id="inputFile" style="background:linear-gradient(to top, #847e86, #c3c0c4);">
                            </div>
                         </div>
 
@@ -32,7 +32,7 @@
 
                         <div class="form-group">
                             <div class="container-fluid d-flex justify-content-center">
-                                <input id="btnUploadDocument" type="submit" class="btn btn-primary" value="Cargar Archivo"/>
+                                <button id="btnUploadDocument" type="button" class="btn btn-primary" onclick="addDocument('Manual')"><span class="icon-document-landscape"></span> Agregar</button>
                             </div>
                         </div>
                     </form>

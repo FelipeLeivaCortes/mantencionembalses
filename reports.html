@@ -24,11 +24,13 @@
                                 <input type="file" id="inputExcel" style="background:linear-gradient(to top, #847e86, #c3c0c4);">
                            </div>
                         </div>
-                    </form>             
+                        <small>*Nota: Si desea ingresar datos antiguos, primero descargue la plantilla, siga la misma estructura de la fila 2 (luego ya puede eliminarla)</small>
+                    </form>   
                 </div>
             
                 <!-- Modal footer -->
                 <div class="modal-footer justify-content-center">
+                    <button class="btn btn-primary" onclick="javascript:downloadTemplatePiezometria();"><span class="icon-document-landscape"></span> Descargar Plantilla</button>
                     <button id="uploadDataBtn" class="btn btn-primary" onclick="javascript:uploadPiezometriaFromExcel();"><span class="icon-document-landscape"></span> Cargar</button>
                     <button type="button" class="btn btn-danger" data-toggle="modal" data-dismiss="modal"><span class="icon-circle-with-cross"></span> Cerrar</button>
                 </div>
@@ -72,4 +74,182 @@
         </div>
     </div>
 
+     <!------------------------------ FORM TO EDIT A DOCUMENT´S NAME ---------------------------------------->
+    <!-- Modal -->
+    <div id="editDocumentForm" class="modal fade" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" style="z-index:1200;">
+        <div class="modal-dialog modal-md modal-dialog-scrollable">
+    
+            <div class="modal-content">
+                
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title"><span class="icon-add-user"></span> Renombrar Documento</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+            
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <form class="form-horizontal" role="form">
+                        <div class="form-group">
+                            <label for="newNameFile" class="col-4 control-label">Renombrar a</label>
+                            <div class="col-12">
+                                <input id="newNameFile" type="text" class="form-control">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="newDescription" class="col-4 control-label">Descripción</label>
+                            <div class="col-12">
+                                <textarea class="form-control" id="newDescription"></textarea>
+                            </div>
+                        </div>
+                    </form>                    
+                </div>
+            
+                <!-- Modal footer -->
+                <div class="modal-footer justify-content-center">
+                    <button class="btn btn-warning" data-toggle="modal" href="#ModalConfirmEvent"><span class="icon-edit"></span> Editar</button>
+                    <button class="btn btn-danger" data-toggle="modal" data-dismiss="modal"><span class="icon-circle-with-cross"></span> Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!------------------------------ Modal Report Event ----------------------------------------------->
+    <div id="ModalConfirmEvent" class="modal fade" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" style="z-index:1200;">
+        <div class="modal-dialog modal-md modal-dialog-scrollable">
+    
+        <!-- Modal content-->
+            <div class="modal-content">
+                
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 id="headerEvent" class="modal-title"><span class="icon-add-user"></span> Confirmar Acción</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+          
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <div class="d-flex flex-column">
+                        <div class="row">
+                            <div class="col-12"><p id="bodyEvent"></p></div>
+                        </div>
+                    </div>    
+                </div>
+          
+                <!-- Modal footer -->
+                <div class="modal-footer justify-content-center">
+                    <button id="btnConfirm" type="button" class="btn btn-success" data-toggle="modal" data-dismiss="modal">Confirmar</button>
+                    <button type="button" class="btn btn-danger" data-toggle="modal" data-dismiss="modal"><span class="icon-circle-with-cross"></span> Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!------------------------------ ABOUT AN ACTIVITY FORM ---------------------------------------->
+    <!-- Modal -->
+    <div id="aboutDocumentForm" class="modal fade" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" style="z-index:1100;">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+
+            <div class="modal-content">
+                
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title"><span class="icon-info"></span> Detalles del Documento</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+            
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <form class="form-horizontal" role="form">
+                        <div class="form-group">
+                            <label for="aboutDocumentName" class="col-3 control-label">Nombre</label>
+                            <div class="col-9">
+                                <input id="aboutDocumentName" type="text" class="form-control" readonly="readonly">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="aboutDocumentDescription" class="col-3 control-label">Descripción</label>
+                            <div class="col-9">
+                                <input id="aboutDocumentDescription" type="text" class="form-control" readonly="readonly">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            
+                <!-- Modal footer -->
+                <div class="modal-footer row">
+                    <div class="col-12">
+                        <div class="container-fluid d-flex justify-content-center">
+                            <button id="downloadDocumentBtn" type="button" class="btn btn-primary col-2"><span class="icon-download"></span> Descargar Documento</button>
+                            <div class="col"></div>
+                            <button id="archiveDocumentBtn" type="button" class="btn btn-primary col-2"></button>
+                            <div class="col"></div>
+                            <button id="editDocumentBtn" type="button" class="btn btn-warning col-2"><span class="icon-edit"></span> Editar Documento</button>
+                            <div class="col"></div>
+                            <button id="deleteDocumentBtn" type="button" class="btn btn-danger col-2" data-toggle="modal" href="#ModalConfirmEvent"><span class="icon-circle-with-cross"></span> Eliminar Documento</button>
+                        </div>
+                    </div>
+                    <div class="col-12" style="margin-top: 1%;">
+                        <div class="container-fluid d-flex justify-content-center">
+                            <button type="button" class="btn btn-danger col-3" data-toggle="modal" data-dismiss="modal"><span class="icon-circle-with-cross"></span> Cerrar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!------------------------------ LOAD FORM TO GET THE PIEZOMETRIA´S DATA ----------------------------------------
+    <-- Modal -->
+    <div id="openGetDocumentEventForm" class="modal fade" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" style="z-index:1100;">
+        <div class="modal-dialog modal-md modal-dialog-scrollable">
+    
+            <div class="modal-content">
+                
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title"><span class="icon-magnifying-glass"></span> Buscar Eventos</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+            
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <p>Ingrese parámetros de búsqueda</p>
+                    <form class="form-horizontal" role="form">
+
+                        <div class="form-group row">
+                            <label for="sourceDocument">Fuente</label>
+                            <div class="col-8">
+                                <select id="sourceDocument">
+                                    <option>--- Todos ---</option>
+                                    <option>Interno</option>
+                                    <option>Externo</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="typeDocument">Tipo</label>
+                            <div class="col-8">
+                                <select id="typeDocument">
+                                    <option>--- Todos ---</option>
+                                    <option>Archivado</option>
+                                    <option>Disponible</option>
+                                </select>
+                            </div>
+                        </div>
+
+                    </form>             
+                </div>
+            
+                <!-- Modal footer -->
+                <div class="modal-footer justify-content-center">
+                    <button id="loadActivitiesBtn" class="btn btn-primary" onclick="javascript:getDocumentEvent();"><span class="icon-magnifying-glass"></span> Buscar</button>
+                    <button type="button" class="btn btn-danger" data-toggle="modal" data-dismiss="modal"><span class="icon-circle-with-cross"></span> Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </html>

@@ -1,4 +1,7 @@
 function initContacts(){
+    // This function is located in the manual.js file
+    $("#inputFile").on("change", handleDocumentEvent);
+
     document.getElementById("sendMessage").disabled     = true;
     document.getElementById("messageContent").value     = "";
 
@@ -142,11 +145,11 @@ function openContent(idReport, title, stringType, stringAuthor, stringContent){
 
     for(var i=0; i<arrayType.length; i++){
         if( arrayType[i] == 'E' ){
-            document.getElementById("contentThread").value      += arrayAuthor[i] + " : " + arrayContent[i] + "\n";
+            document.getElementById("contentThread").value      += arrayAuthor[i] + " :" + arrayContent[i] + "\n";
         
         }else if( arrayType[i] == 'A' ){
             if( arrayContent[i] != null || arrayContent[i] != '' ){
-                document.getElementById("contentThread").value  += "Webmaster : " + arrayContent[i] + "\n";
+                document.getElementById("contentThread").value  += "Webmaster :" + arrayContent[i] + "\n";
             }
 
         }
@@ -174,7 +177,7 @@ function respondMessage(idReport){
 };
 
 function addReport(){
-    $('#contactForm').modal('toggle');
+    $('#reportErrorForm').modal('toggle');
     ShowSpinner();
 
     var topic   = document.getElementById("topicMessage").value;

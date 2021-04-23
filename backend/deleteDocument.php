@@ -25,6 +25,7 @@
     /***************************************************************************** */
 
         $id         = $_POST["id"];
+        $type       = $_POST["type"];
         
         $QUERY  =   $LINK->prepare("SELECT nombre FROM documento WHERE id = ?;");
         $QUERY  ->  bind_param("i", $id);
@@ -44,9 +45,17 @@
             $DATA["MESSAGE"]    = "Se han encontrado duplicidades en sus datos. Comuníquese con el administrador";
   
         }else{
-            $document   = $PATH_FILES.$ID_COMPANY."/".$nameFile;
+            $folderStore    = "";
+
+            if( $type == "Manual" ){
+                $folderStore		= $PATH_FILES.$ID_COMPANY."/documents/manuals/".$nameFile;
+    
+            }else if( $type == "Event" ){
+                $folderStore		= $PATH_FILES.$ID_COMPANY."/documents/events/".$nameFile;
+    
+            }
       
-            if( unlink($document) ){
+            if( unlink($folderStore) ){
                 $QUERY  =   $LINK->prepare("DELETE FROM documento WHERE id = ?");
                 $QUERY  ->  bind_param("i", $id);
                 $QUERY  ->  execute();

@@ -25,14 +25,15 @@
     /***************************************************************************** */
 
         $idFile         = $_POST["idFile"];
-        $newNameFile    = $_POST["newNameFile"];
+        $type           = $_POST["type"];
+        $newName        = $_POST["newName"];
         $newDescription = $_POST["newDescription"];
 
         $QUERY  =   $LINK->prepare("SELECT nombre, descripcion FROM documento WHERE id = ?;");
         $QUERY  ->  bind_param("i", $idFile);
         $QUERY  ->  execute();
         $QUERY  ->  store_result();
-        $QUERY  ->  bind_result($oldNameFile, $oldDescription);
+        $QUERY  ->  bind_result($oldName, $oldDescription);
         $QUERY  ->  fetch();
 
         if( $QUERY->num_rows == 0 ){
@@ -49,13 +50,22 @@
 
         //  Is necessary detect if the name changed, the description, or both
             $operations     = "";
+            $folderStore    = "";
 
-            $oldDocument    = $PATH_FILES.$ID_COMPANY."/".$oldNameFile;
-            $newDocument    = $PATH_FILES.$ID_COMPANY."/".$newNameFile;  
+            if( $type == "Manual" ){
+                $folderStore		= $PATH_FILES.$ID_COMPANY."/documents/manuals/";
+                
+            }else if( $type == "Event" ){
+                $folderStore		= $PATH_FILES.$ID_COMPANY."/documents/events/";
+                
+            }
+
+            $oldDocument    = $folderStore.$oldName;
+            $newDocument    = $folderStore.$newName;  
         
-            if( $oldNameFile != $newNameFile ){
+            if( $oldName != $newName ){
                 $QUERY  =   $LINK->prepare("UPDATE documento SET nombre = ? WHERE id = ?;");
-                $QUERY  ->  bind_param("si", $newNameFile, $idFile);
+                $QUERY  ->  bind_param("si", $newName, $idFile);
                 $QUERY  ->  execute();
                 
                 if( $QUERY->affected_rows == 1 ){
@@ -66,14 +76,14 @@
                     }else{
                         $DATA["ERROR"]      = true;
                         $DATA["ERRNO"]      = 59;
-                        $DATA["MESSAGE"]    = "No se ha podido actualizar el documento ".$newNameFile;
+                        $DATA["MESSAGE"]    = "No se ha podido actualizar el documento ".$newName;
         
                     }
                 
                 }else{
                     $DATA["ERROR"]      = true;
                     $DATA["ERRNO"]      = 60;
-                    $DATA["MESSAGE"]    = "El documento con el nombre ".$newNameFile." ya se encuentra registrado";
+                    $DATA["MESSAGE"]    = "El documento con el nombre ".$newName." ya se encuentra registrado";
                 }
             }
             

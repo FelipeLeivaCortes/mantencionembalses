@@ -392,3 +392,376 @@ function isValidDoubleValue(value, index, Column){
 
     }
 };
+
+function downloadTemplatePiezometria(){
+    location.href   = "docs/empresa" + sessionStorage.getItem("ID_COMPANY") + "/documents/templates/Plantilla Piezometria.xlsx";
+};
+
+function getDocumentEvent(){
+    $("#openGetDocumentEventForm").modal("toggle");
+    ShowSpinner();
+
+    var sourceDocument  = document.getElementById("sourceDocument").value;
+    var typeDocument    = document.getElementById("typeDocument").value;
+
+    switch(sourceDocument){
+        case "--- Todos ---":
+            sourceDocument  = "";
+            break;
+        
+        case "Interno":
+            sourceDocument  = "Interno";
+            break;
+
+        case "Externo":
+            sourceDocument  = "Externo";
+            break;
+        
+        default:
+            return;
+    }
+
+    switch(typeDocument){
+        case "--- Todos ---":
+            typeDocument  = "";
+            break;
+        
+        case "Archivado":
+            typeDocument  = 1;
+            break;
+
+        case "Disponible":
+            typeDocument  = 0;
+            break;
+        
+        default:
+            return;
+    }
+
+    var data        = new FormData();
+    data.append("type", "Event");
+    data.append("sourceDocument", sourceDocument);
+    data.append("typeDocument", typeDocument);
+
+    $.ajax({
+        url:            "backend/getDocuments.php",
+        type:           "POST",
+        data:           data,
+        contentType:    false,
+        processData:    false,
+        success:        function(DATA){
+
+            var idContainer = "myContainer";
+            var idTable     = "myTable";
+            var table;
+            var divTable;
+
+            try{
+                document.getElementById(idContainer).remove();
+            
+            }catch(e){
+                console.log("The container: " + idContainer + " doesn´t exists");
+
+            }
+
+            if( DATA.ERROR ){
+                setTimeout(() => {
+                    CloseSpinner();
+                    ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
+                }, 500);
+
+            }else{
+                divTable    = document.createElement("div");
+                divTable.setAttribute("class", "table-modal table-reponsive-xl");
+                divTable.setAttribute("style", "width: 120%;");
+                divTable.setAttribute("id", idContainer);
+        
+                table       = document.createElement("table");
+                table.setAttribute("class", "table table-striped");
+                table.setAttribute("id", idTable);
+        
+                var thead                   = document.createElement("thead");
+
+                var rowHead                 = document.createElement("tr");
+
+                var indexHeadCell           = document.createElement("th");
+                var documentHeadCell        = document.createElement("th");
+                var authorHeadCell          = document.createElement("th");
+                var dateHeadCell            = document.createElement("th");
+                var sourceHeadCell          = document.createElement("th");
+                var stateHeadCell           = document.createElement("th");
+
+                indexHeadCell.setAttribute("scope", "col");
+                documentHeadCell.setAttribute("scope", "col");
+                documentHeadCell.setAttribute("style", "width: 40%;");
+                dateHeadCell.setAttribute("scope", "col");
+                sourceHeadCell.setAttribute("scope", "col");
+                stateHeadCell.setAttribute("scope", "col");
+
+                var indexHead       = document.createTextNode("N°");
+                var documentHead    = document.createTextNode("Documento");
+                var authorHead      = document.createTextNode("Responsable");
+                var dateHead        = document.createTextNode("Fecha Emisión");
+                var sourceHead      = document.createTextNode("Fuente");
+                var stateHead       = document.createTextNode("Estado");
+
+                indexHeadCell.appendChild(indexHead);
+                documentHeadCell.appendChild(documentHead);
+                authorHeadCell.appendChild(authorHead);
+                dateHeadCell.appendChild(dateHead);
+                sourceHeadCell.appendChild(sourceHead);
+                stateHeadCell.appendChild(stateHead);
+
+                rowHead.appendChild(indexHeadCell);
+                rowHead.appendChild(documentHeadCell);
+                rowHead.appendChild(authorHeadCell);
+                rowHead.appendChild(dateHeadCell);
+                rowHead.appendChild(sourceHeadCell);
+                rowHead.appendChild(stateHeadCell);
+
+                thead.appendChild(rowHead);
+                table.appendChild(thead);
+            
+                var bodyTable   = document.createElement("tbody");
+
+                // Create the rows
+                for (var i=0; i<DATA.COUNT; i++){
+
+                    // Here is created every row
+                    var row             = document.createElement("tr");
+                    row.setAttribute("id", "row:" + DATA[i].id);
+
+                    // Here is created every cell
+                    var indexCell	    = document.createElement("td");
+                    var documentCell    = document.createElement("td");
+                    var authorCell      = document.createElement("td");
+                    var dateCell        = document.createElement("td");
+                    var sourceCell      = document.createElement("td");
+                    var stateCell       = document.createElement("td");
+                    
+                    // Here is storaged the content into a node
+                    var index           = document.createTextNode( i + 1 );
+                    var documentLink    = document.createElement("a");
+                    var documentText    = document.createTextNode(DATA[i].name);
+                    var author          = document.createTextNode(DATA[i].author);
+                    var dateEmitted     = document.createTextNode( FormatDate(DATA[i].date) );
+                    var source          = document.createTextNode(DATA[i].source);
+                    var state           = document.createTextNode("");
+                    var iconState       = document.createElement("span");
+
+                    if( DATA[i].state == 0 ){
+                        iconState.setAttribute("class", "icon-lock-open icon-space");
+                        state.textContent   = "Disponible";
+
+                    }else if( DATA[i].state == 1 ){
+                        iconState.setAttribute("class", "icon-lock icon-space");
+                        state.textContent   = "Archivado";
+
+                    }else{
+                        iconState.setAttribute("class", "icon-circle-with-cross icon-space");
+                        state.textContent   = "Error";
+
+                    }
+
+                    documentLink.href   = "javascript:openModalAboutDocument(" + DATA[i].id + "," +
+                        DATA[i].state + ",'" + DATA.fakepath + "','" + DATA[i].name + "','" + 
+                        DATA[i].description  + "', 'Event');";
+                    documentLink.appendChild(documentText);
+
+                    // Here is inserted the content into the cells
+                    indexCell.appendChild(index);
+                    documentCell.appendChild(documentLink);
+                    authorCell.appendChild(author);
+                    dateCell.appendChild(dateEmitted);
+                    sourceCell.appendChild(source);
+                    stateCell.appendChild(iconState);
+                    stateCell.appendChild(state);
+
+                    // Here is inserted the cells into a row
+                    row.appendChild(indexCell);
+                    row.appendChild(documentCell);
+                    row.appendChild(authorCell);
+                    row.appendChild(dateCell);
+                    row.appendChild(sourceCell);
+                    row.appendChild(stateCell);
+                    
+                    // Here is inserted the row into the table´s body
+                    bodyTable.appendChild(row);
+                }
+
+                
+                // Here is inserted the body´s table into the table
+                table.appendChild(bodyTable);
+                divTable.appendChild(table);
+                
+                document.getElementById("body-container").appendChild(divTable);
+
+                setTimeout(() => {
+                    CloseSpinner();
+                }, 500);
+            }
+        },
+        error:          function(DATA){
+            console.log(DATA);
+        }
+
+    });
+};
+
+function openModalArchiveDocument(id, action, type, fakepath, description){
+    document.getElementById("headerEvent").innerHTML    = "Archivar Documento";
+    document.getElementById("bodyEvent").innerHTML      = "¿Está seguro que desea archivar el documento?";
+
+    document.getElementById("btnConfirm").setAttribute("onclick", "archiveDocument(" + id + "," + action + ",'"
+        + type + "','" + fakepath + "','" + description + "');");
+    $('#ModalConfirmEvent').modal('show');
+};
+
+function archiveDocument(id, action, type, fakepath, description){
+    var data    = new FormData();
+
+    data.append("id", id);
+    data.append("type", type);
+    data.append("action", action);
+
+    $.ajax({
+        url:            "backend/archiveDocument.php",
+        type:           "POST",
+        data:           data,
+        contentType:    false,
+        processData:    false,
+        success:        function(DATA){
+
+            if( DATA.ERROR  == true ){
+                ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
+            
+            }else{
+                if( type == 'Event' ){
+                    $("#aboutDocumentForm").modal("toggle");
+                }
+
+                ModalReportEvent("Operación Exitosa", "", DATA.MESSAGE);
+    
+                var table   = document.getElementById("myTable");
+                var target  = "row:" + id;
+                var index   = 0;
+
+           //     if( table.children[1].children.length > 1 ){
+                    for(var i=0; i<table.children[1].children.length; i++){
+                        if( target == table.children[1].children[i].id ){
+                        /*    table.children[1].children[i].remove();
+                            index   = i;*/
+
+                            // Updating the icon and value in the state cell
+                            var name        = table.children[1].children[i].cells[1].textContent;
+                            var linkCell    = table.children[1].children[i].cells[1].children[0];
+                            var stateCell   = table.children[1].children[i].cells[5];
+                            var iconState   = document.createElement("span");
+                            var textState   = document.createTextNode("");
+
+                            removeAllChildNodes(stateCell);
+
+                            if( action == 0 ){
+                                iconState.setAttribute("class", "icon-lock-open icon-space");
+                                textState.textContent   = "Disponible";
+
+                                stateCell.appendChild(iconState);
+                                stateCell.appendChild(textState);
+                                linkCell.href = "";
+                                linkCell.href   = "javascript:openModalAboutDocument(" + id + "," + 0 + 
+                                    ",'" + fakepath + "','" + name + "','" + description  + "', 'Event');";
+
+                            }else if( action == 1 ){
+                                iconState.setAttribute("class", "icon-lock icon-space");
+                                textState.textContent   = "Archivado";
+
+                                stateCell.appendChild(iconState);
+                                stateCell.appendChild(textState);
+                                linkCell.href = "";
+                                linkCell.href   = "javascript:openModalAboutDocument(" + id + "," + 1 + 
+                                ",'" + fakepath + "','" + name + "','" + description  + "', 'Event');";
+
+                            }
+
+                            break;
+                            
+                        }
+                    }
+
+                   /* for(var j=index; j<table.children[1].children.length; j++){
+                        table.children[1].children[j].cells[0].textContent  = j + 1;
+                    }
+    
+                }else{
+                    document.getElementById("myContainer").remove();
+                } */
+                
+            }
+
+        },
+        error:          function(DATA){
+            console.log(DATA);
+        }
+    });
+};
+
+function openModalAboutDocument(id, state, path, name, description, type){
+    // Setting the value to the modal
+    document.getElementById("aboutDocumentName").value          = name;
+    document.getElementById("aboutDocumentDescription").value   = description;
+
+    // Adapting the data, for example, the path to download the document.
+    var pathSplitted        = path.split("/");
+    var url                 = "";
+    var archiveDocumentBtn  = document.getElementById("archiveDocumentBtn");
+    var iconArchiveBtn      = document.createElement("span");
+    var textArchiveBtn      = document.createTextNode("");
+
+    removeAllChildNodes(archiveDocumentBtn);
+
+    for(var x=1; x<pathSplitted.length; x++){
+        url = url == "" ? "/mantencionembalses/" + pathSplitted[x] : url + "/" + pathSplitted[x];
+    }
+
+    // Setting the buttons to ejecute the functions respectives
+    document.getElementById("downloadDocumentBtn").addEventListener("onclick", (url, name) => { window.href = url + name; });
+    
+    if( state == 0 ){
+        iconArchiveBtn.setAttribute("class", "icon-lock icon-space");
+        textArchiveBtn.textContent   = "Archivar";
+
+        archiveDocumentBtn.appendChild(iconArchiveBtn);
+        archiveDocumentBtn.appendChild(textArchiveBtn);
+
+        archiveDocumentBtn.setAttribute("onclick",
+        "openModalArchiveDocument(" + id + "," + 1 + ",'" + type + "','" + path + "','" + description +
+            "'); return false;");
+        
+    }else if( state == 1 ){
+        iconArchiveBtn.setAttribute("class", "icon-lock-open icon-space");
+        textArchiveBtn.textContent   = "Habilitar";
+
+        archiveDocumentBtn.appendChild(iconArchiveBtn);
+        archiveDocumentBtn.appendChild(textArchiveBtn);
+
+        archiveDocumentBtn.setAttribute("onclick",
+        "openModalArchiveDocument(" + id + "," + 0 + ",'" + type + "','" + path + "','" + description +
+            "'); return false;");
+
+    }else{
+        archiveDocumentBtn.disabled     = true;
+        iconState.setAttribute("class", "icon-circle-with-cross icon-space");
+        textArchiveBtn.textContent   = "Error";
+
+        archiveDocumentBtn.appendChild(iconArchiveBtn);
+        archiveDocumentBtn.appendChild(textArchiveBtn);
+
+    }
+    
+    document.getElementById("editDocumentBtn").setAttribute("onclick",
+        "openModalEditDocument(" + id + ", '" + description + "', 'Event'); return false;");
+    document.getElementById("deleteDocumentBtn").setAttribute("onclick",
+        "openModalDeleteDocument(" + id + ", 'Event'); return false;");
+
+    $('#aboutDocumentForm').modal('show');
+};

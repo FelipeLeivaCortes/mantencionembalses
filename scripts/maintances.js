@@ -51,7 +51,6 @@ function getRecord(idRecord, onlyRead){
                 }, 500);
             
             }else{
-console.log(DATA);
                 var table;
                 var divTable;
                 var isComplete      = true;

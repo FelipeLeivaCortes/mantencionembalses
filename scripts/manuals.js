@@ -2,69 +2,8 @@
 function initManuals(){
     document.getElementById("btnUploadDocument").disabled   = true;
 
-    document.getElementById('documentToUpload').addEventListener('change', VerifyNameDocument, false);
-    document.getElementById('formUploadDocument').addEventListener('submit', function(e){
-        e.preventDefault();
-            
-        var description = document.getElementById("descriptionDocument").value;
-        var file        = document.getElementById("documentToUpload").value;
-
-        if( file != "" ){
-            if( description != "" ){
-                $('#uploadDocumentForm').modal('toggle');
-
-                ShowSpinner();
-
-                var formData    = new FormData(document.getElementById("formUploadDocument"));
-
-                formData.append('nameFile', document.getElementById("documentToUpload").value.slice(12));
-                formData.append('description', description);
-                formData.append('username', sessionStorage.getItem('USERNAME'));
-
-                $.ajax({
-                    url: "backend/addDocument.php",
-                    type: "post",
-                    dataType: "html",
-                    data: formData,
-                    cache: false,
-                    contentType: false,
-                    processData: false
-                })
-                .done(function(DATA){
-                    DATA    = JSON.parse(DATA);
-                    
-                    if( DATA.ERROR ){
-                        setTimeout(function(){
-                            CloseSpinner();
-
-                            ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
-                        
-                            document.getElementById('documentToUpload').value       = "";
-                            document.getElementById("descriptionDocument").value   = "";
-                        }, 500);
-
-                    }else{
-                        setTimeout(function(){
-                            document.getElementById('documentToUpload').value       = "";
-                            document.getElementById("descriptionDocument").value   = "";
-
-                            getManuals();
-
-                            ModalReportEvent("Operación exitosa", "", DATA.MESSAGE);
-                        }, 500);
-                        
-                    }
-                });
-
-            }else{
-                ModalReportEvent("Error", 54, "No se ha agregado ninguna descripción al documento");
-            }
-
-        }else{
-            ModalReportEvent("Error", 56, "No se ha seleccionado ningun documento");
-        }
-
-    });
+    document.getElementById('inputFile').addEventListener('change', VerifyNameDocument, false);
+    $('#inputFile').on("change", handleDocumentEvent);
         
     getManuals();
 };
@@ -90,7 +29,8 @@ function VerifyNameDocument(){
 };
 
 function getManuals(){
-    $.post("backend/getManuals.php", "", function(DATA){
+
+    $.post("backend/getDocuments.php", "type=Manual", function(DATA){
 
         if( DATA.ERROR ){
             setTimeout(function(){
@@ -99,20 +39,22 @@ function getManuals(){
             }, 500);
         
         }else{
+            var idConteiner = "myContainer";
+            var idTable     = "myTable";
             var table;
             var divTable;
 
-            if( document.getElementById("tableManuals") == null ){
+            if( document.getElementById(idConteiner) == null ){
                 divTable    = document.createElement("div");
                 divTable.setAttribute("class", "table-modal table-reponsive-xl");
-                divTable.setAttribute("id", "containerTable");
+                divTable.setAttribute("id", idConteiner);
         
                 table       = document.createElement("table");
                 table.setAttribute("class", "table table-striped");
-                table.setAttribute("id", "tableManuals");
+                table.setAttribute("id", idTable);
         
-                var thead               = document.createElement("thead");
-                var rowHead             = document.createElement("tr");
+                var thead                   = document.createElement("thead");
+                var rowHead                 = document.createElement("tr");
 
                 var indexHeadCell           = document.createElement("th");
                 var nameHeadCell            = document.createElement("th");
@@ -149,16 +91,16 @@ function getManuals(){
                 table.appendChild(thead);
             
             }else{
-                divTable    = document.getElementById("containerTable");
-                table       = document.getElementById("tableManuals");
-                ClearTable("tableManuals");
+                divTable    = document.getElementById(idConteiner);
+                table       = document.getElementById(idTable);
+                ClearTable(idTable);
 
             }
             
             var bodyTable   = document.createElement("tbody");
 
             // Create the rows
-            for (var i = 0; i < DATA.COUNT; i++){
+            for (var i=0; i < DATA.COUNT; i++){
 
                 // Here is created every row
                 var row             = document.createElement("tr");
@@ -178,7 +120,15 @@ function getManuals(){
 
                 // Here we set the attributes
                 name.appendChild(linkName);
-                name.href           = "docs/empresa" + DATA[i].idCompany + "/" + DATA[i].name; 
+
+                var pathSplitted    = DATA.fakepath.split("/");
+                var url             = "";
+
+                for(var x=1; x<pathSplitted.length; x++){
+                    url = url == "" ? "/mantencionembalses/" + pathSplitted[x] : url + "/" + pathSplitted[x];
+                }
+
+                name.href   = url + DATA[i].name;
 
                 description.appendChild(linkDescription);
                 description.href    = "javascript:showDescription('" + DATA[i].description + "');";
@@ -222,8 +172,8 @@ function getManuals(){
                     btnEdit.className   = "btn btn-warning sm-btn";
                     btnDel.className    = "btn btn-danger sm-btn";
 
-                    btnEdit.setAttribute("onclick", "openModalEditDocument(" + DATA[i].id + ", '" + DATA[i].description + "'); return false;");
-                    btnDel.setAttribute("onclick", "openModalDeleteDocument(" + DATA[i].id + "); return false;");
+                    btnEdit.setAttribute("onclick", "openModalEditDocument(" + DATA[i].id + ", '" + DATA[i].description + "', 'Manual'); return false;");
+                    btnDel.setAttribute("onclick", "openModalDeleteDocument(" + DATA[i].id + ", 'Manual'); return false;");
 
 
                     actionsCell.appendChild(btnEdit);
@@ -251,14 +201,14 @@ function showDescription(description){
     $('#descriptionForm').modal('show');
 };
 
-function openModalEditDocument(id, oldDescription){
+function openModalEditDocument(id, oldDescription, type){
 
     var currentNameFile = document.getElementById("row:" + id).cells[1].textContent.split(".");
 
 //  The next tree lines are necessary to setup the confirmation windows to eject the edit function. 
     document.getElementById("headerEvent").innerHTML    = " Actualización de datos";
     document.getElementById("bodyEvent").innerHTML      = "¿Está seguro que desea editar estos datos?";
-    document.getElementById("btnConfirm").setAttribute("onclick", "editDocument(" + id + ", '" + currentNameFile[1] + "', '" + currentNameFile[0] + "', '" + oldDescription + "');");
+    document.getElementById("btnConfirm").setAttribute("onclick", "editDocument(" + id + ", '" + currentNameFile[1] + "', '" + currentNameFile[0] + "', '" + oldDescription + "', '" + type + "');");
 
     document.getElementById("newNameFile").value        = currentNameFile[0];
     document.getElementById("newDescription").value     = oldDescription;
@@ -266,16 +216,16 @@ function openModalEditDocument(id, oldDescription){
     $('#editDocumentForm').modal('show');
 };
 
-function editDocument(idFile, extension, oldNameFile, oldDescription){
-    var newNameFile     = document.getElementById("newNameFile").value + "." + extension;
+function editDocument(idFile, extension, oldName, oldDescription, type){
+    var newName         = document.getElementById("newNameFile").value + "." + extension;
     var newDescription  = document.getElementById("newDescription").value;
 
-    oldNameFile         = oldNameFile + "." + extension;
+    oldName             = oldName + "." + extension;
 
-    if( idFile == "" || newNameFile == "" || newDescription == "" ){
+    if( idFile == "" || newName == "" || newDescription == "" ){
         ModalReportEvent("Error", 28, "Debe rellenar todos los campos");
 
-    }else if( newNameFile == oldNameFile && newDescription == oldDescription ){
+    }else if( newName == oldName && newDescription == oldDescription ){
         $('#ModalConfirmEvent').modal('toggle');
         ModalReportEvent("Advertencia", "", "No se han realizado cambios");
     
@@ -285,63 +235,213 @@ function editDocument(idFile, extension, oldNameFile, oldDescription){
 
         ShowSpinner();
 
-        var Variables   = "idFile=" + idFile + "&newNameFile=" + newNameFile + "&newDescription=" + newDescription;
+        var data    = new FormData();
+        data.append("idFile", idFile);
+        data.append("type", type);
+        data.append("newName", newName);
+        data.append("newDescription", newDescription);
 
-        $.post("backend/updateDocument.php", Variables, function(DATA){
-            if( DATA.ERROR  == true ){
-                setTimeout(function(){
-                    CloseSpinner();
+        $.ajax({
+            url:            "backend/updateDocument.php",
+            type:           "POST",
+            data:           data,
+            contentType:    false,
+            processData:    false,
+            success:        function(DATA){
+                if( DATA.ERROR  == true ){
+                    setTimeout(function(){
+                        CloseSpinner();
+                        ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
 
-                    ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
-                }, 500);
+                    }, 500);
+    
+                }else{
+                    setTimeout(function(){
+                        if( type == "Manual" ){
+                            getManuals();
 
-            }else{
-                setTimeout(function(){
-                    getManuals();
-                    ModalReportEvent("Operación Exitosa", "", DATA.MESSAGE);
-                }, 500);
+                        }else if( type == "Event" ){
+                            document.getElementById("aboutDocumentName").value          = newName;
+                            document.getElementById("aboutDocumentDescription").value   = newDescription;
+
+                            getDocumentEvent();
+
+                        }
+
+                        ModalReportEvent("Operación Exitosa", "", DATA.MESSAGE);
+
+                    }, 500);
+                }
+
+            },
+            error:          function(DATA){
+                console.log(DATA);
             }
         });
+
     }
 };
 
-function openModalDeleteDocument(id){
+function openModalDeleteDocument(id, type){
     document.getElementById("headerEvent").innerHTML    = " Eliminar Documento";
     document.getElementById("bodyEvent").innerHTML      = "¿Está seguro que desea eliminar el documento?";
 
-    document.getElementById("btnConfirm").setAttribute("onclick", "deleteDocument(" + id + ");");
+    document.getElementById("btnConfirm").setAttribute("onclick", "deleteDocument(" + id + ", '" + type + "');");
     $('#ModalConfirmEvent').modal('show');
 };
 
-function deleteDocument(id){
-    $.post("backend/deleteDocument.php", "id=" + id, function(DATA){
+function deleteDocument(id, type){
+    var data    = new FormData();
 
-        if( DATA.ERROR  == true ){
-            ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
-        
-        }else{
-            ModalReportEvent("Operación Exitosa", "", DATA.MESSAGE);
+    data.append("id", id);
+    data.append("type", type);
 
-            var table   = document.getElementById("tableManuals");
-            var target  = "row:" + id;
+    $.ajax({
+        url:            "backend/deleteDocument.php",
+        type:           "POST",
+        data:           data,
+        contentType:    false,
+        processData:    false,
+        success:        function(DATA){
 
-            if( table.children[1].children.length > 1 ){
-                for(var i=0; i<table.children[1].children.length; i++){
-                    if( target == table.children[1].children[i].id ){
-                        table.deleteRow(i + 1);
-
-                        for(var j=i; j<table.children[1].children.length; j++){
-                            table.children[1].children[j].cells[0].textContent  = j + 1;
-                        }
-
-                        break;
-                    }
+            if( DATA.ERROR  == true ){
+                ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
+            
+            }else{
+                if( type == "Event" ){
+                    $("#aboutDocumentForm").modal("toggle");
                 }
 
-            }else{
-                document.getElementById("containerTable").remove();
+                ModalReportEvent("Operación Exitosa", "", DATA.MESSAGE);
+    
+                var table   = document.getElementById("myTable");
+                var target  = "row:" + id;
+                var index   = 0;
+
+                if( table.children[1].children.length > 1 ){
+                    for(var i=0; i<table.children[1].children.length; i++){
+                        if( target == table.children[1].children[i].id ){
+                            table.children[1].children[i].remove();
+                            index   = i;
+
+                            break;
+                        }
+                    }
+
+                    for(var j=index; j<table.children[1].children.length; j++){
+                        table.children[1].children[j].cells[0].textContent  = j + 1;
+                    }
+    
+                }else{
+                    document.getElementById("myContainer").remove();
+                }
+                
             }
-            
+
+        },
+        error:          function(DATA){
+            console.log(DATA);
         }
     });
+};
+
+function handleDocumentEvent(e){
+    var files       = e.target.files;
+    var filesArr    = Array.prototype.slice.call(files);
+    
+    filesArr.forEach(function(f) {
+        if(!f.type.match(".doc") && !f.type.match(".docx") && !f.type.match(".pdf")){
+            ModalReportEvent("Error", 86, "Se ha ingresado un documento incorrecto");
+            document.getElementById("inputFile").value  = "";
+
+        }else{
+            storedFiles.push(f);
+    
+            var reader = new FileReader();
+            reader.readAsDataURL(f);
+
+        }        
+    });
+};
+
+function addDocument(type){
+    var file        = document.getElementById("inputFile").files;
+    var description = document.getElementById("descriptionDocument").value;
+    var source      = type == "Event" ? document.getElementById("typeEvent").value  : "";
+
+    if( type == "Manual" || type == "Event" ){
+        if( description == "" ){
+            ModalReportEvent("Error", 54, "No se ha agregado ninguna descripción al documento");
+        
+        }else if( file.length == 0 ){
+            ModalReportEvent("Error", 88, "Debe seleccionar algún documento");
+        
+        }else{
+
+            if( type == "Event" ){
+                if( source == "Internal" ){
+                    source  = "Interno";
+                
+                }else if( source == "External" ){
+                    source  = "Externo";
+                
+                }else{
+                    return;
+                }
+            }
+
+            ShowSpinner();
+            $("#addDocumentForm").modal("toggle");
+            
+            var formData    = new FormData();
+            formData.append("file", document.getElementById("inputFile").files[0]);
+            formData.append("username", sessionStorage.getItem('USERNAME'));
+            formData.append("description", description);
+            formData.append("source", source);
+    
+            if( type == "Manual" ){
+                formData.append("type", "Manual");
+            
+            }else if( type == "Event" ){
+                formData.append("type", "Event");
+            }
+            
+            $.ajax({
+                url:            "backend/addDocument.php",
+                type:           "POST",
+                data:           formData,
+                contentType:    false,
+                processData:    false,
+                success:        function(DATA){
+                    document.getElementById("inputFile").value              = "";
+                    document.getElementById("descriptionDocument").value    = "";
+    
+                    if( DATA.ERROR ){
+                        setTimeout(()=>{
+                            ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
+                            CloseSpinner();
+                        }, 500);
+                        
+                    }else{
+                        setTimeout(()=>{
+                            if( type == "Manual" ){
+                                getManuals();
+                            }
+    
+                            ModalReportEvent("Operación exitosa", "", DATA.MESSAGE);
+                            CloseSpinner();
+                        }, 500);
+    
+                    }
+    
+                },
+                error:          function(DATA){
+                    console.log(DATA);
+                }
+            });
+        }
+
+    }else{
+
+    }
 };
