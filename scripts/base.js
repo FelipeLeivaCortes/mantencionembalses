@@ -36,12 +36,12 @@ window.addEventListener("load", function(){
 
 function ShowNewFeatures(){
     
-    var dayUpdate       = 20;
+    var dayUpdate       = 22;
     var monthUpdate     = "04";
     var yearUpdate      = "2021";
     var dateUpdate      = dayUpdate + "/" + monthUpdate + "/" + yearUpdate;
 
-    var version         = "1.3";
+    var version         = "1.4";
     
     var versionSystem   = " Actualización del sistema: Versión " + version;
 
