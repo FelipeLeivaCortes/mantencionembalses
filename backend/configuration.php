@@ -5,6 +5,9 @@
 	$PASSWORD       = "";
 	$ADMINISTRATION = "administration";
   $PATH_FILES     = "../docs/empresa";
+  $PATH_EVENTS    = "/documents/events/";
+  $PATH_MANUALS   = "/documents/manuals/";
+
   date_default_timezone_set("America/Santiago");
 
 # The next variable is to assgin by default the last and next maintance of an activity

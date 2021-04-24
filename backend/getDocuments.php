@@ -30,10 +30,10 @@
       $folderStore   = "";
 
       if( $type == "Manual" ){
-         $folderStore	= $PATH_FILES.$ID_COMPANY."/documents/manuals/";
-
+         $folderStore	= $PATH_FILES.$ID_COMPANY.$PATH_MANUALS;
+         
       }else if( $type == "Event" ){
-         $folderStore	= $PATH_FILES.$ID_COMPANY."/documents/events/";
+         $folderStore	= $PATH_FILES.$ID_COMPANY.$PATH_EVENTS;
 
       }
 

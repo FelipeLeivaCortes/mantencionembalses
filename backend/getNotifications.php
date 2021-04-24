@@ -24,26 +24,42 @@
     /***************************************************************************** */
     /***************************************************************************** */
 
+        $arrayRecords   = array();
+        $arrayEvents    = array();
+
         $QUERY  =   $LINK -> prepare("SELECT id FROM registro WHERE estado = 0 AND revisada = 0");
         $QUERY  ->  execute();
         $QUERY  ->  store_result();
-        $QUERY  ->  bind_result($id);
+        $QUERY  ->  bind_result($idRecord);
 
-        if( $QUERY->num_rows == 0 ){
-            $DATA["ERROR"]      = true;
-            $DATA["ERRNO"]      = 8;
-		    $DATA["MESSAGE"]    = "No se han encontrado resultados en su búsqueda";
-
-        }else{
-            $DATA["ERROR"]      = false;
-            $DATA["count"]      = $QUERY->num_rows;
-
+        if( $QUERY->num_rows > 0 ){
+            
             while ( $QUERY -> fetch() ){
-				array_push($DATA, [
-				    'id'    => $id,
+				array_push($arrayRecords, [
+				    'id'    => $idRecord,
 				]);
 			}
         }
+
+        $QUERY  ->  free_result();
+        $QUERY  =   $LINK -> prepare("SELECT id, nombre FROM documento WHERE tipo = 'Event' AND archivado = 0;");
+        $QUERY  ->  execute();
+        $QUERY  ->  store_result();
+        $QUERY  ->  bind_result($idDocument, $nameDocument);
+
+        if( $QUERY->num_rows > 0 ){
+            
+            while ( $QUERY -> fetch() ){
+				array_push($arrayEvents, [
+				    'id'    => $idDocument,
+                    'name'  => $nameDocument,
+                    'link'  => "mantencionembalses/".$PATH_FILES.$ID_COMPANY.$PATH_EVENTS.$nameDocument,
+				]);
+			}
+        }
+
+        $DATA["records"]    = $arrayRecords;
+        $DATA["events"]     = $arrayEvents;
 
         $QUERY ->  free_result();
 		$LINK   ->  close();

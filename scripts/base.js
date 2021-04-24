@@ -1,3 +1,13 @@
+/**
+ * Only modify these parameters, to avoid any error
+ * */
+
+ var dayUpdate       = 23;
+ var monthUpdate     = "04";
+ var yearUpdate      = "2021";
+ var version         = "1.4.1";
+
+
 /* By default, the base.js will load the home´s content */
 window.addEventListener("load", function(){
    ConfigureSystem();
@@ -5,22 +15,7 @@ window.addEventListener("load", function(){
    var items 	 	= document.getElementById("AdminContainer").children.length;
 
     if( items > 0 ){
-
-        $.post("backend/getNotifications.php", "", function(DATA){
-            if( !DATA.ERROR && DATA.count > 0 ){
-                document.getElementById("notificationsIcon").setAttribute("data-target", "#notificationsForm");
-                document.getElementById("notificationsIcon").setAttribute("data-toggle", "modal");
-                document.getElementById("notificationsIcon").setAttribute("href", "");
-
-                var spanCount       = document.createElement("span");
-                spanCount.className = "badge badge-pill badge-warning notification";
-                spanCount.innerHTML = DATA.count;
-
-                document.getElementById("notificationsIcon").appendChild(spanCount);
-                refillNotifications(DATA);
-            }
-        });
-
+        getNotifications();
         loadStadistics();
 
     }else{
@@ -35,13 +30,7 @@ window.addEventListener("load", function(){
 });
 
 function ShowNewFeatures(){
-    
-    var dayUpdate       = 22;
-    var monthUpdate     = "04";
-    var yearUpdate      = "2021";
     var dateUpdate      = dayUpdate + "/" + monthUpdate + "/" + yearUpdate;
-
-    var version         = "1.4";
     
     var versionSystem   = " Actualización del sistema: Versión " + version;
 
@@ -50,8 +39,8 @@ function ShowNewFeatures(){
         "características:"
     
     var bodyFeature     = "<b>* Memoranda:</b> Ahora es posible agregar documentos de eventualidades desde el botón <i>'Informar eventualidad'</i>.<br><br>" +
-    "<b>* Reportes:</b> Puedes descargar, editar, eliminar o archivar los reportes de eventualidades desde" +
-    " el botón <i>'Informes de eventualidades'</i>.";
+    "<b>* Reportes:</b> Puedes descargar, editar, eliminar o archivar los reportes de eventualidades desde el botón <i>'Informes de eventualidades'</i>.<br><br>" +
+    "<b>* Notificaciones:</b> Cuando se agregue reporte de eventualidad, el sistema lo informará mediante el cuadro de noticicaciones.";
 
     $('#versionSystem').html(versionSystem);
     $('#newFeatureHeader').html(headerFeature);
@@ -72,21 +61,71 @@ function ConfigureSystem(){
    document.getElementById("logoCompany").setAttribute("src", path);
 };
 
-function refillNotifications(data){
+function getNotifications(){
 
-    $('#formNotifications').empty();
+    $.ajax({
+        url:            "backend/getNotifications.php",
+        type:           "POST",
+        contentType:    false,
+        processData:    false,
+        success:        function(DATA){
+            if( !DATA.ERROR ){
+                document.getElementById("notificationsIcon").setAttribute("data-target", "#notificationsForm");
+                document.getElementById("notificationsIcon").setAttribute("data-toggle", "modal");
+                document.getElementById("notificationsIcon").setAttribute("href", "");
+    
+                var spanCount       = document.createElement("span");
+                spanCount.className = "badge badge-pill badge-warning notification";
+                spanCount.innerHTML = "!";
+                document.getElementById("notificationsIcon").appendChild(spanCount);
+                
+                $('#formNotifications').empty();
 
-    for(var i=0; i<data.count; i++){
-        var div             = document.createElement("div");
-        div.setAttribute("id", data[i].id);
-        var content         = document.createElement("p");
+                for(var i=0; i<DATA.events.length; i++){
+                    var container       = document.createElement("div");
+                    var commonMessage   = document.createElement("p");
+                    var link2Document   = document.createElement("a");
+                    
+                    container.className       = "form-group";
+                    commonMessage.innerHTML   = "Se ha emitido una alerta asociada al documento: ";
+                    commonMessage.setAttribute("style", "float: left; margin-right: 1%;");
 
-        div.className       = "form-group";
-        content.innerHTML   = "La guía N° " + data[i].id + " aún está pendiente";
+                    link2Document.textContent    = DATA.events[i].name;
+                    link2Document.href           = DATA.events[i].link;
+                    
+                    container.appendChild(commonMessage);
+                    container.appendChild(link2Document);
+
+                    document.getElementById("formNotifications").appendChild(container);
+                } 
+
+
+                for(var i=0; i<DATA.records.length; i++){
+                    var div             = document.createElement("div");
+                    div.setAttribute("id", "alertRecord:" + DATA.records[i].id);
+                    var content         = document.createElement("p");
+
+                    div.className       = "form-group";
+                    content.innerHTML   = "La guía N° " + DATA.records[i].id + " aún está pendiente";
+                    
+                    div.appendChild(content);
+                    document.getElementById("formNotifications").appendChild(div);
+                } 
+            }
+
+        },
+        error:          function(DATA){
+            console.log(DATA);
+        }
+
+    });
+
+    $.post("backend/getNotifications.php", "", function(DATA){
         
-        div.appendChild(content);
-        document.getElementById("formNotifications").appendChild(div);
-    }   
+    });
+
+
+      
 }
 
 /*  Depending what button was pressed by the user, this script going to load the content relationated with that file

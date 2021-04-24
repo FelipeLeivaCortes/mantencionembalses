@@ -83,13 +83,13 @@
                 
                 <!-- Modal Header -->
                 <div class="modal-header">
-                    <h4 class="modal-title"><span class="icon-add-user"></span> Notificaciones</h4>
+                    <h4 class="modal-title"><span class="icon-new-message"></span> Notificaciones</h4>
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                 </div>
             
                 <!-- Modal body -->
-                <div class="modal-body">
-                    <form id="formNotifications" class="form-horizontal" role="form" style="height: 100%;">
+                <div class="modal-body" style="height: 300%;">
+                    <form id="formNotifications" class="form-horizontal" role="form" style="height: auto;">
                     </form>                    
                 </div>
             
