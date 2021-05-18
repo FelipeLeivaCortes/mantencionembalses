@@ -74,15 +74,17 @@ function getRecord(idRecord, onlyRead){
                 var locationHeadCell        = document.createElement("th");
                 var statusHeadCell          = document.createElement("th");
                 var imagesHeadCell          = document.createElement("th");
+                var importanceHeadCell      = document.createElement("th");
 
                 indexHeadCell.setAttribute("scope", "col");
                 activityHeadCell.setAttribute("scope", "col");
-                activityHeadCell.setAttribute("style", "width: 25%;");
+                activityHeadCell.setAttribute("style", "width: 20%;");
                 descriptionHeadCell.setAttribute("scope", "col3");
-                descriptionHeadCell.setAttribute("style", "width: 30%;");
+                descriptionHeadCell.setAttribute("style", "width: 25%;");
                 locationHeadCell.setAttribute("scope", "col");
                 statusHeadCell.setAttribute("scope", "col");
                 imagesHeadCell.setAttribute("scope", "col");
+                importanceHeadCell.setAttribute("scope", "col");
 
                 var indexHead       = document.createTextNode("N°");
                 var activityHead    = document.createTextNode("Actividad");
@@ -90,6 +92,7 @@ function getRecord(idRecord, onlyRead){
                 var locationHead    = document.createTextNode("Ubicación");
                 var statusHead      = document.createTextNode("Estado");
                 var imagesHead      = document.createTextNode("Anexos");
+                var importanceHead  = document.createTextNode("Importancia");
 
                 if( onlyRead ){
                     indexHeadCell.appendChild(indexHead);
@@ -112,12 +115,14 @@ function getRecord(idRecord, onlyRead){
                     descriptionHeadCell.appendChild(descriptionHead);
                     statusHeadCell.appendChild(statusHead);
                     imagesHeadCell.appendChild(imagesHead);
+                    importanceHeadCell.appendChild(importanceHead);
 
                     rowHead.appendChild(indexHeadCell);
                     rowHead.appendChild(activityHeadCell);
                     rowHead.appendChild(descriptionHeadCell);
                     rowHead.appendChild(statusHeadCell);
                     rowHead.appendChild(imagesHeadCell);
+                    rowHead.appendChild(importanceHeadCell);
 
                 }
 
@@ -139,6 +144,7 @@ function getRecord(idRecord, onlyRead){
                     var descriptionCell = document.createElement("td");
                     var statusCell      = document.createElement("td");
                     var annexesCell     = document.createElement("td");
+                    var importanceCell  = document.createElement("td");
                     
                     // Here is storaged the content into a node
                     var index           = document.createTextNode( i + 1 );
@@ -235,16 +241,41 @@ function getRecord(idRecord, onlyRead){
                              }
                          }
 
+                        /**
+                        * Adding the importance of an activity
+                        */
+                        var selectImportance    = document.createElement("select");
+                        var optionNormal        = document.createElement("option");
+                        var optionImportant     = document.createElement("option");
+
+                        optionNormal.textContent    = "Normal";
+                        optionImportant.textContent = "Urgente";
+
+                        selectImportance.add(optionNormal);
+                        selectImportance.add(optionImportant);
+
+                        if( DATA[i].importance == "0" ){
+                            selectImportance.value  = "Normal";
+
+                        }else if( DATA[i].importance == "1" ){
+                            selectImportance.value  = "Urgente";
+
+                        }else{
+                            selectImportance.value  = "Error";
+
+                        }
+
                         //  If the guide is incomplete
                         if( DATA[i].state == "0" ){
                             status.value        = "Pendiente";
                             isComplete          = false;
 
                         }else{
-                            status.value            = "Realizada";
-                            description.disabled    = true;
-                            status.disabled         = true;
-                            imageButton.disabled    = true;
+                            status.value                = "Realizada";
+                            description.disabled        = true;
+                            status.disabled             = true;
+                            imageButton.disabled        = true;
+                            selectImportance.disabled   = true;
                         }
 
                         if( DATA[i].name == 'realizar piezometría' ){
@@ -262,12 +293,14 @@ function getRecord(idRecord, onlyRead){
                             });
                         }
 
+
                         // Here is inserted the content into the cells
                         indexCell.appendChild(index);
                         activityCell.appendChild(activity);
                         descriptionCell.appendChild(description);
                         statusCell.appendChild(status);
                         annexesCell.appendChild(imageButton);
+                        importanceCell.appendChild(selectImportance);
 
                         // Here is inserted the cells into a row
                         row.appendChild(indexCell);
@@ -275,6 +308,7 @@ function getRecord(idRecord, onlyRead){
                         row.appendChild(descriptionCell);
                         row.appendChild(statusCell);
                         row.appendChild(annexesCell);
+                        row.appendChild(importanceCell);
 
                     }
                     
@@ -346,12 +380,16 @@ function openModalConfirmEvent(idRecord){
     
     var arrayObservations   = [];
     var arrayStates         = [];
+    var arrayImportances    = [];
     var error               = false;
 
     for(var i=0; i<table.children.length; i++){
         var observation     = table.children[i].cells[2].children[0].value.replace(/\n/g, "");
         arrayObservations.push( observation.replace(/,/g, "|") );
 
+        /**
+         * Getting the data from the states
+         */
         if( table.children[i].cells[3].children[0].value == "Pendiente" ){
             arrayStates.push( "0" );
         
@@ -364,6 +402,22 @@ function openModalConfirmEvent(idRecord){
             
             break;    
         }
+
+        /**
+         * Getting the importance of every activity
+         */
+        if( table.children[i].cells[5].children[0].value == "Normal" ){
+            arrayImportances.push("0");
+        
+        }else if( table.children[i].cells[5].children[0].value == "Urgente" ){
+            arrayImportances.push("1");
+        
+        }else{
+            ModalReportEvent("Error", 93, "La importancia de la actividad en la fila " + (i + 1) + " ha sido modificado incorrectamente");
+            error   = true;
+            
+            break;    
+        }
         
     }
 
@@ -371,28 +425,34 @@ function openModalConfirmEvent(idRecord){
         document.getElementById("headerEvent").innerHTML    = " Actualizar guía de mantención";
         document.getElementById("bodyEvent").innerHTML      = "¿Está seguro que desea guardar los cambios?";
 
-        document.getElementById("btnConfirm").setAttribute("onclick", "updateRecord(" + idRecord + ", '" + arrayObservations + "', '" + arrayStates + "');");
+        document.getElementById("btnConfirm").setAttribute("onclick", "updateRecord(" + idRecord + ", '" + arrayObservations + "', '" + arrayStates + "','" + arrayImportances + "');");
 
         $('#ModalConfirmEvent').modal('show');
     }
 };
 
-function updateRecord(idRecord, arrayObservations, arrayStates){
+function updateRecord(idRecord, arrayObservations, arrayStates, arrayImportances){
     $('#ModalConfirmEvent').modal('toggle');
     ShowSpinner();
 
     piezometriaData     = sessionStorage.getItem("piezometriaData");
     piezometriaData == null ? [] : sessionStorage.removeItem("piezometriaData");
 
-
-    var Variables   = "idRecord=" + idRecord + "&arrayObservations=" + arrayObservations + "&arrayStates=" + 
-                        arrayStates + "&piezometriaData=" + piezometriaData;
+    var data        = new FormData();
+    
+    data.append("idRecord", idRecord);
+    data.append("arrayObservations", arrayObservations);
+    data.append("arrayStates", arrayStates);
+    data.append("piezometriaData", piezometriaData);
+    data.append("arrayImportances", arrayImportances);
 
     $.ajax({
-        type:   "POST",
-        url:    "backend/updateRecord.php",
-        data:   Variables,
-        success: function(DATA){
+        type:           "POST",
+        url:            "backend/updateRecord.php",
+        contentType:    false,
+        processData:    false,
+        data:           data,
+        success:        function(DATA){
             console.log(DATA);
             if( DATA.ERROR ){
                 setTimeout(()=>{
@@ -410,11 +470,8 @@ function updateRecord(idRecord, arrayObservations, arrayStates){
 
             }
         },
-        error: function (DATA) {
-            setTimeout(()=>{
-                CloseSpinner();
-                ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
-            }, 500);
+        error:          function (DATA) {
+            console.log(DATA);
         }
 
     });

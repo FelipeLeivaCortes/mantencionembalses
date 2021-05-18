@@ -24,23 +24,46 @@
     /***************************************************************************** */
     /***************************************************************************** */
 
-        $arrayRecords   = array();
-        $arrayEvents    = array();
+        $arrayRecords       = array();
+        $arrayEvents        = array();
+        $arrayOutstanding   = array();
 
-        $QUERY  =   $LINK -> prepare("SELECT id FROM registro WHERE estado = 0 AND revisada = 0");
+        /**
+         * Getting the pending and important records
+         */ 
+        $QUERY  =   $LINK -> prepare("SELECT id, importancias FROM registro WHERE estado = 0 AND revisada = 0");
         $QUERY  ->  execute();
         $QUERY  ->  store_result();
-        $QUERY  ->  bind_result($idRecord);
+        $QUERY  ->  bind_result($idRecord, $stringImportance);
 
         if( $QUERY->num_rows > 0 ){
-            
+
             while ( $QUERY -> fetch() ){
 				array_push($arrayRecords, [
 				    'id'    => $idRecord,
 				]);
+
+                $arrayImportances   = explode(",", $stringImportance);
+                $founded            = false;
+
+                for($i=0; $i<sizeof($arrayImportances); $i++){
+                    if( $arrayImportances[$i] == "1" ){
+                        $founded    = true;
+                        break;
+                    }
+                }
+
+                if( $founded ){
+                    array_push($arrayOutstanding, [
+                        'id'    => $idRecord,
+                    ]);
+                }
 			}
         }
 
+        /**
+         * Getting the event´s document
+         */
         $QUERY  ->  free_result();
         $QUERY  =   $LINK -> prepare("SELECT id, nombre FROM documento WHERE tipo = 'Event' AND archivado = 0;");
         $QUERY  ->  execute();
@@ -58,8 +81,9 @@
 			}
         }
 
-        $DATA["records"]    = $arrayRecords;
-        $DATA["events"]     = $arrayEvents;
+        $DATA["records"]        = $arrayRecords;
+        $DATA["events"]         = $arrayEvents;
+        $DATA["outstanding"]    = $arrayOutstanding;
 
         $QUERY ->  free_result();
 		$LINK   ->  close();

@@ -2,10 +2,10 @@
  * Only modify these parameters, to avoid any error
  * */
 
- var dayUpdate       = 23;
- var monthUpdate     = "04";
+ var dayUpdate       = 17;
+ var monthUpdate     = "05";
  var yearUpdate      = "2021";
- var version         = "1.4.1";
+ var version         = "1.4.3";
 
 
 /* By default, the base.js will load the home´s content */
@@ -38,9 +38,8 @@ function ShowNewFeatures(){
         "implementado la nueva versión <b>" + version + "</b>, en la cúal destacan las siguientes " +
         "características:"
     
-    var bodyFeature     = "<b>* Memoranda:</b> Ahora es posible agregar documentos de eventualidades desde el botón <i>'Informar eventualidad'</i>.<br><br>" +
-    "<b>* Reportes:</b> Puedes descargar, editar, eliminar o archivar los reportes de eventualidades desde el botón <i>'Informes de eventualidades'</i>.<br><br>" +
-    "<b>* Notificaciones:</b> Cuando se agregue reporte de eventualidad, el sistema lo informará mediante el cuadro de noticicaciones.";
+    var bodyFeature     = "<b>* Notificaciones:</b> Desde ahora, cada vez que un usuario marque una actividad como importante, se informará al iniciar sesión.<br><br>" +
+    "<b>* Mantenciones:</b> Todo usuario con permisos de operario podrá indicar al sistema si una actividad tiene una importancia de tipo normal o urgente.";
 
     $('#versionSystem').html(versionSystem);
     $('#newFeatureHeader').html(headerFeature);
@@ -81,6 +80,9 @@ function getNotifications(){
                 
                 $('#formNotifications').empty();
 
+                /**
+                 * Alert to show the events
+                 */
                 for(var i=0; i<DATA.events.length; i++){
                     var container       = document.createElement("div");
                     var commonMessage   = document.createElement("p");
@@ -100,6 +102,9 @@ function getNotifications(){
                 } 
 
 
+                /**
+                 * Alert to show the pending records
+                 */
                 for(var i=0; i<DATA.records.length; i++){
                     var div             = document.createElement("div");
                     div.setAttribute("id", "alertRecord:" + DATA.records[i].id);
@@ -110,7 +115,27 @@ function getNotifications(){
                     
                     div.appendChild(content);
                     document.getElementById("formNotifications").appendChild(div);
-                } 
+                }
+
+                /**
+                 * Alert to show the important records
+                 */
+                for(var i=0; i<DATA.outstanding.length; i++){
+                    var div             = document.createElement("div");
+                    div.setAttribute("id", "alertRecord:" + DATA.outstanding[i].id);
+                    var content         = document.createElement("p");
+                    var link            = document.createElement("a");
+
+                    link.href           = "javascript:loadRecords(" + DATA.outstanding[i].id + ")";
+                    link.textContent    = "Ver Detalles";
+
+                    div.className       = "form-group";
+                    content.innerHTML   = "La guía N° " + DATA.outstanding[i].id + " ha sido marcada como importante: ";
+                    content.appendChild(link);
+                    
+                    div.appendChild(content);
+                    document.getElementById("formNotifications").appendChild(div);
+                }
             }
 
         },
@@ -119,12 +144,6 @@ function getNotifications(){
         }
 
     });
-
-    $.post("backend/getNotifications.php", "", function(DATA){
-        
-    });
-
-
       
 }
 
@@ -224,7 +243,7 @@ function loadMaintances(){
     }, 500);
 }
 
-function loadRecords(){
+function loadRecords(idRecord){
     document.getElementById("title-page").innerHTML = "Guías de Mantención";
 
     var navbar = new XMLHttpRequest();
@@ -241,6 +260,11 @@ function loadRecords(){
 
     setTimeout(() => {
         initRecords();
+
+        if( idRecord != 0 ){
+            $("#notificationsForm").modal("toggle");
+            getRecord(idRecord, true);
+        }
     }, 500);
 }
 

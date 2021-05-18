@@ -28,6 +28,7 @@
         $arrayObservations  =   explode(",", $_POST["arrayObservations"]);
         $arrayStates        =   explode(",", $_POST["arrayStates"]);
         $arrayPiezometria   =   explode(",", $_POST["piezometriaData"]);
+        $arrayImportances   =   explode(",", $_POST["arrayImportances"]);
 
         $QUERY  =   $LINK -> prepare("SELECT actividades, estados FROM registro WHERE id = ?");
         $QUERY  ->  bind_param("i", $idRecord);
@@ -207,10 +208,11 @@
 
                     }
 
-                    $stringStates   =   implode(",", $arrayStatesOriginal);
+                    $stringStates       =   implode(",", $arrayStatesOriginal);
+                    $stringImportances  =   implode(",", $arrayImportances);
 
-                    $QUERY  	=   $LINK -> prepare("UPDATE registro SET estados = ? WHERE id = ?");
-                    $QUERY  	->	bind_param('si', $stringStates, $idRecord);
+                    $QUERY  	=   $LINK -> prepare("UPDATE registro SET estados = ?, importancias = ? WHERE id = ?");
+                    $QUERY  	->	bind_param('ssi', $stringStates, $stringImportances, $idRecord);
                     $QUERY  	->  execute();
                     
                     if( $QUERY->affected_rows == 1 ){
@@ -226,9 +228,6 @@
                     $empty  = true;
 
                     for( $i=0; $i<sizeof($arrayObservations); $i++ ){
-                        array_push($DATA, [
-                            'test'  => $arrayObservations[$i],
-                        ]);
                         if( $arrayObservations[$i] != '' ){
                             $empty  = false;
                             break;

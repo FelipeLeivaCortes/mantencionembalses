@@ -94,7 +94,7 @@ window.addEventListener("load", function(event){
                 link1.setAttribute("href", "javascript:loadStadistics();");
                 link2.setAttribute("href", "javascript:loadUsers();");
                 link3.setAttribute("href", "javascript:loadActivities();");
-                link4.setAttribute("href", "javascript:loadRecords();");
+                link4.setAttribute("href", "javascript:loadRecords(0);");
                 link5.setAttribute("href", "javascript:loadReports();");
 
                 link1.appendChild(span1);

@@ -40,11 +40,11 @@
       $username      = intval($_POST["username"]);
       $isAdmin       = boolval($_POST["isAdmin"]);
 
-      $QUERY  =   $LINK -> prepare("SELECT encargado, actividades, fechaInicio, estados FROM registro WHERE id = ?");
+      $QUERY  =   $LINK -> prepare("SELECT encargado, actividades, fechaInicio, estados, importancias FROM registro WHERE id = ?");
       $QUERY  ->  bind_param("i", $idRecord);
       $QUERY  ->  execute();
       $QUERY  ->  store_result();
-      $QUERY  ->  bind_result($usernameRecorded, $activities, $dateStart, $states);
+      $QUERY  ->  bind_result($usernameRecorded, $activities, $dateStart, $states, $importances);
       $QUERY  ->  fetch();
 
       if( $QUERY->num_rows == 0 ){
@@ -59,12 +59,15 @@
 
       }else{
          if( $isAdmin || $username == $usernameRecorded ){   
-            $arrayStates         = explode(",", $states);
             $arrayIds           	= explode(",", $activities);
+            $arrayStates         = explode(",", $states);
+            $arrayImportances    = explode(",", $importances);
+
             $arrayActivities    	= array();
             $arrayLocations      = array();
             $arrayWarning       	= array();
             $arrayIdsSuccess     = array();
+
             $error              	= false;
             $warning            	= 0;
             $success            	= 0;
@@ -173,10 +176,11 @@
 
                   for($i=0; $i<sizeof($arrayActivities); $i++){
                      array_push($DATA, [
-                        'id'        => $arrayIdsSuccess[$i],
-                        'name'      => $arrayActivities[$i],
-                        'location'  => $arrayLocations[$i],
-                        'state'     => $arrayStates[$i],
+                        'id'           => $arrayIdsSuccess[$i],
+                        'name'         => $arrayActivities[$i],
+                        'location'     => $arrayLocations[$i],
+                        'state'        => $arrayStates[$i],
+                        'importance'   => $arrayImportances[$i],
                      ]);
                   }
 

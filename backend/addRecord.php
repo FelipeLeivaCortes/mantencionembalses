@@ -28,15 +28,17 @@
         $activities	= $_POST["activities"];
 		$dateStart	= date('Y-m-d');
 
-		$arrayAux 	= explode(",", $activities);
-		$stringAux	= "0";
+		$arrayActivities	= explode(",", $activities);
+		$stringStates		= "0";
+		$stringImportance	= "0";
 
-		for( $i=1; $i<sizeof($arrayAux); $i++ ){
-			$stringAux 	= $stringAux.',0';
+		for( $i=1; $i<sizeof($arrayActivities); $i++ ){
+			$stringStates 		= $stringStates.',0';
+			$stringImportance	= $stringImportance.",0";
 		}
 
-		$QUERY  =   $LINK -> prepare("INSERT INTO registro (encargado, actividades, fechaInicio, fechaTermino, estados) VALUES (?, ?, ?, ?, ?);");
-		$QUERY  ->  bind_param('issss', $username, $activities, $dateStart, $defaultDate, $stringAux);
+		$QUERY  =   $LINK -> prepare("INSERT INTO registro (encargado, actividades, fechaInicio, fechaTermino, estados, iimportancias) VALUES (?, ?, ?, ?, ?, ?);");
+		$QUERY  ->  bind_param('isssss', $username, $activities, $dateStart, $defaultDate, $stringStates, $stringImportance);
 		$QUERY  ->  execute();
 
 		if( $QUERY->affected_rows == 1 ){
