@@ -40,11 +40,11 @@
       $username      = intval($_POST["username"]);
       $isAdmin       = boolval($_POST["isAdmin"]);
 
-      $QUERY  =   $LINK -> prepare("SELECT encargado, actividades, fechaInicio, estados, importancias FROM registro WHERE id = ?");
+      $QUERY  =   $LINK -> prepare("SELECT encargado, actividades, fechaInicio, estados, importancias, estado FROM registro WHERE id = ?");
       $QUERY  ->  bind_param("i", $idRecord);
       $QUERY  ->  execute();
       $QUERY  ->  store_result();
-      $QUERY  ->  bind_result($usernameRecorded, $activities, $dateStart, $states, $importances);
+      $QUERY  ->  bind_result($usernameRecorded, $activities, $dateStart, $states, $importances, $state);
       $QUERY  ->  fetch();
 
       if( $QUERY->num_rows == 0 ){
@@ -58,7 +58,7 @@
          $DATA["MESSAGE"]    = "Se han encontrado duplicidades en sus datos. Comuníquese con el administrador";
 
       }else{
-         if( $isAdmin || $username == $usernameRecorded ){   
+         if( $isAdmin || $username == $usernameRecorded ){
             $arrayIds           	= explode(",", $activities);
             $arrayStates         = explode(",", $states);
             $arrayImportances    = explode(",", $importances);
@@ -141,27 +141,34 @@
                   $arrayObservations   = array();
                   $arrayAnnexes        = array();
 
-                  $folderRecord        = $PATH_FILES.$ID_COMPANY."/records/record_".$idRecord."/record_".$idRecord.".txt";
+                  $folderRecord        = $PATH_FILES.$ID_COMPANY."/records/record_".$idRecord;
 
                   if( file_exists($folderRecord) ){
-                     $file    = fopen($folderRecord, "r");
-                     $index   = 0;
+                     $fileRecord    = $PATH_FILES.$ID_COMPANY."/records/record_".$idRecord."/record_".$idRecord.".txt";
 
-                     while( !feof($file) ){
-                        $line          = fgets($file);
-                        
-                        $arrayObservations[$index] = $line;
-                        
-                        $lineSplitted  = explode("|", $line);
-                        $idActivity    = $lineSplitted[0];
-                        
-                        $folderAnnexes          = $PATH_FILES.$ID_COMPANY."/records/record_".$idRecord."/activity_".$idActivity."_*";
-                        $arrayAnnexes[$index]   = glob($folderAnnexes, GLOB_BRACE)? true : false;
+                     if(file_exists($fileRecord)){
+                        $file    = fopen($fileRecord, "r");
+                        $index   = 0;
 
-                        $index++;
+                        while( !feof($file) ){
+                           $line          = fgets($file);
+                           
+                           $arrayObservations[$index] = $line;
+                           
+                           $lineSplitted  = explode("|", $line);
+                           $idActivity    = $lineSplitted[0];
+                           
+                           $index++;
+                        }
+                        
+                        fclose($file);
                      }
-                     
-                     fclose($file);
+
+                     for($i=0; $i<sizeof($arrayIds); $i++){
+                        $fileAnnexes      = $PATH_FILES.$ID_COMPANY."/records/record_".$idRecord."/activity_".$arrayIds[$i]."_*";
+                        $arrayAnnexes[$i] = glob($fileAnnexes, GLOB_BRACE) ? true : false;
+                     }
+
                   }
 
                   $DATA["ERROR"]             = false;
@@ -173,6 +180,7 @@
                   $DATA["name_mandated"]     = $name_mandated;
                   $DATA["lastname_mandated"] = $lastname_mandated;
                   $DATA["COUNT"]             = sizeof($arrayActivities);
+                  $DATA["stateRecord"]       = $state;
 
                   for($i=0; $i<sizeof($arrayActivities); $i++){
                      array_push($DATA, [

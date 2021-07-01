@@ -1,111 +1,107 @@
 
- window.onload  = StartupConfig;
+window.onload  = StartupConfig;
  
-function StartupConfig(){
-FocusOn("uname");
-FormatRut("uname");
-FormatRut("recoveryUname");
-EventToPressEnter("Validate", "");
+let session;
+let rut;
 
-document.getElementById("hash").setAttribute("style", "resize: none;");
+function StartupConfig(){
+    FocusOn("uname");
+    EventToChangeInput("newRut('uname')", "uname");
+    EventToPressEnter("validateCredentials", "");
 }
 
-function Validate(){
 
-    var rut         = document.getElementById("uname").value;
-    var status      = isValidRut(rut, "uname");
 
-    if( status === true ){
-        var rut         = document.getElementById("uname").value;
-        var username    = ParseRut(rut);
-        var password    = document.getElementById("psw").value;
+function validateCredentials(){
+    let input2  = document.getElementById("psw").value;
+    
+    session     = new Session(rut.username, input2);
 
-        if( password === "" ){
-            ModalReportEvent("Error", 13, "No se ha ingresado ninguna contraseña");
-            document.getElementById("uname").style.borderColor = "white";
-            document.getElementById("psw").style.borderColor = "red";
-            document.getElementById("psw").focus();
-            
-        
-        }else{
-            var Variables   = "username="+username + "&password="+password;
-            $.post("backend/login.php", Variables, function(DATA){
-                var delay   = 100;
-                
-                setTimeout(function(){
-                    if( DATA.ERROR === true ){
-                        ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
+    if( session.isValid() ){
+        data   = new FormData();
+        data.append("username", session.username);
+        data.append("password", session.password);
+
+        $.ajax({
+            url:            "backend/login.php",
+            type:           "POST",
+            data:           data,
+            processData:    false,
+            contentType:    false,
+            error:          function(response){
+                console.log(response);
+            },
+            success:        function(response){
+                if( response.ERROR === true ){
+                    ModalReportEvent("Error", response.ERRNO, response.MESSAGE);
+                    
+                    switch(response.ERRNO){
+                        // The password wrong
+                        case 14:
+                            document.getElementById("psw").focus();
+                            document.getElementById("psw").value    = "";
+                            document.getElementById("psw").style.borderColor = "red";
+                            document.getElementById("uname").style.borderColor = "white";
+                            break;
+
+                        // The user is doesn´t registered
+                        case 4:
+                            document.getElementById("uname").value  = "";
+                            document.getElementById("psw").value    = "";
+
+                            document.getElementById("uname").focus();
+                            document.getElementById("uname").style.borderColor = "red";
+                            document.getElementById("psw").style.borderColor = "white";
+                            break;
                         
-                        switch(DATA.ERRNO){
-                            // The password wrong
-                            case 14:
-                                document.getElementById("psw").focus();
-                                document.getElementById("psw").value    = "";
-                                document.getElementById("psw").style.borderColor = "red";
-                                document.getElementById("uname").style.borderColor = "white";
-                                break;
-
-                            // The user is doesn´t registered
-                            case 4:
-                                document.getElementById("uname").value  = "";
-                                document.getElementById("psw").value    = "";
-
-                                document.getElementById("uname").focus();
-                                document.getElementById("uname").style.borderColor = "red";
-                                document.getElementById("psw").style.borderColor = "white";
-                                break;
+                        // Licence expired
+                        case 11 : case 38:
+                            try{
+                                document.getElementById("bodyModalReportEvent").children[1].remove();
+                            }catch(e){
+                                console.log(e);
+                            }
                             
-                            // Licence expired
-                            case 11 : case 38:
+                            var link        = document.createElement("a");
+                            link.innerHTML  = "Para renovar su licencia, haga click aquí"
+                            link.setAttribute("style", "color: black;");
+                            link.style.textDecoration   = "underline";
+                            $(link).on( "click", function() {
+                                $('#ModalReportEvent').modal('toggle');
+                                $('#renovateLicenceModal').modal('show');
+
                                 try{
                                     document.getElementById("bodyModalReportEvent").children[1].remove();
                                 }catch(e){
                                     console.log(e);
                                 }
-                                
-                                var link        = document.createElement("a");
-                                link.innerHTML  = "Para renovar su licencia, haga click aquí"
-                                link.setAttribute("style", "color: black;");
-                                link.style.textDecoration   = "underline";
-                                $(link).on( "click", function() {
-                                    $('#ModalReportEvent').modal('toggle');
-                                    $('#renovateLicenceModal').modal('show');
+                            });
 
-                                    try{
-                                        document.getElementById("bodyModalReportEvent").children[1].remove();
-                                    }catch(e){
-                                        console.log(e);
-                                    }
-                                    });
+                            document.getElementById("bodyModalReportEvent").appendChild(link);
 
-                                document.getElementById("bodyModalReportEvent").appendChild(link);
-
-                                break;
-                
-                            case 49:
-                                ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
-                                break;
-                        }
-
-                    }else{
-                        sessionStorage.setItem("USERNAME", username);
-                        sessionStorage.setItem("NAME", DATA.name);
-                        sessionStorage.setItem("LASTNAME", DATA.lastname);
-                        sessionStorage.setItem("PERMISSIONS", JSON.stringify(DATA.permissions));
-                        sessionStorage.setItem("ID_COMPANY", JSON.stringify(DATA.idCompany));
-                        
-                        location.href   = "base.php";
+                            break;
+            
+                        case 49:
+                            ModalReportEvent("Error", response.ERRNO, response.MESSAGE);
+                            break;
                     }
+
+                }else{
+                    sessionStorage.setItem("USERNAME", session.username);
+                    sessionStorage.setItem("NAME", response.name);
+                    sessionStorage.setItem("LASTNAME", response.lastname);
+                    sessionStorage.setItem("PERMISSIONS", JSON.stringify(response.permissions));
+                    sessionStorage.setItem("ID_COMPANY", JSON.stringify(response.idCompany));
                     
-                }, delay);
-                
-            });
-        }    
+                    location.href   = "base.php";
+                }
+            }
+        });
+
     }
 }
 
-function ValidateLicence(){
-    
+function ValidateLicence(){   
     var hash   = document.getElementById("hash").value;
 
     if(hash.length == 96){

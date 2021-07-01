@@ -2,10 +2,10 @@
  * Only modify these parameters, to avoid any error
  * */
 
- var dayUpdate       = 17;
- var monthUpdate     = "05";
+ var dayUpdate       = 30;
+ var monthUpdate     = "06";
  var yearUpdate      = "2021";
- var version         = "1.4.3";
+ var version         = "1.5";
 
 
 /* By default, the base.js will load the home´s content */
@@ -38,8 +38,8 @@ function ShowNewFeatures(){
         "implementado la nueva versión <b>" + version + "</b>, en la cúal destacan las siguientes " +
         "características:"
     
-    var bodyFeature     = "<b>* Notificaciones:</b> Desde ahora, cada vez que un usuario marque una actividad como importante, se informará al iniciar sesión.<br><br>" +
-    "<b>* Mantenciones:</b> Todo usuario con permisos de operario podrá indicar al sistema si una actividad tiene una importancia de tipo normal o urgente.";
+    var bodyFeature     = "<b>* Optimización:</b> Se ha aplicado optimizaciones al sistema.<br><br>";
+   // "<b>* Mantenciones:</b> Todo usuario con permisos de operario podrá indicar al sistema si una actividad tiene una importancia de tipo normal o urgente.";
 
     $('#versionSystem').html(versionSystem);
     $('#newFeatureHeader').html(headerFeature);

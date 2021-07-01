@@ -2,196 +2,123 @@
 function initManuals(){
     document.getElementById("btnUploadDocument").disabled   = true;
 
-    document.getElementById('inputFile').addEventListener('change', VerifyNameDocument, false);
+    document.getElementById('inputFile').addEventListener('change', ()=>{
+        document.getElementById("btnUploadDocument").disabled   = false;
+    }, false);
+
     $('#inputFile').on("change", handleDocumentEvent);
         
     getManuals();
 };
 
-function VerifyNameDocument(){
-/*
-    //Reference the FileUpload element.
-    var fileUpload = document.getElementById("documentToUpload");
-
-    //Validate whether File is valid Excel file.
-    var regex = /^([a-zA-Z0-9\s_\\.\-:])+(.pdf)$/;
-
-    if( regex.test(fileUpload.value.toLowerCase()) ){
-        document.getElementById("btnUploadDocument").disabled   = false;
-            
-    }else{
-        ModalReportEvent("Error", 53, "El archivo ingresado no es tipo pdf");
-        document.getElementById("btnUploadDocument").disabled   = true;
-        document.getElementById("documentToUpload").value       = "";
-    }
-*/
-    document.getElementById("btnUploadDocument").disabled   = false;
-};
-
 function getManuals(){
+    let data    = new FormData();
+    data.append("type", "Manual");
+    data.append("sourceDocument", "");
+    data.append("typeDocument", "");
 
-    $.post("backend/getDocuments.php", "type=Manual", function(DATA){
-
-        if( DATA.ERROR ){
-            setTimeout(function(){
+    $.ajax({
+        url:            "backend/getDocuments.php",
+        type:           "POST",
+        data:           data,
+        contentType:    false,
+        processData:    false,
+        error:          (error)=>{console.log(error)},
+        success:        (response)=>{
+            setTimeout(()=>{
                 CloseSpinner();
-                ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
-            }, 500);
-        
-        }else{
-            var idConteiner = "myContainer";
-            var idTable     = "myTable";
-            var table;
-            var divTable;
 
-            if( document.getElementById(idConteiner) == null ){
-                divTable    = document.createElement("div");
-                divTable.setAttribute("class", "table-modal table-reponsive-xl");
-                divTable.setAttribute("id", idConteiner);
-        
-                table       = document.createElement("table");
-                table.setAttribute("class", "table table-striped");
-                table.setAttribute("id", idTable);
-        
-                var thead                   = document.createElement("thead");
-                var rowHead                 = document.createElement("tr");
-
-                var indexHeadCell           = document.createElement("th");
-                var nameHeadCell            = document.createElement("th");
-                var descriptionHeadCell     = document.createElement("th");
-
-                indexHeadCell.setAttribute("scope", "col");
-                nameHeadCell.setAttribute("scope", "col");
-                descriptionHeadCell.setAttribute("scope", "col");
-
-                var indexHead       = document.createTextNode("N°");
-                var nameHead        = document.createTextNode("Nombre");
-                var descriptionHead = document.createTextNode("Descripción");
-
-                indexHeadCell.appendChild(indexHead);
-                nameHeadCell.appendChild(nameHead);
-                descriptionHeadCell.appendChild(descriptionHead);
-
-                rowHead.appendChild(indexHeadCell);
-                rowHead.appendChild(nameHeadCell);
-                rowHead.appendChild(descriptionHeadCell);
-
-            //  This option is only able to the administrators 
-                if( document.getElementById('user-role').innerHTML == 'Administrador' ){
-                    var actionsHeadCell         = document.createElement("th");
-                    actionsHeadCell.setAttribute("scope", "col");
-                    
-                    var actionsHead     = document.createTextNode("Acciones");
-                    actionsHeadCell.appendChild(actionsHead);
-
-                    rowHead.appendChild(actionsHeadCell);
-                }
-
-                thead.appendChild(rowHead);
-                table.appendChild(thead);
+                if(response.ERROR){
+                    ModalReportEvent("Error", response.ERRNO, response.MESSAGE);
             
-            }else{
-                divTable    = document.getElementById(idConteiner);
-                table       = document.getElementById(idTable);
-                ClearTable(idTable);
+                }else{
+                    let idTable     = "myTable";
+                    let header;
+                    let types       = ["Text","Link","Link"];
+                    let permission  = sessionStorage.getItem("PERMISSIONS");
 
-            }
-            
-            var bodyTable   = document.createElement("tbody");
+                    if(permission == "\"1000\""){
+                        types.push("Button");
+                        header  = {
+                            0:  {   name:   "N°",
+                                    width:  "5%"      },
+                            1:  {   name:   "Nombre",
+                                    width:  "10%"   },
+                            2:  {   name:   "Descripción",
+                                    width:  "10%"   },
+                            3:  {   name:   "Acciones",
+                                    width:  "20%"   },
+                            length:     4,
+                            father: {   id: "body-container",
+                                        style: "height: 300px; overflow: scroll"
+                            }
+                        }
+                    }else{
+                        header  = {
+                            0:  {   name:   "N°",
+                                    width:  "5%"      },
+                            1:  {   name:   "Nombre",
+                                    width:  "10%"   },
+                            2:  {   name:   "Descripción",
+                                    width:  "10%"   },
+                            length:     3,
+                            father:     "body-container"
+                        }
+                    }
 
-            // Create the rows
-            for (var i=0; i < DATA.COUNT; i++){
-
-                // Here is created every row
-                var row             = document.createElement("tr");
-                row.setAttribute("id", "row:" + DATA[i].id);
-
-                // Here is created every cell
-                var indexCell	    = document.createElement("td");
-                var nameCell	    = document.createElement("td");
-                var descriptionCell = document.createElement("td");
-                
-                // Here is storaged the content into a node
-                var index           = document.createTextNode( i + 1 );
-                var name            = document.createElement("a");
-                var description     = document.createElement("a");
-                var linkName        = document.createTextNode( DATA[i].name );
-                var linkDescription = document.createTextNode( 'Ver Descripción' );
-
-                // Here we set the attributes
-                name.appendChild(linkName);
-
-                var pathSplitted    = DATA.fakepath.split("/");
-                var url             = "";
-
-                for(var x=1; x<pathSplitted.length; x++){
-                    url = url == "" ? "/mantencionembalses/" + pathSplitted[x] : url + "/" + pathSplitted[x];
-                }
-
-                name.href   = url + DATA[i].name;
-
-                description.appendChild(linkDescription);
-                description.href    = "javascript:showDescription('" + DATA[i].description + "');";
-
-                // Here is inserted the content into the cells
-                indexCell.appendChild(index);
-                nameCell.appendChild(name);
-                descriptionCell.appendChild(description);
-
-                // Here is inserted the cells into a row
-                row.appendChild(indexCell);
-                row.appendChild(nameCell);
-                row.appendChild(descriptionCell);
-
-                //  This option is only able to the administrators 
-                if( document.getElementById('user-role').innerHTML == 'Administrador' ){
-                    var actionsCell	    = document.createElement("td");
-
-                    var btnEdit         = document.createElement("button");
-                    var btnDel          = document.createElement("button");
-                    var spanEdit        = document.createElement("span");
-                    var spanDel         = document.createElement("span");
-                    var textEdit        = document.createElement("textNode");
-                    var textDel         = document.createElement("textNode");
-
-                    spanEdit.setAttribute("class", "icon-edit icon-space");
-                    spanDel.setAttribute("class", "icon-circle-with-cross icon-space");
-
-                    textEdit.textContent    = "Editar";
-                    textDel.textContent     = "Eliminar";
+                    table   = new Table(
+                        idTable,
+                        header,
+                        header.length,
+                        false
+                    );
                     
-                    btnEdit.style.marginRight   = "1%";
-                    btnEdit.style.float         = "left";
+                    for(var i=0; i<response.count; i++){
+                        let data        = [];
 
-                    btnEdit.appendChild(spanEdit);
-                    btnEdit.appendChild(textEdit);
+                        let name        = { content:    response[i].name,
+                                            function:   "mantancionembalses/" + response.fakepath + response[i].name,
+                                        };
 
-                    btnDel.appendChild(spanDel);
-                    btnDel.appendChild(textDel);
+                        let description = { content:    "Ver Descripción",
+                                            function:   "javascript:showDescription('" + response[i].description + "')",                
+                                        };
 
-                    btnEdit.className   = "btn btn-warning sm-btn";
-                    btnDel.className    = "btn btn-danger sm-btn";
+                        let buttons     = { 
+                                            0: {    text:       "Editar",
+                                                    styleBtn:   "margin-right: 2%",
+                                                    classBtn:   "btn btn-warning btn-sm",
+                                                    classIcon:  "icon-edit icon-space",
+                                                    action:     "javascript:openModalEditDocument(" + response[i].id + ",'" + response[i].description + "','Manual')"
+                                                },
+                                            1: {    text:       "Eliminar",
+                                                    styleBtn:   "",
+                                                    classBtn:   "btn btn-danger btn-sm",
+                                                    classIcon:  "icon-circle-with-cross icon-space",
+                                                    action:     "javascript:openModalDeleteDocument(" + response[i].id + ", 'Manual')"
+                                                },
+                                            items: 2
+                                        };
 
-                    btnEdit.setAttribute("onclick", "openModalEditDocument(" + DATA[i].id + ", '" + DATA[i].description + "', 'Manual'); return false;");
-                    btnDel.setAttribute("onclick", "openModalDeleteDocument(" + DATA[i].id + ", 'Manual'); return false;");
+                        if(permission == "\"1000\""){
+                            data    = [ i + 1,
+                                        name,
+                                        description,
+                                        buttons
+                                    ];       
+                        }else{
+                            data    = [ i + 1,
+                                        name,
+                                        description
+                                    ];
+                        }
 
-
-                    actionsCell.appendChild(btnEdit);
-                    actionsCell.appendChild(btnDel);
-
-                    row.appendChild(actionsCell);
+                        table.addRow(types, data, "row:" + response[i].id);
+                    }
+                    
+                    table.encapsulate();
                 }
-
-                // Here is inserted the row into the table´s body
-                bodyTable.appendChild(row);
-            }
-
-            // Here is inserted the body´s table into the table
-            table.appendChild(bodyTable);
-            divTable.appendChild(table);
-            document.getElementById("body-container").appendChild(divTable);
-
-            CloseSpinner();
+            }, delay);
         }
     });
 };
@@ -345,19 +272,20 @@ function deleteDocument(id, type){
         data:           data,
         contentType:    false,
         processData:    false,
-        success:        function(DATA){
-
-            if( DATA.ERROR  == true ){
-                ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
+        error:          (error)=>{console.log(error)},
+        success:        (response)=>{
+            if( response.ERROR  == true ){
+                ModalReportEvent("Error", response.ERRNO, response.MESSAGE);
             
             }else{
                 if( type == "Event" ){
                     $("#aboutDocumentForm").modal("toggle");
                 }
 
-                ModalReportEvent("Operación Exitosa", "", DATA.MESSAGE);
+                ModalReportEvent("Operación Exitosa", "", response.MESSAGE);
     
-                var table   = document.getElementById("myTable");
+                let idTable = "myTable";
+                var table   = document.getElementById(idTable);
                 var target  = "row:" + id;
                 var index   = 0;
 
@@ -376,14 +304,10 @@ function deleteDocument(id, type){
                     }
     
                 }else{
-                    document.getElementById("myContainer").remove();
+                    document.getElementById("container:" + idTable).remove();
                 }
                 
             }
-
-        },
-        error:          function(DATA){
-            console.log(DATA);
         }
     });
 };
@@ -433,8 +357,8 @@ function addDocument(type){
                 }
             }
 
-            ShowSpinner();
             $("#addDocumentForm").modal("toggle");
+            ShowSpinner();
             
             var formData    = new FormData();
             formData.append("file", document.getElementById("inputFile").files[0]);
@@ -455,37 +379,28 @@ function addDocument(type){
                 data:           formData,
                 contentType:    false,
                 processData:    false,
-                success:        function(DATA){
-                    console.log(DATA);
-                    document.getElementById("inputFile").value              = "";
-                    document.getElementById("descriptionDocument").value    = "";
-    
-                    if( DATA.ERROR ){
-                        setTimeout(()=>{
-                            ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
-                            CloseSpinner();
-                        }, 500);
+                error:          (error)=>{console.log(error)},
+                success:        (response)=>{
+                    setTimeout(()=>{
                         
-                    }else{
-                        setTimeout(()=>{
+                        document.getElementById("inputFile").value              = "";
+                        document.getElementById("descriptionDocument").value    = "";
+        
+                        CloseSpinner();
+
+                        if(response.ERROR){
+                            ModalReportEvent("Error", response.ERRNO, response.MESSAGE);
+                            
+                        }else{
+                            ModalReportEvent("Operación exitosa", "", response.MESSAGE);
+
                             if( type == "Manual" ){
                                 getManuals();
                             }
-    
-                            ModalReportEvent("Operación exitosa", "", DATA.MESSAGE);
-                            CloseSpinner();
-                        }, 500);
-    
-                    }
-    
-                },
-                error:          function(DATA){
-                    console.log(DATA);
+                        }
+                    }, delay);    
                 }
             });
         }
-
-    }else{
-
     }
 };

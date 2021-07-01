@@ -31,13 +31,13 @@
         for( $i=0; $i<sizeof($arrayIdActivities); $i++ ){
             $idActivity     = $arrayIdActivities[$i];
 
-            $QUERY  =   $LINK -> prepare("SELECT nombre, sector, prioridad, observacion FROM 
+            $QUERY  =   $LINK -> prepare("SELECT nombre, sector, prioridad, area, observacion FROM 
                                             actividad WHERE id = ?");
 
             $QUERY  ->  bind_param("i", $idActivity);
             $QUERY  ->  execute();
             $QUERY  ->  store_result();
-            $QUERY  ->  bind_result($name, $location, $priority, $comments);
+            $QUERY  ->  bind_result($name, $location, $priority, $area, $comments);
             $QUERY  ->  fetch();
 
             if( $QUERY->num_rows == 0 ){
@@ -54,6 +54,7 @@
                     'name'          => $name,
                     'location'      => $location,
                     'priority'      => $priority,
+                    'area'          => $area,
                     'comments'      => $comments,
                 ]);
 

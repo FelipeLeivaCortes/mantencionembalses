@@ -1,4 +1,6 @@
- function initAdministration(){
+let table;
+
+function initAdministration(){
     
     $('#bttnCloseUpdateUser').click(function(){
         $('#SearchResultsForm').modal('toggle');
@@ -6,9 +8,10 @@
         
 //The arguments are: function, id
     EventToPressEnter("searchUser", "searchUname");
+    EventToChangeInput("newRut('addUname')", "addUname");
+    EventToChangeInput("newRut('searchUname')", "searchUname");
 
-    FormatRut("addUname");
-    FormatRut("searchUname");
+
 
     GetUsers();
     
@@ -18,159 +21,127 @@
 }
 
 function GetUsers(){
-    ClearTable("ListUsers");
-    
-    $.post("backend/getUsers.php", "",function(DATA){
-        if( DATA.ERROR === true ){
-            ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
-            CloseModal("#ListUsersForm");
-        
-        }else{
+    $.ajax({
+        url:            "backend/getUsers.php",
+        type:           "POST",
+        contentType:    false,
+        processData:    false,
+        error:          (error)=>{console.log(error)},
+        success:        (response)=>{
+            if( response.ERROR === true ){
+                ModalReportEvent("Error", response.ERRNO, response.MESSAGE);
+           
+            }else{
+                let idTable = "ListUsers";
+                let types   = ["Text","Text","Text","Text","Text","Text","Text"];
 
-            // Create the Table´s Body
-            var table       = document.getElementById("ListUsers");
-            var bodyTable   = document.createElement("tbody");
-        
-            // Create the rows
-            for (var i = 0; i < DATA.count; i++){
-
-                // Here is created every row
-                var row             = document.createElement("tr");
-        
-                // Here is created every cell
-                var numUserCell     = document.createElement("td");
-                var usernameCell    = document.createElement("td");
-                var typeCell	    = document.createElement("td");
-                var nameCell	    = document.createElement("td");
-                var lastnameCell    = document.createElement("td");
-                var emailCell 		= document.createElement("td");
-                var phoneCell		= document.createElement("td");
-        
-                // Here is storaged the content into a node
-                var numUser         = document.createTextNode( i + 1 );
-                var username		= document.createTextNode( GenerateRut(DATA[i].username) );
+                table   = new Table(
+                    idTable,
+                    types,
+                    types.length,
+                    false
+                );
                 
-                // If you need to show more permissions, just delete the next line
-                var type            = document.createTextNode( GeneratePermission(DATA[i].permissions) );
-                
-                var name 			= document.createTextNode( DATA[i].name );
-                var lastname 		= document.createTextNode( DATA[i].lastname );
-                var email 		    = document.createTextNode( DATA[i].email );
-                var phone 			= document.createTextNode( DATA[i].phone );
-            
-                // Here is inserted the content into the cells
-                numUserCell.appendChild(numUser);
-                usernameCell.appendChild(username);
-                //typeCell.appendChild( GeneratePermissionsList( DATA[i].permissions ) );
-                typeCell.appendChild(type);
-                nameCell.appendChild(name);
-                lastnameCell.appendChild(lastname);
-                emailCell.appendChild(email);
-                phoneCell.appendChild(phone);
-            
-                // Here is inserted the cells into a row
-                row.appendChild(numUserCell);
-                row.appendChild(usernameCell);
-                row.appendChild(typeCell);
-                row.appendChild(nameCell);
-                row.appendChild(lastnameCell);
-                row.appendChild(emailCell);
-                row.appendChild(phoneCell);
-        
-                // Here is inserted the row into the table´s body
-                bodyTable.appendChild(row);
-            }
-	 
-	  // Here is inserted the body´s table into the table
-          table.appendChild(bodyTable);
-          $('#ListUsersForm').modal('show');
-	}
-     });
-}
+                let data    = [];
 
-/*
-This function was designed to add any person to the platform.
-Is mandatory complete the follow fields:
- * Name
- * Lastname
- * Email
-The phone field is optional.
-*/
+                for(var i=0; i<response.count; i++){
+                    let rut     = new Rut(response[i].username, false);
+                    rut.generateRut();
 
-function AddUser(){
-    var rut     = document.getElementById("addUname").value;
-    var status  = isValidRut(rut, "addUname");
-    
-    if( status === true ){
-        var username    = ParseRut(rut);
-        var name        = NormalizeString(document.getElementById("addName").value);
-        status          = isValidName(name, "nombre");
+                    data    = [ i + 1,
+                                rut.rut,
+                                GeneratePermission(response[i].permissions),
+                                response[i].name,
+                                response[i].lastname,
+                                response[i].email,
+                                response[i].phone
+                            ];
 
-        if( status === true ){
-            var lastname    = NormalizeString(document.getElementById("addLastname").value);
-            status          = isValidName(lastname, "apellido");
-
-            if( status === true ){
-                var email   = document.getElementById("addEmail").value;
-                status      = isValidEmail(email);
-                
-                if( status === true ){
-                    var phone       = document.getElementById("addPhone").value;
-                    
-                    if(phone != ""){
-                        status = isValidPhoneNumber(phone, "addPhone");
-                    }
-
-                    if( status === true ){
-                        var permissions   = areValidPermissions("add");
-
-                        if( permissions != "0" ){
-                            $('#AddUserForm').modal('toggle');
-                            ShowSpinner();
-
-			                var idCompany 	= sessionStorage.getItem("ID_COMPANY");
-                            var Variables   = "idCompany=" + idCompany + "&username=" + username + "&permissions=" + permissions + "&name=" + name + "&lastname=" + lastname + "&email=" + email + "&phone=" + phone;
-
-                            $.post("backend/addUser.php", Variables, function(DATA){
-                                if( DATA.ERROR  === true ){
-                                    setTimeout(()=>{
-                                        CloseSpinner();
-                                        ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE); 
-                                    }, 500);
-
-                                }else{
-                                    setTimeout(()=>{
-                                        CloseSpinner();
-                                        ModalReportEvent("Operación exitosa", "", DATA.MESSAGE); 
-                                    }, 500);
-
-                                    GetUsers();
-                                }
-
-                                $('#addUname').val('');
-                                $('#addName').val('');
-                                $('#addLastname').val('');
-                                $('#addEmail').val('');
-                                $('#addPhone').val('');
-                                
-                                $("#addAdministrator").prop("checked", false);
-                                $("#addMechanic").prop("checked", false);
-                                $("#addElectrician").prop("checked", false);
-                                $("#addGardener").prop("checked", false);
-
-                                var active = false;
-
-                                document.getElementById("addAdministrator").disabled    = active;
-                                document.getElementById("addMechanic").disabled         = active;
-                                document.getElementById("addElectrician").disabled      = active;
-                                document.getElementById("addGardener").disabled         = active;
-                            });
-                        }
-                    }
+                    table.addRow(types, data, "row:" + response[i].username);
                 }
+                
+                table.encapsulate();
             }
         }
-    }
+    });
+}
+
+async function AddUser(){
+    $("#AddUserForm").modal("toggle");
+
+    let rut         = new Rut(
+        document.getElementById("addUname").value,
+        true
+    );
+
+    let permission  = areValidPermissions("add");
+
+    let user     = new User(
+        sessionStorage.getItem("ID_COMPANY"),
+        rut.username,
+        permission,
+        document.getElementById("addName").value,
+        document.getElementById("addLastname").value,
+        document.getElementById("addEmail").value,
+        document.getElementById("addPhone").value,
+        0
+    );
+
+    if(!rut.isValid("addUname")){ delete rut, delete user; return }
+    if(!user.isValidName("addName")){ delete user; return }
+    if(!user.isValidLastname("addLastname")){ delete user; return }
+    if(!user.isValidEmail("addEmail")){ delete user; return }
+    if(!user.isValidPhone("addPhone")){ delete user; return }
+
+    ShowSpinner();
+
+    user.add();
+
+    setTimeout(()=>{
+        if(user.lastOperation){
+            let state = false;
+
+            document.getElementById("addAdministrator").disabled    = state;
+            document.getElementById("addMechanic").disabled         = state;
+            document.getElementById("addElectrician").disabled      = state;
+            document.getElementById("addGardener").disabled         = state;
+
+            $('#addUname').val('');
+            $('#addName').val('');
+            $('#addLastname').val('');
+            $('#addEmail').val('');
+            $('#addPhone').val('');
+            
+            $("#addAdministrator").prop("checked", false);
+            $("#addMechanic").prop("checked", false);
+            $("#addElectrician").prop("checked", false);
+            $("#addGardener").prop("checked", false);
+
+            var active = false;
+
+            document.getElementById("addAdministrator").disabled    = active;
+            document.getElementById("addMechanic").disabled         = active;
+            document.getElementById("addElectrician").disabled      = active;
+            document.getElementById("addGardener").disabled         = active;
+
+            table       = new Table("ListUsers", "","", true);
+
+            let phone   = user.phone == "" ? 0 : user.phone; 
+
+            let types   = ["Text","Text","Text","Text","Text","Text","Text"];
+            let data    = [ table.rows,
+                            rut.rut,
+                            GeneratePermission(user.permissions),
+                            user.name,
+                            user.lastname,
+                            user.email,
+                            phone
+                        ];
+
+            table.addRow(types, data, user.username);
+            table.encapsulate();
+        }
+    }, 5000);
 }
 
 function searchUser(Action){
@@ -181,161 +152,141 @@ function searchUser(Action){
 }
 
 function getUser(){
-    $('#searchUserForm').modal('toggle');
 
+    let rut         = new Rut(
+        document.getElementById("searchUname").value,
+        true,
+    );
+    
+    if(!rut.isValid("searchUname")){ delete rut; return }
+
+    let newUser     = new User(0,0,"","","","",0,0);
+    newUser.get(rut.username);
+    
+    $('#searchUserForm').modal('toggle');
     var Action  = sessionStorage.getItem('SearchUser');
     sessionStorage.removeItem('SearchUser');
 
-    var rut         = document.getElementById("searchUname").value;
-    var status      = isValidRut(rut, "searchUname");
+    setTimeout(()=>{
+        if( Action == 'deleteUser' ){
+            document.getElementById("userToDelete").innerHTML   = newUser.name + " " + newUser.lastname;
+            $('#deleteUserForm').modal('show');
+        
+        }else{
+            document.getElementById("usernamePrevious").setAttribute('readonly', true);
+            document.getElementById("usernamePrevious").setAttribute('disabled', true);
+            document.getElementById("usernamePrevious").value   = rut.rut;
+            document.getElementById("resultName").value         = newUser.name;
+            document.getElementById("resultLastname").value     = newUser.lastname;
+            document.getElementById("resultEmail").value        = newUser.email;
+            document.getElementById('resultPhone').value        = newUser.phone == 0 ? "" : newUser.phone;
+           
+            var aux = newUser.permissions.split("");
     
-    if( status === true ){
-        var username    = ParseRut(rut);
-        var Variables   = "username=" + username;
+            // We must assign the permissions associated to the uname.
 
-        $.post("backend/getUser.php", Variables, function(DATA){
-            if( DATA.ERROR == true ){ 
-                ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
-                document.getElementById("searchUname").value    = "";
-            
-            }else{
-                if( Action == 'deleteUser' ){
-                    document.getElementById("userToDelete").innerHTML   = DATA.name + " " + DATA.lastname;
-                    $('#deleteUserForm').modal('show');
-                
-                }else{
-                    document.getElementById("usernamePrevious").value   = rut;
-                    document.getElementById("usernamePrevious").setAttribute('readonly', true);
-                    document.getElementById("usernamePrevious").setAttribute('disabled', true);
-                    document.getElementById("resultName").value         = DATA.name;
-                    document.getElementById("resultLastname").value     = DATA.lastname;
-                    document.getElementById("resultEmail").value        = DATA.email;
+            let permissions = ["editAdministrator", "editMechanic",
+                                "editElectrician", "editGardener"];
 
-                    if( DATA.phone == 0 ){
-                        document.getElementById('resultPhone').value    = "";
-                    
-                    }else{
-                        document.getElementById('resultPhone').value    = DATA.phone;
+            for(let i=0; i<permissions.length; i++){
+                if(aux[i] == 0){
+                    document.getElementById(permissions[i]).disabled    = true;
+                    document.getElementById(permissions[i]).checked     = false;
 
-                    }
-                   
-                    var aux = DATA.permissions.split("");
+                }else if(aux[i] == 1){
+                    document.getElementById(permissions[i]).disabled    = false;
+                    document.getElementById(permissions[i]).checked     = true;
 
-                    // We must assign the permissions associated to the uname.
-                    if(aux[0]==0){
-                        document.getElementById("editAdministrator").disabled   = true;
-                    }else if(aux[0]==1){
-                        document.getElementById("editAdministrator").checked    = true;
-                    }
-                    
-                    if(aux[1]==0){
-                        document.getElementById("editMechanic").disabled        = true;
-                    }else if(aux[1]==1){
-                        document.getElementById("editMechanic").checked         = true;
-                    }
-
-                    if(aux[2]==0){
-                        document.getElementById("editElectrician").disabled     = true;
-                    }else if(aux[2]==1){
-                        document.getElementById("editElectrician").checked      = true;
-                    }
-
-                    if(aux[3]==0){
-                        document.getElementById("editGardener").disabled        = true;
-                    }else if(aux[3]==1){
-                        document.getElementById("editGardener").checked         = true;
-                    }
-
-                    filterPermissions("Edit", "change");
-
-                    $('#editUserForm').modal('show');
-                    sessionStorage.setItem("idUsername", DATA.id);
                 }
             }
-        });
-    }
+    
+            filterPermissions("Edit", "change");
+    
+            $('#editUserForm').modal('show');
+            sessionStorage.setItem("idUsername", newUser.id);
+        }
+
+    }, 500);
+
 }
 
-function UpdateUser(){
+async function UpdateUser(){
     $('#editUserForm').modal('toggle');
 
-    var id          = sessionStorage.getItem("idUsername");
-    var rut         = document.getElementById("usernamePrevious").value;
-    var status      = isValidRut(rut, "usernamePrevious");
+    let rut         = new Rut(
+        document.getElementById("usernamePrevious").value,
+        true,
+    );
+
+    let permission  = await areValidPermissions("edit");
+    if(permission == ""){return}
     
-    if( status === true ){
-        var username    = ParseRut(rut);
-        var permissions = areValidPermissions("edit");
-        
-        if( permissions != "0" ){
-            
-            var name        = NormalizeString(document.getElementById("resultName").value);
-            status          = isValidName(name, "nombre");
-            
-            if( status === true ){
-                var lastname    = NormalizeString(document.getElementById("resultLastname").value);
-                status          = isValidName(lastname, "apellido");
-                
-                if( status  === true ){
-                    var email   = document.getElementById("resultEmail").value;
-                    status      = isValidEmail(email);
-                    
-                    if( status === true ){
-                        
-                        var phone       = document.getElementById("resultPhone").value;
-    
-                        if(phone != ""){
-                            status = isValidPhoneNumber(phone, "resultPhone");
-                        }
-    
-                        if( status === true ){
-                            var Variables   = "id=" + id + "&username=" + username + "&permissions=" + permissions + "&name=" + name + "&lastname=" + lastname + "&email=" + email + "&phone=" + phone;
-    
-                            $.post("backend/updateUser.php", Variables, function(DATA){
-                                if( DATA.ERROR === true ){
-                                    ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
-    
-                                }else{
-                                    ModalReportEvent("Operación Exitosa", "", DATA.MESSAGE);
-                                    GetUsers();
-                                    
-                                }
-                            });
-                        }
-                    }
-                }
-            }
+    let user        = new User(
+        sessionStorage.getItem("ID_COMPANY"),
+        rut.username,
+        permission,
+        document.getElementById("resultName").value,
+        document.getElementById("resultLastname").value,
+        document.getElementById("resultEmail").value,
+        document.getElementById("resultPhone").value,
+        sessionStorage.getItem("idUsername")
+    );
+
+    if(!rut.isValid("usernamePrevious")){ delete rut; delete user; return }
+    if(!user.isValidName("resultName")){ delete user; return }
+    if(!user.isValidLastname("resultLastname")){ delete user; return }
+    if(!user.isValidEmail("resultEmail")){ delete user; return }
+    if(!user.isValidPhone("resultPhone")){ delete user; return }
+
+    user.update();
+
+    setTimeout(()=>{
+        if( user.lastOperation ){
+            let state = false;
+
+            document.getElementById("editAdministrator").disabled    = state;
+            document.getElementById("editMechanic").disabled         = state;
+            document.getElementById("editElectrician").disabled      = state;
+            document.getElementById("editGardener").disabled         = state;
+
+            GetUsers();
         }
-    }
+
+    }, 1000);
+    
 }
 
 function DeleteUser(){
     $('#deleteUserForm').modal('toggle');
 
-    var author      = sessionStorage.getItem("USERNAME");
-    var rut         = document.getElementById("searchUname").value;
-    var username    = ParseRut(rut);
-    var Variables   = "username=" + username;
-    
-    $.post("backend/deleteUser.php", Variables, function(DATA){
-        
-        if( DATA.ERROR === true ){
-            ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
-            $('body').children('div:nth-last-child(1)').remove();
-            
-        }else{
-            ModalReportEvent("Operación Exitosa", "", DATA.MESSAGE);
-            if(author == rut){
-                Logout();
+    let rut         = new Rut(
+        document.getElementById("searchUname").value,
+        true,
+    );
 
-            }else{
-                GetUsers();
+    let user        = new User(sessionStorage.getItem("ID_COMPANY"),rut.username,"","", "","","","");
 
+    if(!rut.isValid("searchUname")){ delete rut; delete user; return }
+   
+    user.delete();
+
+    setTimeout(()=>{
+        if( user.lastOperation ){
+            let row     = document.getElementById("row:" + rut.username);
+            let parent  = row.parentElement;
+            let limit   = parent.children.length;
+            let index   = parseInt(row.cells[0].textContent);
+
+            row.remove();
+
+            for(let i=index; i<limit - 1; i++){
+                parent.children[i].cells[0].textContent = i;
             }
+
+            if(sessionStorage.getItem("USERNAME") == rut.username){ Logout() }else{ GetUsers() }
         }
-        
-        $('#searchUname').val('');
-    });
+    }, (delay * 3));
+    
 }
 
 function filterPermissions(Parameter, Event){
@@ -437,7 +388,7 @@ function GeneratePermission(permission){
 
 }
 
- function GeneratePermissionsList(permissions){
+function GeneratePermissionsList(permissions){
      
     var arrayPermissions    = permissions.split("");
     var Select              = document.createElement("select");
@@ -468,4 +419,4 @@ function GeneratePermission(permission){
 
     Select.selectedIndex = "0";  
     return Select;
- }
+}

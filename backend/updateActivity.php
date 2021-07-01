@@ -23,10 +23,9 @@
 
     /***************************************************************************** */
     /***************************************************************************** */
-
         $id         = $_POST["id"];
         $name       = $_POST["name"];
-        $dateStart  = $_POST["dateStart"];
+        $dateStart  = $_POST["date"];
         $frecuency  = $_POST["frecuency"];
         $location   = $_POST["location"];
         $priority   = $_POST["priority"];
@@ -39,7 +38,7 @@
         
         if( $QUERY->affected_rows == 1 ){
             $DATA["ERROR"] 		= false;
-			$DATA["MESSAGE"]	= "Se han modificado los datos exitosamente. Para ver los cambios haga click en la sección de 'Actividades'";
+			$DATA["MESSAGE"]	= "Se han modificado los datos exitosamente";
         
         }else{
             $DATA["ERROR"] 		= true;

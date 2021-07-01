@@ -119,11 +119,13 @@
                                 <input type="file" id="activitiesExcel" style="background:linear-gradient(to top, #847e86, #c3c0c4);">
                            </div>
                         </div>
+                        <small>*Nota: Si desea ingresar actividades desde excel, primero descargue la plantilla y rellene las celdas con los datos correspondientes</small>
                     </form>             
                 </div>
             
                 <!-- Modal footer -->
                 <div class="modal-footer justify-content-center">
+                    <button class="btn btn-primary" onclick="javascript:downloadTemplateActivities();"><span class="icon-document-landscape"></span> Descargar Plantilla</button>
                     <button id="loadActivitiesBtn" class="btn btn-primary" onclick="javascript:LoadActivitiesFromExcel();"><span class="icon-document-landscape"></span> Cargar</button>
                     <button type="button" class="btn btn-danger" data-toggle="modal" data-dismiss="modal"><span class="icon-circle-with-cross"></span> Cerrar</button>
                 </div>

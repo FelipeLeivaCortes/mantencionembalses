@@ -37,7 +37,7 @@
 			$stringImportance	= $stringImportance.",0";
 		}
 
-		$QUERY  =   $LINK -> prepare("INSERT INTO registro (encargado, actividades, fechaInicio, fechaTermino, estados, iimportancias) VALUES (?, ?, ?, ?, ?, ?);");
+		$QUERY  =   $LINK -> prepare("INSERT INTO registro (encargado, actividades, fechaInicio, fechaTermino, estados, importancias) VALUES (?, ?, ?, ?, ?, ?);");
 		$QUERY  ->  bind_param('isssss', $username, $activities, $dateStart, $defaultDate, $stringStates, $stringImportance);
 		$QUERY  ->  execute();
 
@@ -52,7 +52,7 @@
 			if( $QUERY1->num_rows == 1 ){
 				$DATA["ERROR"] 		= false;
 				$DATA["MESSAGE"]	= "Se han registrado las actividades exitosamente";
-				$DATA["idRecord"]	= $idRecord;
+				$DATA["id"]			= $idRecord;
 
 				$QUERY1	-> free_result();
 

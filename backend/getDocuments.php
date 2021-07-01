@@ -95,7 +95,7 @@
             $LINK =   new mysqli($URL, $USERNAME, $PASSWORD, $ADMINISTRATION);
 
             while( $QUERY->fetch() ){
-               $DATA["COUNT"]    = $QUERY->num_rows;
+               $DATA["count"]    = $QUERY->num_rows;
                $DATA["fakepath"] = $folderStore;
 
                $QUERY_AUX  =  $LINK -> prepare("SELECT nombre, apellido FROM usuario WHERE rut = ?;");

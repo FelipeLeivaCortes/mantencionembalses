@@ -1,3 +1,1759 @@
+const delay   = 500;
+
+class Session{
+    /**
+     * @param {The username without the format} username 
+     * @param {The password of the user} password 
+     */
+    constructor(username, password){
+        this._username   = username;
+        this._password   = password;
+    }
+
+    get username(){
+        return this._username;
+    }
+
+    get password(){
+        return this._password;
+    }
+
+    isValid(){
+        if( this.username == "" ){
+            ModalReportEvent("Error", "15", "El rut ingresado no es válido");
+            return false;
+        }
+
+        if( this.password == "" ){
+            ModalReportEvent("Error", 13, "No se ha ingresado ninguna contraseña");
+            return false;
+        }
+
+        return true;
+    }
+}
+
+class Rut{
+    /**
+     * 
+     * @param {number} username The username without format
+     * @param {boolean} isFormated Is the rut formated?
+     */
+    constructor(username, isFormated){
+        username    = username.toString();
+
+        if(isFormated){
+            username    = username.replace(/[\.\-]/g, "");
+        }
+
+        this._username      = username.substr(0, username.length - 1);
+        this._verificator   = username.charAt(username.length - 1);
+
+        if(isFormated){
+            this.assingFormat("");
+        }
+    }
+
+    set username(value){
+        this._username   = value;
+    }
+
+    set rut(value){
+        this._rut    = value;
+    }
+
+    set verificator(value){
+        this._verificator   = value;
+    }
+
+    get username(){
+        return this._username;
+    }
+
+    get rut(){
+        return this._rut;
+    }
+
+    get verificator(){
+        return this._verificator;
+    }
+
+    /**
+     * 
+     * @param {string} id : Id of the input to set the rut. In other case put "" 
+     */
+    assingFormat(id){
+        let chars  = this.username.split("");
+
+        switch(chars.length){
+            case 7:
+                this._rut = chars[0] + "." + chars[1] + chars[2] + chars[3] + "." + chars[4] + chars[5] +
+                        chars[6] + "-" + this.verificator;
+                break;
+
+            case 8:
+                this._rut = chars[0] + chars[1] + "." + chars[2] + chars[3] + chars[4] + "." + chars[5] +
+                        chars[6] + chars[7] + "-" + this.verificator;
+                break;
+
+            default:
+                ModalReportEvent("Error", "15", "El rut ingresado no es válido");
+
+                if(id != ""){ document.getElementById(id).value   = "" };
+                this._rut = 0;
+                return 0;
+        }
+    }
+
+    isValid(id){
+        var regex   = /([1-9]{1})([0-9]{0,1})\.([0-9]{3})\.([0-9]{3})\-((K|k|[0-9])){1}$/g;
+	
+        if( !regex.test( this.rut )){ 
+            ModalReportEvent("Error", "15", "El rut ingresado no es válido");
+            document.getElementById(id).value   = "";
+            this._rut = 0;
+            
+            return false;
+        }
+
+        if( computeDv( parseInt(this.username) ).toString().toUpperCase() === this.verificator.toUpperCase() ){
+            document.getElementById(id).value   = this.rut;
+            return true;
+            
+        }else{
+            ModalReportEvent("Error", 16, "El dígito verificador no coincide");
+            document.getElementById(id).value   = "";
+            return false;
+        }
+
+        /**
+         * 
+         * @param {Calculate the verificator digit} value 
+         */
+        function computeDv(value){
+            var suma	= 0;
+            var mul		= 2;
+            
+            if(typeof(value) !== 'number') { return ""; }
+            
+            value = value.toString();
+            
+            for(var i=value.length -1; i >= 0; i--) {
+                suma = suma + value.charAt(i) * mul;
+                mul = ( mul + 1 ) % 8 || 2;
+            }
+            
+            switch(suma % 11) {
+                case 1	: return 'k';
+                case 0	: return 0;
+                default	: return 11 - (suma % 11);
+            }
+        }
+    }
+
+    generateRut(){
+        this.username       = this.username + this.verificator;
+        this.verificator    = this.computeDv(parseInt(this.username)).toString().toUpperCase();
+
+        this.assingFormat("");
+    }
+
+    /**
+     * @param {Calculate the verificator digit} value 
+     */
+    computeDv(value){
+        var suma	= 0;
+        var mul		= 2;
+        
+        if(typeof(value) !== 'number') { return ""; }
+        
+        value = value.toString();
+        
+        for(var i=value.length -1; i >= 0; i--) {
+            suma = suma + value.charAt(i) * mul;
+            mul = ( mul + 1 ) % 8 || 2;
+        }
+        
+        switch(suma % 11) {
+            case 1	: return 'k';
+            case 0	: return 0;
+            default	: return 11 - (suma % 11);
+        }
+    }
+}
+
+class User{
+    /**
+     * 
+     * @param {number} idCompany: Identified of the company  
+     * @param {number} username: Is the rut the user without format 
+     * @param {string} permissions: The permissions assigned (Admin, Mechanical, Electrician or Gardener)
+     * @param {string} name: Name of the new user 
+     * @param {string} lastname: Lastname of the new user 
+     * @param {string} email: Email of the new user 
+     * @param {number} phone: Number of movile (OPTIONAL)
+     * @param {number} idOnDatabase: Id on the database (OPTIONAL)
+     */
+    constructor(idCompany, username, permissions, name, lastname, email, phone, idOnDatabase){
+        this._idcompany     = idCompany;
+        this._username      = username;
+        this._permissions   = permissions;
+        this._name          = NormalizeString(name);
+        this._lastname      = NormalizeString(lastname);
+        this._email         = email;
+        this._phone         = phone;
+        this._id            = idOnDatabase;
+        this._lastOperation = "";
+    }
+
+    get idCompany(){
+        return this._idcompany;
+    }
+
+    get username(){
+        return this._username;
+    }
+
+    get permissions(){
+        return this._permissions;
+    }
+
+    get name(){
+        return this._name;
+    }
+
+    get lastname(){
+        return this._lastname;
+    }
+
+    get email(){
+        return this._email;
+    }
+
+    get phone(){
+        return this._phone;
+    }
+
+    get id(){
+        return this._id;
+    }
+
+    get lastOperation(){
+        return this._lastOperation;
+    }
+
+    set idCompany(value){
+        this._idcompany     = value;
+    }
+
+    set username(value){
+        this._username      = value;
+    }
+
+    set permissions(value){
+        this._permissions   = value
+    }
+
+    set name(value){
+        this._name          = value;
+    }
+
+    set lastname(value){
+        this._lastname      = value;
+    }
+
+    set email(value){
+        this._email         = value;
+    }
+
+    set phone(value){
+        this._phone         = value;
+    }
+
+    set id(value){
+        this._id            = value;
+    }
+
+    set lastOperation(value){
+        this._lastOperation     = value;
+    }
+
+    isValidName(inputId){
+        var regex   = /([a-zA-Z\ \u00C0-\u00FF]){1,30}$/;
+    
+        if( !regex.test(this.name) ){
+            ModalReportEvent("Error", 17, "El nombre ingresado contiene carácteres inválidos");
+            document.getElementById(inputId).value  = "";
+
+            return false;
+        
+        }else{
+            return true;
+        }
+    }
+
+    isValidLastname(inputId){
+        var regex   = /([a-zA-Z\ \u00C0-\u00FF]){1,30}$/;
+    
+        if( !regex.test(this.lastname) ){
+            ModalReportEvent("Error", 18, "El apellido ingresado contiene carácteres inválidos");
+            document.getElementById(inputId).value  = "";
+
+            return false;
+        
+        }else{
+            return true;
+        }
+    }
+
+    isValidEmail(inputId){
+        var regex       = /^[-\w.%+]{1,64}@(?:[A-Z0-9-]{1,63}\.){1,125}[A-Z]{2,63}$/i;
+         
+        if( !regex.test(this.email) ){
+            ModalReportEvent("Error", 18, "El correo ingresado no es válido");
+            document.getElementById(inputId).value  = "";
+
+            return false;
+
+        }else{
+            return true;
+        }
+    }
+
+    isValidPhone(inputId){
+        var regex   = /^[3-9][0-9]{7}$/;
+        
+        if( !regex.test(this.phone) ){
+//            ModalReportEvent("Error", 35, "El número telefónico ingresado es incorrecto");
+            document.getElementById(inputId).value  = "";
+            this.phone  = "";
+
+            return true;
+
+        }else{
+            return true;
+        }
+    }
+
+    add(){
+        let data    = new FormData();
+        data.append("idCompany",    this.idCompany);
+        data.append("username",     this.username);
+        data.append("permissions",  this.permissions);
+        data.append("name",         this.name);
+        data.append("lastname",     this.lastname);
+        data.append("email",        this.email);
+        data.append("phone",        this.phone);
+        
+        $.ajax({
+            url:            "backend/addUser.php",
+            type:           "POST",
+            data:           data,
+            contentType:    false,
+            processData:    false,
+            error:          (error)=>{ console.log(error); },
+            success:        (response)=>{
+                setTimeout(()=>{
+                    CloseSpinner();
+
+                    if( response.ERROR === true ){
+                        ModalReportEvent("Error", response.ERRNO, response.MESSAGE);
+                        this.lastOperation  = false;
+                        return false;
+
+                    }else{
+                        ModalReportEvent("Operación Exitosa", "", response.MESSAGE);
+                        this.lastOperation  = true;
+                        return true;
+                    }
+                }, delay);
+            }
+        });
+    }
+
+    update(){
+        ShowSpinner();
+
+        let data    = new FormData();
+        data.append("id", this.id);
+        data.append("username", this.username);
+        data.append("permissions", this.permissions);
+        data.append("name", this.name);
+        data.append("lastname", this.lastname);
+        data.append("email", this.email);
+        data.append("phone", this.phone);
+
+        $.ajax({
+            url:            "backend/updateUser.php",
+            type:           "POST",
+            data:           data,
+            contentType:    false,
+            processData:    false,
+            error:          (response)=>{console.log(response)},
+            success:        (response)=>{
+                setTimeout(()=>{
+                    CloseSpinner();
+
+                    if( response.ERROR === true ){
+                        ModalReportEvent("Error", response.ERRNO, response.MESSAGE);
+                        this.lastOperation  = false;
+                        
+                    }else{
+                        ModalReportEvent("Operación Exitosa", "", response.MESSAGE);
+                        this.lastOperation  = true;
+                        
+                    }
+
+                    return;
+
+                }, 500);
+            }
+        });
+    }
+
+    delete(){
+        ShowSpinner();
+
+        let data    = new FormData();
+        data.append("username", this.username);
+
+        $.ajax({
+            url:            "backend/deleteUser.php",
+            type:           "POST",
+            data:           data,
+            contentType:    false,
+            processData:    false,
+            error:          (response)=>{console.log(response)},
+            success:        (response)=>{
+                setTimeout(()=>{
+                    CloseSpinner();
+
+                    if( response.ERROR === true ){
+                        ModalReportEvent("Error", response.ERRNO, response.MESSAGE);
+                        this.lastOperation  = false;
+
+                    }else{
+                        ModalReportEvent("Operación Exitosa", "", response.MESSAGE);
+                        this.lastOperation  = true;
+                    }
+
+                    return;
+                }, delay);
+            }
+        });
+    }
+
+    /**
+     * 
+     * @param {number} username: The username what will search to fill the inputs
+     */
+    get(username){
+       
+        let data    = new FormData();
+        data.append("username", username);
+
+        $.ajax({
+            url:            "backend/getUser.php",
+            type:           "POST",
+            data:           data,
+            contentType:    false,
+            processData:    false,
+            error:          (response)=>{console.log(response)},
+            success:        (response)=>{
+                if( response.ERROR == true ){ 
+                    ModalReportEvent("Error", response.ERRNO, response.MESSAGE);
+                    document.getElementById("searchUname").value    = "";
+                
+                }else{
+                    this.idcompany      = sessionStorage.getItem("ID_COMPANY");
+                    this.username       = username;
+                    this.permissions    = response.permissions;
+                    this.name           = response.name;
+                    this.lastname       = response.lastname;
+                    this.email          = response.email;
+                    this.phone          = response.phone;
+                    this.id             = response.id;
+                }
+            }
+        });
+    }
+}
+
+class Table{
+    /**
+     * @param {string} id : Id of the table
+     * @param {json} header : Header of the table
+     * @param {number} columns : Number of columns (OPTIONAL)
+     * @param {boolean} clone: Do you want to clone some table? Set the id
+     */
+    constructor(id, header, columns, clone){
+        let table, container;
+
+        if(clone){
+            table   = document.getElementById(id);
+
+            this._table     = table;
+            this._columns   = table.children[0].children[0].childElementCount;
+            this._tbody     = table.children[1];
+            this._rows      = table.children[1].rows.length + 1;
+        
+        }else{
+            switch(document.getElementById(id)){
+                case null:
+                case undefined:
+                    container   = document.createElement("div");
+                    container.setAttribute("class", "table-modal table-reponsive-xl");
+                    container.setAttribute("id", "container:" + id);
+                    container.setAttribute("style", header.father.style);
+    
+                    table       = document.createElement("table");
+                    table.setAttribute("class", "table table-striped");
+                    table.setAttribute("id", id);
+                    table.setAttribute("style", header.table.width);
+    
+                    let thead       = document.createElement("thead");
+                    let row         = document.createElement("tr");
+    
+                    for(let i=0; i<header.length; i++){
+                        let cell  = document.createElement("th");
+                        cell.setAttribute("scope", "col");
+    
+                        if(header[i].width != ""){
+                            cell.setAttribute("width", header[i].width);
+                        };
+    
+                        let name    = document.createTextNode(header[i].name);
+                        cell.appendChild(name);
+                        row.appendChild(cell);
+                    }
+    
+                    thead.appendChild(row);
+                    table.appendChild(thead);
+                    container.appendChild(table);
+                    document.getElementById(header.father.id).appendChild(container);
+                    
+                    columns = header.length;
+    
+                    break;
+    
+                default:
+                    table           = document.getElementById(id);
+
+                    break;
+            };
+
+            this._table     = table;
+            this._columns   = columns;
+            this._tbody     = document.createElement("tbody");
+            this._rows      = 0;
+
+        }
+
+        this._id        = id;
+    }
+
+    get id(){
+        return this._id;
+    }
+
+    get tbody(){
+        return this._tbody;
+    }
+
+    get columns(){
+        return this._columns;
+    }
+
+    get rows(){
+        return this._rows;
+    }
+
+    get table(){
+        return this._table;
+    }
+
+    set id(value){
+        this._id        = value;
+    }
+
+    set tbody(value){
+        this._tbody     = value;
+    }
+
+    set columns(value){
+        this._columns   = value;
+    }
+
+    set rows(value){
+        this._rows      = value;
+    }
+
+    set table(value){
+        this._table     = value;
+    }
+
+    /**
+     * @param {array} type: Array with the type of data (Button, Link or Text)
+     * @param {array} data: Array that contains the data
+     * @param {string} id: Id associated to the row (OPTIONAL)
+     */
+    addRow(type, data, id){
+        var row     = document.createElement("tr");
+        var cell    = [];
+
+        if(id != ""){
+            row.setAttribute("id", id);
+        }
+
+        for(var j=0; j<this.columns; j++){
+            cell[j] = document.createElement("td");
+
+            switch(type[j]){
+                case "Button":;
+                    for(let x=0; x<data[j].items; x++){
+                        let textBtn = document.createTextNode(data[j][x].text);
+                        let button  = document.createElement("button");
+                        let icon    = document.createElement("span");
+
+                        button.setAttribute("onclick", data[j][x].action);
+                        button.setAttribute("class", data[j][x].classBtn);
+                        button.setAttribute("style", data[j][x].styleBtn);
+                        icon.setAttribute("class", data[j][x].classIcon);
+                        
+                        button.appendChild(icon);
+                        button.appendChild(textBtn);
+
+                        cell[j].appendChild(button);
+                    }
+
+                    break;
+                
+                case "Link":
+                    let text    = document.createTextNode(data[j].content);
+                    let link    = document.createElement("a");
+                    link.href   = data[j].function;
+                    link.appendChild(text);
+                    cell[j].appendChild(link);
+
+                    break;
+                
+                case "Select":
+                    let select  = document.createElement("select");
+                    
+                    for(var i=0; i<data[j].options.length; i++){
+                        let option  = document.createElement("option");
+                        option.textContent  = data[j].options[i];
+                        select.add(option);
+                    }
+
+                    switch(data[j].type){
+                        case "state":
+                            if(data[j].value == "1"){
+                                select.value    = "Realizada";
+        
+                            }else if(data[j].value == "0"){
+                                select.value    = "Pendiente";
+        
+                            }else{
+                                select.value    = "Error Values";
+        
+                            }
+
+                            break;
+                
+                        case "importance":
+                            if(data[j].value == "1"){
+                                select.value    = "Urgente";
+        
+                            }else if(data[j].value == "0"){
+                                select.value    = "Normal";
+        
+                            }else{
+                                select.value    = "Error Importance";
+        
+                            }
+
+                            break;
+
+                        default:
+                            console.log("ERROR TYPE SELECT");
+                    }
+                    
+                    cell[j].appendChild(select);
+
+                    break;
+
+                case "Text":
+                    let content = document.createTextNode(data[j]);
+                    cell[j].appendChild(content);
+
+                    break;
+
+                case "TextArea":
+                    let textArea            = document.createElement("textarea");
+                    textArea.textContent    = data[j];
+                    cell[j].appendChild(textArea);
+
+                    break;
+
+                default:
+                    let error   = document.createTextNode("Error Type");
+                    cell[j].appendChild(error);
+
+                    break;
+            }
+
+            row.appendChild(cell[j]);
+            this.rows   = this.rows + 1;
+        }
+        
+        this.tbody.appendChild(row);
+    }
+
+    clear(){
+        try{
+            let table   = document.getElementById(this.id);
+            table.children[1].remove();
+        
+        }catch(e){
+            console.log("No se pueden borrar los hijos de una tabla vacia");
+        }
+    }
+
+    encapsulate(){
+        this.clear();
+        document.getElementById(this.id).appendChild(this.tbody);
+    }
+
+}
+
+class Activity{
+    /**
+     * 
+     * @param {string} name: Name of the activity
+     * @param {date} date: When the activity can be realice
+     * @param {string} frecuency: Period to do the next maintance 
+     * @param {string} location: Where the activity is associated
+     * @param {string} priority: Priority of the activity. This can be Alta, Media or Baja
+     * @param {string} area: Area associated to the activity. This can be Mecánica, Eléctrica or Jardinería
+     * @param {text} comments: Comments associated to the activity (OPTIONAL)
+     * @param {number} id: Id on the database (OPTIONAL)
+     */
+    constructor(name, date, frecuency, location, priority, area, comments, id){
+        this._name          = name;
+        this._date          = date;
+        this._frecuency     = frecuency;
+        this._location      = location;
+        this._priority      = priority;
+        this._area          = area;
+        this._comments      = comments;
+        this._id            = id;
+        this._lastOperation = 0;
+        this._maintances    = "";
+    }
+
+    get name(){
+        return this._name;
+    }
+
+    get date(){
+        return this._date;
+    }
+
+    get frecuency(){
+        return this._frecuency;
+    }
+
+    get location(){
+        return this._location;
+    }
+
+    get priority(){
+        return this._priority;
+    }
+
+    get area(){
+        return this._area;
+    }
+
+    get comments(){
+        return this._comments;
+    }
+
+    get lastOperation(){
+        return this._lastOperation;
+    }
+
+    get id(){
+        return this._id;
+    }
+
+    get maintances(){
+        return this._maintances;
+    }
+
+    set name(value){
+        this._name      = value;
+    }
+
+    set date(value){
+        this._date      = value;
+    }
+
+    set frecuency(value){
+        this._frecuency = value;
+    }
+
+    set location(value){
+        this._location  = value;
+    }
+
+    set priority(value){
+        this._priority  = value;
+    }
+
+    set area(value){
+        this._area      = value;
+    }
+
+    set priority(value){
+        this._priority  = value;
+    }
+
+    set area(value){
+        this._area      = value;
+    }
+
+    set comments(value){
+        this._comments  = value;
+    }
+
+    set lastOperation(value){
+        this._lastOperation     = value;
+    }
+
+    set id(value){
+        this._id    = value;
+    }
+
+    set maintances(value){
+        this._maintances        = value;
+    }
+
+    /**
+     * 
+     * @param {string} inputId : Id of the input that containts the name 
+     * @param {number} index : If is create by the application, the value is -1
+     */
+    isValidName(inputId, index){
+        var regex   = /([a-zA-Z0-9\ \u00C0-\u00FF]){1,50}$/;
+            
+        if(!regex.test(this.name)){
+            if(index == -1){
+                ModalReportEvent("Error", 17, "El nombre ingresado contiene carácteres inválidos");
+                document.getElementById(inputId).value  = "";
+         
+            }else{
+                setTimeout(()=>{
+                    CloseSpinner();
+                    ModalReportEvent("Error", 46, "El nombre en la posición " + index + " contiene carácteres inválidos");
+                }, 500);
+            }
+            
+            return false;
+            
+        }else{
+            return true;
+        }
+    }
+    
+     /**
+     * 
+     * @param {string} inputId : Id of the input that containts the name 
+     * @param {number} index : If is create by the application, the value is -1
+     */
+    isValidDate(inputId, index){
+        var today   = new Date();
+        today       = today.toISOString().slice(0,10);
+    
+        let dateAux = this.date.split("-");
+
+        if( dateAux.length == 3 ){
+            return  true;
+          /*  let dateRequired    = "";
+            
+            if( index == -1 ){
+                dateRequired    = dateAux[0] + "-" + dateAux[1] + "-" + dateAux[2];
+            }else{
+                dateRequired    = dateAux[2] + "-" + dateAux[1] + "-" + dateAux[0];
+            }
+    
+            var date    = new Date( dateRequired );
+            date        = date.toISOString().slice(0,10);
+    
+            var date    = new Date(this.date);
+            date        = date.toISOString().slice(0,10);
+
+            if( date < today ){
+                if(index == -1){
+                    ModalReportEvent("Error", 52, "No es posible iniciar actividades en periodos anteriores a hoy");
+                    document.getElementById(inputId).value  = "";
+
+                }else{
+                /*    setTimeout(()=>{
+                        CloseSpinner();
+                        ModalReportEvent("Error", 47, "La fecha de inicio en la fila " + index + " es previa al dia de hoy");
+                    }, 500);
+                
+                    return true;
+                }
+    
+                return false;
+            
+            }else{
+                return true;
+            
+            }
+    */
+        }else{
+            if( index != -1){
+                setTimeout(()=>{
+                    CloseSpinner();
+                    ModalReportEvent("Error", 64, "La fecha de inicio en la fila " + index + " contiene un error de escritura");
+                }, 500);
+
+            }else{
+                ModalReportEvent("Error", "MODIFICAR", "La fecha ingresada es incorrecta");
+                document.getElementById(inputId).value  = "";
+
+            }
+
+            return false;
+        }
+    }
+
+     /**
+     * 
+     * @param {string} inputId : Id of the input that containts the name 
+     * @param {number} index : If is create by the application, the value is -1
+     */
+    isValidFrecuency(inputId, index){
+        switch(this.frecuency){
+            case "Diaria":
+            case "Semanal":
+            case "Quincenal":
+            case "Mensual":
+            case "Bimensual":
+            case "Trimestral":
+            case "Semestral":
+            case "Anual":
+            case "Bianual":
+            case "Trianual":
+                return true;
+            default:
+                if(index == -1){
+                    ModalReportEvent("Error", 20, "La frecuencia ingresada no es válida");
+                    document.getElementById(inputId).value  = "";
+    
+                }else{
+                    setTimeout(()=>{
+                        CloseSpinner();
+                        ModalReportEvent("Error", 20, "La frecuencia en la posición " + index +" es incorrecta.");
+                    }, 500);
+                }
+    
+                return false;
+        }
+    }
+
+     /**
+     * 
+     * @param {string} inputId : Id of the input that containts the name 
+     * @param {number} index : If is create by the application, the value is -1
+     */
+    isValidLocation(inputId, index){
+        let target      = this.location;
+        let found       = false;
+        let locations   = document.getElementById(inputId); 
+    
+        for(var i=0; i<locations.length; i++){
+            if( target != "" && target == locations.children[i].value ){
+                found   = true;
+                break;
+            }
+        }
+    
+        if(found){
+            return true;
+
+        }else{
+            if(index == -1){
+                ModalReportEvent("Error", "MODIFICAR", "La ubicación selecionada no es válida");
+                document.getElementById(inputId).value  = "";
+
+            }else{
+                setTimeout(()=>{
+                    CloseSpinner();
+                    ModalReportEvent("Error", 43, "La ubicación en la posición " + index + " no está registrada");
+                }, 500);
+            }
+
+            return false;
+        }
+    }
+
+    /**
+     * 
+     * @param {string} inputId : Id of the input that containts the name 
+     * @param {number} index : If is create by the application, the value is -1
+     */
+    isValidPriority(inputId, index){
+        switch(this.priority){
+            case "Baja":
+                return true;
+            case "Media":
+                return true;
+            case "Alta":
+                return true;
+            default:
+                if(index == -1){
+                    ModalReportEvent("Error", "MODIFICAR", "La prioridad selecionada no es válida");
+                    document.getElementById(inputId).value  = "";
+    
+                }else{
+                    setTimeout(()=>{
+                        CloseSpinner();
+                        ModalReportEvent("Error", 42, "La prioridad en la posición " + index + " es incorrecta. Sólo se acepta 'Alta', 'Media' o 'Baja'");
+                    }, 500);
+                }
+    
+                return false;
+        }
+    }
+
+    /**
+     * 
+     * @param {string} inputId : Id of the input that containts the name 
+     * @param {number} index : If is create by the application, the value is -1
+     */
+    isValidArea(inputId, index){
+        switch(this.area){
+            case "Mecánica":
+                return true;
+            case "Eléctrica":
+                return true;
+            case "Jardinería":
+                return true;
+            default:
+                if(index == -1){
+                    ModalReportEvent("Error", 44, "El área seleccionada no es válida");
+                    document.getElementById(inputId).value  = "";
+    
+                }else{
+                    setTimeout(()=>{
+                        CloseSpinner();
+                        ModalReportEvent("Error", 44, "El área en la posición " + index + " es incorrecta. Sólo se acepta 'Mecánica', 'Eléctrica' o 'Jardinería'");
+                    }, 500);
+                }
+    
+                return false;
+        }
+    }
+
+    frecuencyToPeriod(){
+        switch(this.frecuency){
+            case "Diaria":
+                return 1;
+            case "Semanal":
+                return 7;
+            case "Quincenal":
+                return 15;
+            case "Mensual":
+                return 30;
+            case "Bimensual":
+                return 60;
+            case "Trimestral":
+                return 120;
+            case "Semestral":
+                return 180;
+            case "Anual":
+                return 360;
+            case "Bianual":
+                return 720;
+            case "Trianual":
+                return 1080;
+            default:
+                return "ERROR";
+        }
+    }
+
+    /**
+     * @param {boolean} showSpinner : Show spinner?
+     */
+    add(showSpinner){
+        if(showSpinner){
+            ShowSpinner();
+        }
+
+        let data    = new FormData();
+        data.append("name", this.name);
+        data.append("date", this.date);
+        data.append("frecuency", this.frecuencyToPeriod());
+        data.append("location", this.location);
+        data.append("priority", this.priority);
+        data.append("area", this.area);
+        data.append("comments", this.comments);
+
+        $.ajax({
+            url:            "backend/addActivity.php",
+            type:           "POST",
+            data:           data,
+            contentType:    false,
+            processData:    false,
+            error:          (response)=>{console.log(response)},
+            success:        (response)=>{
+                setTimeout(()=>{
+                    if(showSpinner){
+                        CloseSpinner();
+                    }
+
+                    if( response.ERROR  === true ){
+                        ModalReportEvent("Error", response.ERRNO, response.MESSAGE);
+                        this.lastOperation  = false;
+
+                    }else{
+                        ModalReportEvent("Operación exitosa", "", response.MESSAGE);
+                        this.lastOperation  = true;
+
+                    }
+
+                    return;
+                }, 500);
+            }
+        });
+    }
+
+    maintances(){
+        ShowSpinner();
+
+        let data    = new FormData();
+        data.append("idActivity", this.id);
+
+        $.ajax({
+            url:            "backend/getRecordsPerActivity.php",
+            type:           "POST",
+            data:           data,
+            contentType:    false,
+            processData:    false,
+            error:          (response)=>{console.log(response)},
+            success:        (response)=>{
+                setTimeout(()=>{
+                    CloseSpinner();
+
+                    if(response.ERROR){
+                        ModalReportEvent("Error", response.ERRNO, response.MESSAGE);
+                        this.lastOperation  = false;
+                    
+                    }else{
+                        this.maintances     = response;
+                        this.lastOperation  = true;
+                    }
+
+                    return;
+                }, 500);
+            }
+        });
+    }
+
+    update(){
+        ShowSpinner();
+        
+        let data    = new FormData();
+        data.append("id", this.id);
+        data.append("name", this.name);
+        data.append("date", this.date);
+        data.append("frecuency", this.frecuencyToPeriod());
+        data.append("location", this.location);
+        data.append("priority", this.priority);
+        data.append("area", this.area);
+        data.append("comments", this.comments);
+
+        $.ajax({
+            url:            "backend/updateActivity.php",
+            type:           "POST",
+            data:           data,
+            contentType:    false,
+            processData:    false,
+            error:          (response)=>{console.log(response)},
+            success:        (response)=>{
+                setTimeout(()=>{
+                    CloseSpinner();
+
+                    if( response.ERROR  === true ){
+                        ModalReportEvent("Error", response.ERRNO, response.MESSAGE);
+                        this.lastOperation  = false;
+
+                    }else{
+                        ModalReportEvent("Operación exitosa", "", response.MESSAGE);
+                        this.lastOperation  = true;
+
+                    }
+
+                    return;
+                }, 500);
+            }
+        });
+    }
+
+    delete(){
+        let data    = new FormData();
+        data.append("id",this.id);
+
+        $.ajax({
+            url:            "backend/deleteActivity.php",
+            type:           "POST",
+            data:           data,
+            contentType:    false,
+            processData:    false,
+            error:          (response)=>{console.log(response)},
+            success:        (response)=>{
+                setTimeout(()=>{
+                    if(response.ERROR){
+                        ModalReportEvent("Error", response.ERRNO, response.MESSAGE);
+                        this.lastOperation  = false;
+
+                    }else{
+                        ModalReportEvent("Operación Exitosa", "", response.MESSAGE);
+                        this.lastOperation  = true;
+                    }
+
+                    return;
+                }, 500);
+            }
+        });
+    }
+}
+
+class PDF{
+    /**
+     * 
+     * @param {string} logo : Image in base 64 format 
+     */
+    constructor(logo){
+        this._doc           = new jsPDF('p', 'pt', 'letter');
+        this._margins       = {top:30, bottom:40, left:50, width:550};
+        this._logo          = logo;
+    }
+
+    get doc(){
+        return this._doc;
+    }
+
+    get margins(){
+        return this._margins;
+    }
+
+    get logo(){
+        return this._logo;
+    }
+
+    get title(){
+        return this._title;
+    }
+
+    set doc(value){
+        this._doc       = value;
+    }
+
+    set margins(value){
+        this._margins   = value;
+    }
+
+    set logo(value){
+        this._logo      = value;
+    }
+
+    set title(value){
+        this._title     = value;
+    }
+
+    setTitle(title){
+        this.doc.addImage(this.logo,
+            'JPEG',
+            this.margins.left,
+            this.margins.top,
+            100,
+            50
+        );
+
+        this.nextLine(35);
+        this.title          = title;
+
+        this.doc.text(this.title, this.margins.left + 150, this.margins.top);
+    }
+
+    setRecord(value){
+        let string;
+
+        switch (value.toString().split("").length){
+            case 1:
+                string  = "N° 00000" + value;
+                break;
+            case 2:
+                string  = "N° 0000" + value;
+                break;
+            case 3:
+                string  = "N° 000" + value;
+                break;
+            case 4:
+                string  = "N° 00" + value;
+                break;
+            case 5:
+                string  = "N° 0" + value;
+                break;
+            case 6:
+                string  = "N° " + value;
+                break;
+            default:
+                string  = "ERROR";
+                break;
+        }
+
+        this.doc.text(string, this.margins.left + 400, this.margins.top);
+    }
+
+    /**
+     * 
+     * @param {string} type : The type of data can be Linear | Table 
+     * @param {object} data : Data to show
+     * @param {boolean} clone : If the data is an table, do you want to clone it?
+     * @param {number} limit : Limit to clone, for example an table
+     */
+    setBody(type, data, clone, limit){
+        this.nextLine(50);
+        this.doc.setFontSize(12);
+
+        switch(type){
+            case "Linear":
+                for(var i=0; i<data.length; i++){
+                    this.doc.text(data[i].title, this.margins.left, this.margins.top);
+                    this.doc.text(data[i].data, this.margins.left + data.position, this.margins.top);
+                
+                    if( data.length - i != 1 ){
+                        this.nextLine(25);
+                    }
+                }
+
+                break;
+
+            case "Table":
+                let objectToPrint;
+
+                if(clone){
+                    objectToPrint  = document.getElementById(data).cloneNode(true);
+                    objectToPrint.rows[0].cells[limit].remove();
+                
+                    for( var i=0; i<objectToPrint.children[1].children.length; i++ ){
+                        objectToPrint.children[1].rows[i].cells[5].remove();
+                    }
+                
+                }else{
+                    objectToPrint   = data;
+                }
+                
+                this.doc.autoTable({
+                    startY: this.margins.top,
+                    html: objectToPrint,
+                });
+
+                break;
+
+            default:
+                break;
+        }
+
+    }
+
+    /**
+     * 
+     * @param {number} value : Space between the current line to the next line
+     */
+    nextLine(value){
+        this.margins.top    = this.margins.top + value;
+    }
+
+    print(name){
+        if(name == ""){ return; }
+        this.doc.save(name + ".pdf");
+    }
+}
+
+class Guide{
+    /**
+     * 
+     * @param {number} id : Id on the database
+     * @param {string} username : User associated to the new guide
+     * @param {array} activities : Activities´s list in the guide
+     * @param {string} dateEmitted : Date when the guide was emitted
+     * @param {string} dateFinished : Date when the guide was finished
+     */
+    constructor(id, username, activities, dateEmitted){
+        this._id            = id;
+        this._username      = username;
+        this._activities    = activities;
+        this._dateEmitted   = dateEmitted;
+        this._lastOperation = 0;
+        this._state         = 0;
+        this._states        = [];
+        this._observations  = [];
+        this._importances   = [];
+        this._piezometrias  = [];
+        this._annexes       = [];
+        this._warnings      = [];
+    }
+
+    get id(){
+        return this._id;
+    }
+
+    get username(){
+        return this._username;
+    }
+
+    get activities(){
+        return this._activities;
+    }
+
+    get dateEmitted(){
+        return this._dateEmitted;
+    }
+
+    get lastOperation(){
+        return this._lastOperation;
+    }
+
+    get states(){
+        return this._states;
+    }
+
+    get state(){
+        return this._state;
+    }
+
+    get observations(){
+        return this._observations;
+    }
+
+    get importances(){
+        return this._importances;
+    }
+
+    get piezometrias(){
+        return this._piezometrias;
+    }
+
+    get annexes(){
+        return this._annexes;
+    }
+
+    get warnings(){
+        return this._warnings;
+    }
+
+    set id(value){
+        this._id        = value;
+    }
+
+    set username(value){
+        this._username  = value;
+    }
+
+    set activities(value){
+        this._activities = value;
+    }
+
+    set dateEmitted(value){
+        this._dateEmitted = value
+    }
+
+    set lastOperation(value){
+        this._lastOperation     = value;
+    }
+
+    set states(value){
+        this._states     = value;
+    }
+
+    set state(value){
+        this._state     = value;
+    }
+
+    set observations(value){
+        this._observations  = value;
+    }
+
+    set importances(value){
+        this._importances   = value;
+    }
+
+    set piezometrias(value){
+        this._piezometrias  = value;
+    }
+
+    set annexes(value){
+        this._annexes       = value;
+    }
+
+    set warnings(value){
+        this._warnings      = value;
+    }
+
+    isValidId(inputId){}
+
+    add(){
+        let data    = new FormData();
+        data.append("username", this.username);
+        data.append("activities", this.activities);
+
+        $.ajax({
+            url:            "backend/addRecord.php",
+            type:           "POST",
+            data:           data,
+            contentType:    false,
+            processData:    false,
+            error:          (response)=>{console.log(response)},
+            success:        (response)=>{
+                if(response.ERROR){
+                    ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
+                    this.lastOperation  = false;
+
+                }else{
+                    this.id             = response.id;
+                    this.lastOperation  = true;
+                }
+
+                return;
+            }
+        });
+    }
+
+    /**
+     * 
+     * @param {number} username : Who is request the data
+     * @param {boolean} isAdmin : Is the user an admin?
+     */
+    get(username, isAdmin){
+        ShowSpinner();
+
+        let data    = new FormData();
+        data.append("idRecord", this.id);
+        data.append("username", username);
+        data.append("isAdmin", isAdmin);
+
+        $.ajax({
+            url:            "backend/getRecord.php",
+            type:           "POST",
+            data:           data,
+            contentType:    false,
+            processData:    false,
+            error:          (error)=>{console.log(error)},
+            success:        (response)=>{
+                setTimeout(()=>{
+                    CloseSpinner();
+
+                    if(response.ERROR){
+                        ModalReportEvent("Error", response.ERRNO, response.MESSAGE);
+                        this.lastOperation  = false;
+
+                    }else{
+                        for(let i=0; i<response.COUNT; i++){
+                            let activity    = new Activity(
+                                response[i].name,
+                                "",
+                                "",
+                                response[i].location,
+                                "",
+                                "",
+                                "",
+                                response[i].id
+                            );
+
+                            let observation = "";
+                            let found       = false;
+                            let index       = 0;
+
+                            try{
+                                for(let j=0; j<response.observations[i].length; j++){
+                                    let idAux   = response.observations[j].split("|")[0];
+    
+                                    if(idAux == response[i].id){
+                                        found   = true;
+                                        index   = j;
+    
+                                        break;
+                                    }
+                                }
+    
+                                if(found){
+                                    let auxObs  = response.observations[index].replace(/\r\n/g, "");
+                                    observation = auxObs.split("|")[1];
+                                }
+                            
+                            }catch(e){
+                                console.log("La actividad no registra observaciones");
+                            }
+
+                            this.importances.push(response[i].importance);
+                            this.observations.push(observation);
+                            this.activities.push(activity);
+                            this.states.push(response[i].state);
+                            this.annexes.push(response.annexes[i]);
+                            this.warnings.push(response.warnings[i]);
+                        }
+
+                        this.state          = response.stateRecord;
+                        this.username       = response.name_mandated + " " + response.lastname_mandated;
+                        this.dateEmitted    = assingFormatDate(response.dateStart);
+                        this.lastOperation  = true;
+                    }
+
+                    return;
+                }, delay);
+            }
+        });
+    }
+
+    update(){
+        ShowSpinner();
+
+        let data = new FormData();
+        data.append("idRecord", this.id);
+        data.append("arrayObservations", this.observations);
+        data.append("arrayStates", this.states);
+        data.append("piezometriaData", this.piezometrias);
+        data.append("arrayImportances", this.importances);
+    
+    
+        $.ajax({
+            type:           "POST",
+            url:            "backend/updateRecord.php",
+            contentType:    false,
+            processData:    false,
+            data:           data,
+            error:          (error)=>{console.log(error)},
+            success:        (response)=>{
+                setTimeout(()=>{
+                    CloseSpinner();
+
+                    if(response.ERROR){
+                        ModalReportEvent("Error", response.ERRNO, response.MESSAGE);
+                        this.lastOperation  = false;
+
+                    }else{
+                        ModalReportEvent("Operación exitosa", "", response.MESSAGE);
+                        this.lastOperation  = true;
+                    }
+                    return;
+                }, delay);
+            }
+        });
+    }
+}
+
+
+
+
+
+
+
+
+/**
+ * 
+ * @param {Where from the data} idInput 
+ */
+function newRut(idInput){
+    rut         = new Rut(document.getElementById(idInput).value, false);
+
+    rut.assingFormat(idInput);
+    rut.isValid(idInput);
+}
+
+function capitalCase(string){
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+/**
+ * 
+ * @param {string} value :Value of the date
+ * @param {boolean} type : Type 1 =  | Type 2 = 
+ */
+function assingFormatDate(value){
+    let dateAux = value.split("-");
+    return dateAux[2] + "-" + dateAux[1] + "-" + dateAux[0];
+}
+
+/**
+ * 
+ * @param {number} value :The value will be parse to the period to frecuency
+ */
+function periodToFrecuency(value){
+    switch(value){
+        case 1:
+            return "Diaria";
+        case 7:
+            return "Semanal";
+        case 15:
+            return "Quincenal";
+        case 30:
+            return "Mensual";
+        case 60:
+            return "Bimensual";
+        case 90:
+            return "Trimestral";
+        case 180:
+            return "Semestral";
+        case 360:
+            return "Anual";
+        case 720:
+            return "Bianual";
+        case 1080:
+            return "Trianual";
+        default:
+            return "ERROR";
+    }
+}
+
+/**
+ * 
+ * @param {What function will be execute} functionName 
+ * @param {What input will trigered the event} inputId 
+ */
+function EventToChangeInput(functionName, inputId){
+    document.getElementById(inputId).addEventListener("change", function(event){
+        if( event.which != 13 || event.keyCode != 13 ){
+            eval(functionName);
+        }
+    });
+}
+
+function EventToPressEnter(functionName, inputId){
+    
+    if( inputId === "" ){
+        document.addEventListener("keypress", function(event){
+            if (event.which == 13 || event.keyCode == 13){
+                window[functionName]();
+            }
+        });
+        
+    }else{
+        document.getElementById(inputId).addEventListener("keypress", function(event){
+            if (event.which == 13 || event.keyCode == 13){
+                window[functionName]();
+            }
+        });
+    }
+}
+
 function removeAllChildNodes(parent) {
     while (parent.firstChild){
         parent.removeChild(parent.firstChild);
@@ -7,13 +1763,6 @@ function removeAllChildNodes(parent) {
 function RemoveElement(id){
 var element = document.getElementById(id);
 element.parentNode.removeChild(element);
-}
-
-function digits_count(number){
-    var chain       = number.toString();
-    var splitted    = chain.split("");
-    
-    return splitted.length;
 }
 
 function RecoveryPass(){
@@ -113,60 +1862,10 @@ function FormatDate(date){
  //   return currentDate;
 }
 
-function CompareTwoDates(dateAux, index){
-    var today   = new Date();
-    today       = today.toISOString().slice(0,10);
-
-    dateAux     = dateAux.split("-");
-
-    if( dateAux.length == 3 ){
-
-        if( index == -1 ){
-            dateRequired    = dateAux[0] + "-" + dateAux[1] + "-" + dateAux[2];
-        }else{
-            dateRequired    = dateAux[2] + "-" + dateAux[1] + "-" + dateAux[0];
-        }
-
-        var date    = new Date( dateRequired );
-        date        = date.toISOString().slice(0,10);
-
-        if( date < today ){
-            if(index == -1){
-                ModalReportEvent("Error", 52, "No es posible iniciar actividades en periodos anteriores a hoy");
-            }else{
-                ModalReportEvent("Error", 47, "La fecha de inicio en la fila " + index + " es previa al dia de hoy");
-            }
-
-            return false;
-        }else{
-            return true;
-        }
-
-    }else{
-        if( index != -1){
-            ModalReportEvent("Error", 64, "La fecha de inicio en la fila " + index + " contiene un error de escritura");
-        }
-    }
-     
-}
-
 function FocusOn(id){
     document.getElementById(id).focus();
 }
 
-function ClearTable(id){
-var table   = document.getElementById(id);
-
-if( table.rows.length > 1 ){
-    var items   = table.rows.length - 1;
-    
-    for( var i=0; i<items; i++){
-        table.deleteRow(1);
-    }    
-}
-
-}
- 
 function NormalizeString(parameter1){
     var aux = parameter1.split(" ");
     aux[0]  = aux[0].toLowerCase();
@@ -179,62 +1878,8 @@ $(id).modal('hide');
 $('body').children('div:nth-last-child(1)').fadeOut();
 $('body').children('div:nth-last-child(2)').fadeOut();
 }
- 
-function EventToPressEnter(Function, id){
-    
-if( id === "" ){
-    document.addEventListener("keypress", function(event){
-        if (event.which == 13 || event.keyCode == 13){
-            window[Function]();
-        }
-    });
-    
-}else{
-    document.getElementById(id).addEventListener("keypress", function(event){
-        if (event.which == 13 || event.keyCode == 13){
-            window[Function]();
-        }
-    });
-}
-}
 
- function isValidName(Name, index){
-    var regex   = /([a-zA-Z\ \u00C0-\u00FF]){1,30}$/;
-    
-    if( !regex.test(Name) ){
-        ModalReportEvent("Error", 17, "El nombre ingresado contiene carácteres inválidos");
-        return false;
-    }else{
-        return true;
-    }
- }
 
-function isValidActivityName(parameter1, index){
-    var regex   = /([a-zA-Z0-9\ \u00C0-\u00FF]){1,50}$/;
-    
-    if(!regex.test(parameter1)){
-        if(index == -1){
-            ModalReportEvent("Error", 17, "El nombre ingresado contiene carácteres inválidos");
-        }else{
-            ModalReportEvent("Error", 46, "El nombre en la posición " + index + " contiene carácteres inválidos");
-        }
-        return false;
-        
-    }else{
-        return true;
-    }
- }
-
- function isValidEmail(Email){
-    var regex       = /^[-\w.%+]{1,64}@(?:[A-Z0-9-]{1,63}\.){1,125}[A-Z]{2,63}$/i;
-     
-    if( !regex.test(Email) ){
-        ModalReportEvent("Error", 18, "El correo ingresado no es válido");
-        return false;
-    }else{
-        return true;
-    }
- }
 
  /*
 This function was designed to verify the permissions assigned to a new user.
@@ -244,7 +1889,9 @@ Here we only have four permissions, these are:
  * 3 = Eléctrico
  * 4 = Jardinero
 */
- function areValidPermissions(option){
+
+function areValidPermissions(option){
+
     var permissions = "";
     var error       = true;
     
@@ -288,14 +1935,14 @@ Here we only have four permissions, these are:
         
         if( error ){
             ModalReportEvent("Error", 19, "No se ha seleccionado ningún permiso");
-            return "0";
+            return "";
         }else{
             return permissions;
         }
 
     }else{
         ModalReportEvent("Error", 20, "La opción " + option + " no es válida dentro de los permisos");
-        return 0;
+        return "";
     }
     
  }
@@ -310,143 +1957,4 @@ Here we only have four permissions, these are:
         ModalReportEvent("Error", 29, "El N° ingresado contiene carácteres incorrectos");
         return 0;
     }
- }
-
- function isValidPhoneNumber(value, id){
-    var regex   = /^[3-9][0-9]{7}$/;
-    
-    if( regex.test(value) ){
-        return true;
-    }else{
-        ModalReportEvent("Error", 35, "El número ingresado es incorrecto");
-        
-        var delay   = 1000;
-        
-        setTimeout(function(){
-            document.getElementById(id).focus();
-            return false;
-        }, delay);
-    }
- }
- 
- 
-// Functions relationated with the username
-
-function ParseRut(rut){
-   var spliterRut	= rut.split("-");
-   var username		= spliterRut[0].replace(/\./g,"");
-   var arrayUsername	= username.split("");
-   
-   if( arrayUsername[0] == '0' ){
-      arrayUsername.shift();
-      var stringUsername	= arrayUsername.toString();
-      username			= stringUsername.replace(/,/g,"");
-   }
-
-   return username;
-}
-
-function FormatRut(id){
-   
-    document.getElementById(id).addEventListener("change", function(event){
-     
-        if( event.which != 13 || event.keyCode != 13 ){
-            var input   = document.getElementById(id).value;
-            var digits  = input.split("");
-
-            if( digits.length == 8 || digits.length == 9 ){
-                var rut;
-
-                if( digits.length == 8 ){
-                    rut = digits[0] + "." + digits[1] + digits[2] + digits[3] + "." + digits[4] + digits[5] + digits[6] + "-" + digits[7];
-
-                }else if( digits.length == 9 ){
-                    rut = digits[0] + digits[1] + "." + digits[2] + digits[3] + digits[4] + "." + digits[5] + digits[6] + digits[7] + "-" + digits[8];
-                
-                }
-
-                isValidRut(rut, id);
-
-            }else{
-                ModalReportEvent("Error", "15", "El rut ingresado no es válido");
-	            document.getElementById(id).value   = "";
-
-            }
-        }
-    });
-}
-
-function isValidRut(rut, id){
-	
-	var regex   = /([1-9]{1})([0-9]{0,1})\.([0-9]{3})\.([0-9]{3})\-((K|k|[0-9])){1}$/g;
-	
-	if( !regex.test(rut) ){ 
-        ModalReportEvent("Error", "15", "El rut ingresado no es válido");
-	    document.getElementById(id).value   = "";
-	    return false;
-	}
-	
-	var cRut    = clearFormat(rut);
-	var cDv     = cRut.charAt(cRut.length - 1).toUpperCase();
-	var nRut    = parseInt(cRut.substr(0, cRut.length - 1));
-
-    if( computeDv(nRut).toString().toUpperCase() === cDv ){
-        document.getElementById(id).value   = rut;
-        return true;
-        
-    }else{
-        ModalReportEvent("Error", 16, "El dígito verificador no coincide");
-        document.getElementById(id).value   = "";
-	    return false;
-    }
-
-}
-
-function GenerateRut(Value){
-  var dv      = computeDv(Value);
-  Value       = Value.toString();
-  var aux     = Value.split("");
-  var digit1, digit2, digit3;
-  
-  if( aux.length == 7 ){
-      digit1  = aux[0];
-      digit2  = aux[1] + aux[2] + aux[3];
-      digit3  = aux[4] + aux[5] + aux[6];
-  
-      return digit1 + "." + digit2 + "." + digit3 + "-" + dv;
-  
-  }else if( aux.length == 8 ){
-      digit1  = aux[0] + aux[1];
-      digit2  = aux[2] + aux[3] + aux[4];
-      digit3  = aux[5] + aux[6] + aux[7];
-  
-      return digit1 + "." + digit2 + "." + digit3 + "-" + dv;
-  
-  }else{
-      return "ERROR";
-  } 
-}
-
-function clearFormat(value){
-  return value.replace(/[\.\-]/g, "");
-}
-
- function computeDv(rut) {
-	var suma	= 0;
-	var mul		= 2;
-	
-	if(typeof(rut) !== 'number') { return; }
-	
-	rut = rut.toString();
-	
-	for(var i=rut.length -1;i >= 0;i--) {
-		suma = suma + rut.charAt(i) * mul;
-		mul = ( mul + 1 ) % 8 || 2;
-	}
-	
-	switch(suma % 11) {
-		case 1	: return 'k';
-		case 0	: return 0;
-		default	: return 11 - (suma % 11);
-	}
  }

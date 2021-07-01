@@ -14,469 +14,304 @@ function initMaintances(){
 }
 
 function getRecord(idRecord, onlyRead){
-    ShowSpinner();
 
     if( document.getElementById("containerTable") != null ){
         document.getElementById("containerTable").remove();
     }
 
-    idRecord        = ( idRecord == -1 ) ? document.getElementById("idRecord").value : idRecord;
-    var aux         = isValidIntegerNumber(idRecord);
-    var isAdmin;
-
-    if( document.getElementById("user-role").innerHTML == 'Administrador' ){
-        isAdmin     = "1";
-
-    }else{
-        isAdmin     = "0";
+    idRecord    = idRecord == -1 ? document.getElementById("idRecord").value : idRecord;
+    let isAdmin = document.getElementById("user-role").innerHTML == 'Administrador' ? "1" : "0";
     
-    }
-
-    if( aux == 0 ){
-        setTimeout(()=>{
-            CloseSpinner();
-            document.getElementById("idRecord").value   = "";
-        }, 500);
-
-    }else{
-        var username    = sessionStorage.getItem('USERNAME');
-        var Variables   = 'idRecord=' + idRecord + "&username=" + username + "&isAdmin=" + isAdmin;
-
-        $.post("backend/getRecord.php", Variables, function(DATA){
-            document.getElementById("idRecord").value   = "";
-            if( DATA.ERROR ){
-                setTimeout(function(){
-                    CloseSpinner();
-                    ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
-                }, 500);
-            
-            }else{
-                var table;
-                var divTable;
-                var isComplete      = true;
-                var isPiezometria   = false;
-
-                divTable    = document.createElement("div");
-                divTable.setAttribute("class", "table-modal table-reponsive-xl");
-                divTable.setAttribute("id", "containerTable");
-        
-                table       = document.createElement("table");
-                table.setAttribute("class", "table table-striped");
-                table.setAttribute("id", "tablePendingRecords");
-        
-                var thead                   = document.createElement("thead");
-
-                var rowHead                 = document.createElement("tr");
-
-                var indexHeadCell           = document.createElement("th");
-                var activityHeadCell        = document.createElement("th");
-                var descriptionHeadCell     = document.createElement("th");
-                var locationHeadCell        = document.createElement("th");
-                var statusHeadCell          = document.createElement("th");
-                var imagesHeadCell          = document.createElement("th");
-                var importanceHeadCell      = document.createElement("th");
-
-                indexHeadCell.setAttribute("scope", "col");
-                activityHeadCell.setAttribute("scope", "col");
-                activityHeadCell.setAttribute("style", "width: 20%;");
-                descriptionHeadCell.setAttribute("scope", "col3");
-                descriptionHeadCell.setAttribute("style", "width: 25%;");
-                locationHeadCell.setAttribute("scope", "col");
-                statusHeadCell.setAttribute("scope", "col");
-                imagesHeadCell.setAttribute("scope", "col");
-                importanceHeadCell.setAttribute("scope", "col");
-
-                var indexHead       = document.createTextNode("N°");
-                var activityHead    = document.createTextNode("Actividad");
-                var descriptionHead = document.createTextNode("Observación");
-                var locationHead    = document.createTextNode("Ubicación");
-                var statusHead      = document.createTextNode("Estado");
-                var imagesHead      = document.createTextNode("Anexos");
-                var importanceHead  = document.createTextNode("Importancia");
-
-                if( onlyRead ){
-                    indexHeadCell.appendChild(indexHead);
-                    activityHeadCell.appendChild(activityHead);
-                    locationHeadCell.appendChild(locationHead);
-                    descriptionHeadCell.appendChild(descriptionHead);
-                    statusHeadCell.appendChild(statusHead);
-                    imagesHeadCell.appendChild(imagesHead);
-
-                    rowHead.appendChild(indexHeadCell);
-                    rowHead.appendChild(activityHeadCell);
-                    rowHead.appendChild(locationHeadCell);
-                    rowHead.appendChild(descriptionHeadCell);
-                    rowHead.appendChild(statusHeadCell);
-                    rowHead.appendChild(imagesHeadCell);
-
-                }else{
-                    indexHeadCell.appendChild(indexHead);
-                    activityHeadCell.appendChild(activityHead);
-                    descriptionHeadCell.appendChild(descriptionHead);
-                    statusHeadCell.appendChild(statusHead);
-                    imagesHeadCell.appendChild(imagesHead);
-                    importanceHeadCell.appendChild(importanceHead);
-
-                    rowHead.appendChild(indexHeadCell);
-                    rowHead.appendChild(activityHeadCell);
-                    rowHead.appendChild(descriptionHeadCell);
-                    rowHead.appendChild(statusHeadCell);
-                    rowHead.appendChild(imagesHeadCell);
-                    rowHead.appendChild(importanceHeadCell);
-
-                }
-
-                thead.appendChild(rowHead);
-                table.appendChild(thead);
-            
-                var bodyTable   = document.createElement("tbody");
-
-                // Create the rows
-                for (var i=0; i<DATA.COUNT; i++){
-
-                    // Here is created every row
-                    var row             = document.createElement("tr");
-
-                    // Here is created every cell
-                    var indexCell	    = document.createElement("td");
-                    var activityCell    = document.createElement("td");
-                    var locationCell    = document.createElement("td");
-                    var descriptionCell = document.createElement("td");
-                    var statusCell      = document.createElement("td");
-                    var annexesCell     = document.createElement("td");
-                    var importanceCell  = document.createElement("td");
-                    
-                    // Here is storaged the content into a node
-                    var index           = document.createTextNode( i + 1 );
-                    var activity        = document.createTextNode( DATA[i].name );
-                    var description, status, option1, option2;
-
-                    if( onlyRead ){
-                        var annexeLink  = document.createElement("a");
-                        var annexeText  = document.createTextNode("Ver Anexos");
-                        var location    = document.createTextNode( DATA[i].location );
-                        description     = document.createTextNode("");
-                        status          = document.createTextNode("");
-
-                        var target  = DATA[i].id;
-
-                        for(var j=0; j<DATA.observations.length; j++){
-                           var fullLine     = DATA.observations[j].replace(/\r\n/g, "");
-                           var lineSplitted = fullLine.split("|");
-                            
-                            if( target == lineSplitted[0] ){
-                                description.textContent     = lineSplitted[1];
-                                break;
-                            }
-                        }
-
-                        if( DATA.annexes[i] ){
-                        // The function GetAnnexes is in records.js file
-                            annexeLink.href     = "javascript:showImages(" + DATA[i].id + ", " + idRecord + ")";
-                            annexeLink.appendChild(annexeText);
-                        
-                        }else{
-                            annexeText.textContent  = "No Presenta";
-                            annexeLink.appendChild(annexeText);
-
-                        }
-
-                        status.textContent  = ( DATA[i].state == '0') ? "Pendiente" : "Realizada";
-
-                        // Here is inserted the content into the cells
-                        indexCell.appendChild(index);
-                        activityCell.appendChild(activity);
-                        locationCell.appendChild(location);
-                        descriptionCell.appendChild(description);
-                        statusCell.appendChild(status);
-                        annexesCell.appendChild(annexeLink);
-
-                        // Here is inserted the cells into a row
-                        row.appendChild(indexCell);
-                        row.appendChild(activityCell);
-                        row.appendChild(locationCell);
-                        row.appendChild(descriptionCell);
-                        row.appendChild(statusCell);
-                        row.appendChild(annexesCell);
-                        
-                    }else{
-                        var imageButton     = document.createElement("button");
-                        var imageIcon       = document.createElement("span");
-                        var textButton      = document.createTextNode("Adjuntar Documentos");
-
-                        imageIcon.setAttribute("class", "icon-image icon-space");
-                        imageButton.setAttribute("class", "btn btn-primary");
-                        imageButton.setAttribute("onclick", "javascript:openAttachFile(" + DATA[i].id + ")");
-
-                        imageButton.appendChild(imageIcon);
-                        imageButton.appendChild(textButton);
-
-                        description         = document.createElement( "textarea" );
-                        status              = document.createElement( "select" );
-                        option1             = document.createElement( "option" );
-                        option2             = document.createElement( "option" );
-
-                        // Here we set the attributes
-                        option1.text        = "Pendiente";
-                        option2.text        = "Realizada";
-
-                        status.add(option1);
-                        status.add(option2);
-
-                        var target  = DATA[i].id;
-
-                        $(description).keypress(function(event){
-                            if( event.charCode == 124 ){   
-                                return false;
-                            }
-                        });
-
-                        for(var j=0; j<DATA.observations.length; j++){
-                            var fullLine     = DATA.observations[j].replace(/\r\n/g, "");
-                            var lineSplitted = fullLine.split("|");
-                             
-                             if( target == lineSplitted[0] ){
-                                 description.value  = lineSplitted[1];
-                                 break;
-                             }
-                         }
-
-                        /**
-                        * Adding the importance of an activity
-                        */
-                        var selectImportance    = document.createElement("select");
-                        var optionNormal        = document.createElement("option");
-                        var optionImportant     = document.createElement("option");
-
-                        optionNormal.textContent    = "Normal";
-                        optionImportant.textContent = "Urgente";
-
-                        selectImportance.add(optionNormal);
-                        selectImportance.add(optionImportant);
-
-                        if( DATA[i].importance == "0" ){
-                            selectImportance.value  = "Normal";
-
-                        }else if( DATA[i].importance == "1" ){
-                            selectImportance.value  = "Urgente";
-
-                        }else{
-                            selectImportance.value  = "Error";
-
-                        }
-
-                        //  If the guide is incomplete
-                        if( DATA[i].state == "0" ){
-                            status.value        = "Pendiente";
-                            isComplete          = false;
-
-                        }else{
-                            status.value                = "Realizada";
-                            description.disabled        = true;
-                            status.disabled             = true;
-                            imageButton.disabled        = true;
-                            selectImportance.disabled   = true;
-                        }
-
-                        if( DATA[i].name == 'realizar piezometría' ){
-                            isPiezometria   = true;
-
-                            status.setAttribute("id", "selectPiezometria");
-                            status.addEventListener("change", function(){
-                                if( this.value == 'Realizada' ){
-                                    $('#updatePiezometriaForm').modal('show');
-                                }
-                            });
-
-                            $("#updatePiezometriaForm").on('hidden.bs.modal', function (){
-                                document.getElementById("selectPiezometria").value  = "Pendiente";
-                            });
-                        }
-
-
-                        // Here is inserted the content into the cells
-                        indexCell.appendChild(index);
-                        activityCell.appendChild(activity);
-                        descriptionCell.appendChild(description);
-                        statusCell.appendChild(status);
-                        annexesCell.appendChild(imageButton);
-                        importanceCell.appendChild(selectImportance);
-
-                        // Here is inserted the cells into a row
-                        row.appendChild(indexCell);
-                        row.appendChild(activityCell);
-                        row.appendChild(descriptionCell);
-                        row.appendChild(statusCell);
-                        row.appendChild(annexesCell);
-                        row.appendChild(importanceCell);
-
-                    }
-                    
-                    // Here is inserted the row into the table´s body
-                    bodyTable.appendChild(row);
-                }
-
-                if( isAdmin == '0' ){
-                    // We create the div that will containts the button to update the changes
-                    var containerButton     = document.createElement("div");
-                    var button              = document.createElement("button");
-                    var span                = document.createElement("span");
-                    var textButton          = document.createElement("textNode");
-
-                    textButton.textContent  = "Guardar";
-
-                    containerButton.setAttribute("class", "container-fluid d-flex justify-content-center");
-                    span.setAttribute("class", "icon-edit");
-                    button.setAttribute("class", "btn btn-primary");
-                    button.setAttribute("onclick", "javascript:openModalConfirmEvent(" + idRecord + ")");
-                    button.setAttribute("data-toggle", "modal");
-
-                    if( isComplete ){
-                        button.disabled     = true;
-                    }
-
-                    button.appendChild(textButton);
-                    button.appendChild(span);
-                    containerButton.appendChild(button);
-                }
-                
-                if( onlyRead ){
-                    document.getElementById("printPdfBtn").setAttribute("onclick", "printRecord(" + idRecord + ")");
-                }
-
-                // Here is inserted the body´s table into the table
-                table.appendChild(bodyTable);
-                divTable.appendChild(table);
-                sessionStorage.setItem("ID_RECORD", idRecord);
-
-                if( isAdmin == '0' ){
-                    divTable.appendChild(containerButton);
-                    document.getElementById("body-container").appendChild(divTable);
-                    
-                    setTimeout(() => {
-                        CloseSpinner();
-                    }, 500);
-
-                }else{
-                    document.getElementById("containerResult").appendChild(divTable);
-                    
-                // Adding the mandated associated to the guide, and the date of this.
-                    document.getElementById("userMandated").value   = DATA.name_mandated + " " + DATA.lastname_mandated;
-                    document.getElementById("dateStart").value      = FormatDate(DATA.dateStart);
-               
-                    setTimeout(() => {
-                        CloseSpinner();
-                        $('#searchRecordForm').modal('show');
-                    }, 500);
-                }
-                
-            }
-        });
-    }
-};
-
-function openModalConfirmEvent(idRecord){
-    var table   = document.getElementById("tablePendingRecords").children[1];
+    let record  = new Guide(idRecord,"",[],"");
     
-    var arrayObservations   = [];
-    var arrayStates         = [];
-    var arrayImportances    = [];
-    var error               = false;
+    //if(!record.isValidId()){ delete record; return }
 
-    for(var i=0; i<table.children.length; i++){
-        var observation     = table.children[i].cells[2].children[0].value.replace(/\n/g, "");
-        arrayObservations.push( observation.replace(/,/g, "|") );
+    record.get(
+        sessionStorage.getItem('USERNAME'),
+        isAdmin
+    );
 
-        /**
-         * Getting the data from the states
-         */
-        if( table.children[i].cells[3].children[0].value == "Pendiente" ){
-            arrayStates.push( "0" );
-        
-        }else if( table.children[i].cells[3].children[0].value == "Realizada" ){
-            arrayStates.push( "1" );
-        
-        }else{
-            ModalReportEvent("Error", 63, "El estado de la fila " + (i + 1) + " ha sido modificado incorrectamente");
-            error   = true;
-            
-            break;    
-        }
-
-        /**
-         * Getting the importance of every activity
-         */
-        if( table.children[i].cells[5].children[0].value == "Normal" ){
-            arrayImportances.push("0");
-        
-        }else if( table.children[i].cells[5].children[0].value == "Urgente" ){
-            arrayImportances.push("1");
-        
-        }else{
-            ModalReportEvent("Error", 93, "La importancia de la actividad en la fila " + (i + 1) + " ha sido modificado incorrectamente");
-            error   = true;
-            
-            break;    
-        }
-        
-    }
-
-    if( !error ){
-        document.getElementById("headerEvent").innerHTML    = " Actualizar guía de mantención";
-        document.getElementById("bodyEvent").innerHTML      = "¿Está seguro que desea guardar los cambios?";
-
-        document.getElementById("btnConfirm").setAttribute("onclick", "updateRecord(" + idRecord + ", '" + arrayObservations + "', '" + arrayStates + "','" + arrayImportances + "');");
-
-        $('#ModalConfirmEvent').modal('show');
-    }
-};
-
-function updateRecord(idRecord, arrayObservations, arrayStates, arrayImportances){
-    $('#ModalConfirmEvent').modal('toggle');
     ShowSpinner();
 
-    piezometriaData     = sessionStorage.getItem("piezometriaData");
-    piezometriaData == null ? [] : sessionStorage.removeItem("piezometriaData");
+    setTimeout(()=>{
+        if(record.lastOperation){
+            sessionStorage.setItem("ID_RECORD", idRecord);
+            document.getElementById("idRecord").value       = "";
 
-    var data        = new FormData();
-    
-    data.append("idRecord", idRecord);
-    data.append("arrayObservations", arrayObservations);
-    data.append("arrayStates", arrayStates);
-    data.append("piezometriaData", piezometriaData);
-    data.append("arrayImportances", arrayImportances);
+            var table   = "";
+            let types   = [];
 
-    $.ajax({
-        type:           "POST",
-        url:            "backend/updateRecord.php",
-        contentType:    false,
-        processData:    false,
-        data:           data,
-        success:        function(DATA){
-            console.log(DATA);
-            if( DATA.ERROR ){
-                setTimeout(()=>{
-                    CloseSpinner();
-                    ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
-                }, 500);
-            
-            }else{
-                document.getElementById("containerTable").remove();
+            switch(isAdmin){
+                case "1":
+                    document.getElementById("userMandated").value   = record.username;
+                    document.getElementById("dateStart").value      = record.dateEmitted;
 
-                setTimeout(()=>{
-                    CloseSpinner();
-                    ModalReportEvent("Operación exitosa", "", DATA.MESSAGE);
-                }, 500);
+                    types   = ["Text","Text","Text","Text","Text"];
 
+                    table   = new Table(
+                        "tablePendingRecords",
+                        types,
+                        7
+                    );
+                    table.clear();
+
+                    for(let i=0; i<record.activities.length; i++){
+                        let data    = [];
+
+                        let observation = record.observations[i] == "" ? "No Presenta" : record.observations[i];
+
+                        let state       = record.states[i] == "1" ? "Realizada" : "Pendiente"; 
+                        let annexe      = "";
+
+                        if(record.annexes[i]){
+                            types.push("Link");
+                            types.push("Text");
+                            annexe  = { content:     "Ver Anexos",
+                                        function:   "javascript:showImages(" + record.activities[i].id + "," + record.id + ")",
+                                    }
+        
+                        }else{
+                            types.push("Text");
+                            types.push("Text");
+                            annexe  = "No Presenta";
+                        }
+
+                        let importance  = record.importances[i] == "0" ? "Normal" : "Urgente";
+        
+                        data    = [ i + 1,
+                                    record.activities[i].name,
+                                    observation,
+                                    record.activities[i].location,
+                                    state,
+                                    annexe,
+                                    importance
+                                ];
+        
+                        table.addRow(types, data, "");
+                    }
+                    
+                    table.encapsulate();
+
+                    document.getElementById("printPdfBtn").setAttribute("onclick", "printRecord(" + record.id + ")");
+
+                    $('#searchRecordForm').modal('show');
+
+                    break;
+
+                case "0":
+                    let idTable = "tablePendingRecords";
+
+                    try{
+                        document.getElementById("container:" + idTable).remove();
+                    }catch(e){
+                        console.log("No se puede eliminar un elemento inexistente");
+                    }
+
+                    let header  = {
+                        0:  {   name:   "N°",
+                                width:  "5%"      },
+                        1:  {   name:   "Actividad",
+                                width:  "10%"   },
+                        2:  {   name:   "Observación",
+                                width:  "10%"   },
+                        3:  {   name:   "Ubicación",
+                                width:  "20%"      },
+                        4:  {   name:   "Estado",
+                                width:  "15%"      },
+                        5:  {   name:   "Anexos",
+                                width:  "15%"      },
+                        6:  {   name:   "Importancia",
+                                width:  "15%"      },
+                        length:     7,
+                        table:  {
+                                    width:  "width: 120%",
+                                },     
+                        father: {   id:     "body-container",
+                                    style:  "height: 300px; overflow: scroll"
+                                }
+                    }
+
+                    table   = new Table(
+                        idTable,
+                        header
+                    );
+
+                    types   = ["Text","Text","TextArea","Text","Select","Button","Select"];
+
+                    for(let i=0; i<record.activities.length; i++){
+                        let data        = [];
+                        let state       = { type:       "state",
+                                            value:      record.states[i],
+                                            options:    ["Realizada", "Pendiente"]
+                                        };
+                        let button      = { 
+                            0:  {   text:       "Adjuntar Documento",
+                                    styleBtn:   "",
+                                    classBtn:   "btn btn-primary btn-sm",
+                                    classIcon:  "icon-image icon-space",
+                                    action:     "javascript:openAttachFile(" + record.activities[i].id + ");"},
+                            items:  1,
+                        };
+
+                        let importance  = { type:       "importance",
+                                            value:      record.importances[i],
+                                            options:    ["Normal", "Urgente"]
+                                        };
+        
+                        data            = [ i + 1,
+                                            record.activities[i].name,
+                                            record.observations[i],
+                                            record.activities[i].location,
+                                            state,
+                                            button,
+                                            importance
+                                        ];
+        
+                        table.addRow(types, data, "");
+
+                        setTimeout(()=>{
+                            let select = table.table.children[1].rows[i];
+
+                            if(record.activities[i].name == 'realizar piezometría'){
+                                select.cells[4].children[0].setAttribute("id", "selectPiezometria");
+                                select.cells[4].children[0].addEventListener("change", function(){
+                                    if( this.value == 'Realizada' ){
+                                        $('#updatePiezometriaForm').modal('show');
+                                    }
+                                });
+        
+                                $("#updatePiezometriaForm").on('hidden.bs.modal', function (){
+                                    document.getElementById("selectPiezometria").value  = "Pendiente";
+                                });
+                            }
+
+                            if(record.states[i] == "1"){
+                                let disabled    = true;
+
+                                select.cells[2].children[0].disabled = disabled;
+                                select.cells[4].children[0].disabled = disabled;
+                                select.cells[5].children[0].disabled = disabled;
+                                select.cells[6].children[0].disabled = disabled;
+                            
+                            }
+                        }, 500);
+                    }
+                    
+                    table.encapsulate();
+
+                    if(record.state == "0"){
+                        var containerButton     = document.createElement("div");
+                        var button              = document.createElement("button");
+                        var span                = document.createElement("span");
+                        var textButton          = document.createElement("textNode");
+
+                        textButton.textContent  = "Guardar";
+
+                        containerButton.setAttribute("class", "container-fluid d-flex justify-content-center");
+                        span.setAttribute("class", "icon-edit");
+                        button.setAttribute("class", "btn btn-primary");
+                        button.setAttribute("data-toggle", "modal");
+
+                        button.onclick  = function(){
+                            let prefixTable         = table.table.children[1];
+
+                            let arrayObservations   = [];
+                            let arrayStates         = [];
+                            let arrayImportances    = [];
+
+                            for(var i=0; i<prefixTable.children.length; i++){
+                                let auxObservation     = prefixTable.children[i].cells[2].children[0].value.replace(/\n/g, "");
+                                let observation         = auxObservation.replace(/,/g, "|");
+                                arrayObservations.push(observation);
+
+                                switch(prefixTable.children[i].cells[4].children[0].value){
+                                    case "Pendiente":
+                                        arrayStates.push("0");
+                                        break;
+
+                                    case "Realizada":
+                                        arrayStates.push("1");
+                                        break;
+
+                                    default:
+                                        ModalReportEvent("Error", 63, "El estado de la fila " + (i + 1) + " ha sido modificado incorrectamente");
+                                        return;
+                                }
+
+                                switch(prefixTable.children[i].cells[6].children[0].value){
+                                    case "Normal":
+                                        arrayImportances.push("0");
+                                        break;
+
+                                    case "Urgente":
+                                        arrayImportances.push("1");
+                                        break;
+
+                                    default:
+                                        ModalReportEvent("Error", 93, "La importancia de la actividad en la fila " + (i + 1) + " ha sido modificado incorrectamente");
+                                        return;
+                                }
+                            }
+
+                            document.getElementById("headerEvent").innerHTML    = " Actualizar guía de mantención";
+                            document.getElementById("bodyEvent").innerHTML      = "¿Está seguro que desea guardar los cambios?";
+
+                            document.getElementById("btnConfirm").onclick       = function(){
+                                $('#ModalConfirmEvent').modal('toggle');
+                                
+                                piezometriaData     = sessionStorage.getItem("piezometriaData");
+                                piezometriaData == null ? [] : sessionStorage.removeItem("piezometriaData");
+                            
+                                record.observations = arrayObservations;
+                                record.states       = arrayStates;
+                                record.piezometrias = piezometriaData;
+                                record.importances  = arrayImportances;
+
+                                record.update();
+                            
+                                setTimeout(()=>{
+                                    if(record.lastOperation){
+                                        document.getElementById("container:" + idTable).remove();
+                                    }
+                                }, 1000);
+                            }
+                            
+                            $('#ModalConfirmEvent').modal('show');
+                        };
+
+                        button.appendChild(textButton);
+                        button.appendChild(span);
+                        containerButton.appendChild(button);
+                        document.getElementById("container:" + idTable).appendChild(containerButton);
+                    }
+
+                    break;
+
+                default:
+                    ModalReportEvent("Error", 100, "Opción no válida");
+                    break;
             }
-        },
-        error:          function (DATA) {
-            console.log(DATA);
         }
-
-    });
-
+    }, 1000);
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 function updatePiezometria(){
     var numPit      = 14;
@@ -620,161 +455,3 @@ function sendDocuments(e){
     });
 
 };
-
-
-
-/*
-function openAttachFile(idActivity){
-    $("#inputFiles").on("change", function(){
-        ShowSpinner();
-
-// Cleanning the preview div
-        
-
-        var files       = document.getElementById('inputFiles').files;
-        var navegador   = window.URL || window.webkitURL;
-        
-// Verifing all the input files
-        for( var x=0; x<files.length; x++){
-
-// Getting the size, type and name file
-            var size    = 1024*1024*5;
-            var types   = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
-            var name    = files[x].name;
-
-            if( files[x].size > size ){
-                $("#containerAttachedFiles").append("<p style='color: red'>El archivo "+name+" supera el máximo permitido 1MB</p>");
-            
-            }else if( files[x].type != types[0] && files[x].type != types[1] && files[x].type != types[2] && files[x].type != types[3] ){
-                $("#containerAttachedFiles").append("<p style='color: red'>El archivo "+name+" no es del tipo de imagen permitida.</p>");
-            
-            }else{
-                var objeto_url          = navegador.createObjectURL(files[x]);
-                var containerGallery    = document.getElementById("containerAttachedFiles");
-                var containerImagen     = document.createElement("div");
-                var button              = document.createElement("button");
-                var iconButton          = document.createElement("span");
-                var textButton          = document.createTextNode("Eliminar");
-
-                containerImagen.setAttribute("class", "row");
-                iconButton.setAttribute("class", "icon-circle-with-cross icon-space");
-                button.setAttribute("class", "btn btn-danger");
-                button.setAttribute("style", "margin-left: 5%;");
-                button.appendChild(iconButton);
-                button.appendChild(textButton);
-                button.addEventListener("click", function(event){
-                    alert("Deleting ...");
-                });
-
-                var img                 = document.createElement("img");
-                img.setAttribute("src", objeto_url);
-                img.setAttribute("style", "width: 250; height: 250; margin-bottom: 5%;");
-                img.setAttribute("class", "col-7");
-
-                containerImagen.appendChild(img);
-                containerImagen.appendChild(button);
-
-                containerGallery.appendChild(containerImagen);
-
-            }
-        }
-
-        setTimeout(()=>{
-            var test    = files;
-            sessionStorage.setItem('Files', test);
-            document.getElementById('inputFiles').value = "";
-            
-            CloseSpinner();
-        }, 1000);
-    });
-    
-    $("#btnStoreimages").on("click", function(){
-        ShowSpinner();
-        document.getElementById('inputFiles').value = sessionStorage.getItem('Files');
-        var formData    = new FormData($("#formImages")[0]);        
-        formData.append('idRecord', sessionStorage.getItem("ID_RECORD"));
-/*
-        $.ajax({
-            url:            "backend/addImages.php",
-            type:           "POST",
-            data:           formData,
-            contentType:    false,
-            processData:    false,
-            success:        function(DATA){
-                console.log(DATA);
-
-                if( DATA.ERROR ){
-                    setTimeout(()=>{
-                        ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
-                        CloseSpinner();
-                    }, 500);
-                    
-                }else{
-                    setTimeout(()=>{
-                        ModalReportEvent("Operación exitosa", DATA.ERRNO, DATA.MESSAGE);
-                        CloseSpinner();
-                    }, 500);
-
-                }
-
-            }
-        });
-    });
-    
-    $('#attachFileForm').modal('show');
-};
-
-
-
-
-
-
-
-/*
-
-
-function storeImages(idActivity){
-    $('#attachFileForm').modal('toggle');
-    ShowSpinner();
-
-    var container   = document.getElementById("containerAttachedFiles");
-    var numImages   = container.children.length;
-    var arrayIds    = [];
-    var arrayFiles  = [];
-
-    for( i=0; i<numImages; i++ ){
-        arrayIds.push(idActivity);
-
-        var src         = container.children[i].children[0].src;
-        var imagen      = src.replace(/^data:image\/(png|jpeg|jpg);base64,/, "");
-
-        arrayFiles.push(imagen);
-    }
-
-    var idRecord    = sessionStorage.getItem('ID_RECORD');
-    var Variables   = "idRecord=" + idRecord + "&arrayIds=" + arrayIds + "&arrayFiles=" + arrayFiles;
-
-    $.ajax({
-        type:   "POST",
-        url:    "backend/addImages.php",
-        data:   Variables,
-        success: function(DATA){
-            console.log(DATA);
-            
-            setTimeout(()=>{
-                CloseSpinner();
-                ModalReportEvent("Operación exitosa", "", "Se han adjuntado las imagenes exitosamente");
-            }, 500);
-        },
-        error: function (DATA) {
-            console.log(DATA);
-            
-            setTimeout(()=>{
-                CloseSpinner();
-                ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
-            }, 500);
-        }
-
-    });
-
-}; */
