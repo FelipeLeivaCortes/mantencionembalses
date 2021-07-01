@@ -1,38 +1,5 @@
 const delay   = 500;
 
-class Session{
-    /**
-     * @param {The username without the format} username 
-     * @param {The password of the user} password 
-     */
-    constructor(username, password){
-        this._username   = username;
-        this._password   = password;
-    }
-
-    get username(){
-        return this._username;
-    }
-
-    get password(){
-        return this._password;
-    }
-
-    isValid(){
-        if( this.username == "" ){
-            ModalReportEvent("Error", "15", "El rut ingresado no es válido");
-            return false;
-        }
-
-        if( this.password == "" ){
-            ModalReportEvent("Error", 13, "No se ha ingresado ninguna contraseña");
-            return false;
-        }
-
-        return true;
-    }
-}
-
 class Rut{
     /**
      * 
@@ -1508,8 +1475,6 @@ class Guide{
         this._warnings      = value;
     }
 
-    isValidId(inputId){}
-
     add(){
         let data    = new FormData();
         data.append("username", this.username);
@@ -1521,7 +1486,7 @@ class Guide{
             data:           data,
             contentType:    false,
             processData:    false,
-            error:          (response)=>{console.log(response)},
+            error:          (error)=>{console.log(error)},
             success:        (response)=>{
                 if(response.ERROR){
                     ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
@@ -1660,13 +1625,6 @@ class Guide{
     }
 }
 
-
-
-
-
-
-
-
 /**
  * 
  * @param {Where from the data} idInput 
@@ -1725,8 +1683,8 @@ function periodToFrecuency(value){
 
 /**
  * 
- * @param {What function will be execute} functionName 
- * @param {What input will trigered the event} inputId 
+ * @param {string} functionName : Function that will be executed
+ * @param {string} inputId : Input that will trigger the function
  */
 function EventToChangeInput(functionName, inputId){
     document.getElementById(inputId).addEventListener("change", function(event){
@@ -1763,36 +1721,6 @@ function removeAllChildNodes(parent) {
 function RemoveElement(id){
 var element = document.getElementById(id);
 element.parentNode.removeChild(element);
-}
-
-function RecoveryPass(){
-    var rut         = document.getElementById("recoveryUname").value;
-    var status      = isValidRut(rut, "recoveryUname");
-    
-    if( status === true ){
-        $("#recoveryPass").modal('toggle');
-        ShowSpinner();
-
-        var username    = ParseRut(document.getElementById("recoveryUname").value);
-        var Variables   = "username="+username
-        
-        $.post("backend/recoveryPass.php", Variables, function(DATA){
-            console.log(DATA);
-            if( DATA.ERROR === true ){
-                setTimeout(()=>{
-                    CloseSpinner();
-                    ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
-                }, 500);
-                
-            }else{
-                setTimeout(()=>{
-                    CloseSpinner();
-                    ModalReportEvent("Operación Exitosa", "", DATA.MESSAGE);
-                }, 500);
-                
-            }
-        });
-    }
 }
  
 function ShowSpinner(){

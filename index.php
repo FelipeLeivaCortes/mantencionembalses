@@ -35,7 +35,7 @@
 				</div>
 
 				<div class="d-flex justify-content-center">
-					<button class="btn login_btn" onclick="Validate()">Ingresar<button>
+					<button class="btn login_btn" onclick="validateCredentials()">Ingresar<button>
 				</div>
 
 				<div class="d-flex justify-content-center links">

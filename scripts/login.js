@@ -1,26 +1,34 @@
-
-window.onload  = StartupConfig;
- 
-let session;
 let rut;
+let password;
 
-function StartupConfig(){
-    FocusOn("uname");
-    EventToChangeInput("newRut('uname')", "uname");
+let idRut       = 'uname';
+let idPassword  = 'psw';
+let idRecovery  = "recoveryUname";
+
+//********************************************************* */
+
+window.onload  = function(){
+    FocusOn(idRut);
+    EventToChangeInput("newRut('" + idRut + "')", idRut);
+    EventToChangeInput("newRut('" + idRecovery + "')", idRecovery);
     EventToPressEnter("validateCredentials", "");
-}
-
-
+};
 
 function validateCredentials(){
-    let input2  = document.getElementById("psw").value;
+    rut         = new Rut(document.getElementById(idRut).value, true);
+    password    = document.getElementById(idPassword).value;
     
-    session     = new Session(rut.username, input2);
+    if(password == ""){
+        delete rut;
 
-    if( session.isValid() ){
+        ModalReportEvent("Error", 13, "No se ha ingresado ninguna contraseña");
+        return;
+    }
+
+    if(rut.isValid(idRut)){
         data   = new FormData();
-        data.append("username", session.username);
-        data.append("password", session.password);
+        data.append("username", rut.username);
+        data.append("password", password);
 
         $.ajax({
             url:            "backend/login.php",
@@ -28,30 +36,28 @@ function validateCredentials(){
             data:           data,
             processData:    false,
             contentType:    false,
-            error:          function(response){
-                console.log(response);
-            },
-            success:        function(response){
+            error:          (error)=>{console.log(error)},
+            success:        (response)=>{
                 if( response.ERROR === true ){
                     ModalReportEvent("Error", response.ERRNO, response.MESSAGE);
                     
                     switch(response.ERRNO){
                         // The password wrong
                         case 14:
-                            document.getElementById("psw").focus();
-                            document.getElementById("psw").value    = "";
-                            document.getElementById("psw").style.borderColor = "red";
-                            document.getElementById("uname").style.borderColor = "white";
+                            document.getElementById(idPassword).focus();
+                            document.getElementById(idPassword).value    = "";
+                            document.getElementById(idPassword).style.borderColor = "red";
+                            document.getElementById(idRut).style.borderColor = "white";
                             break;
 
                         // The user is doesn´t registered
                         case 4:
-                            document.getElementById("uname").value  = "";
-                            document.getElementById("psw").value    = "";
+                            document.getElementById(idRut).value  = "";
+                            document.getElementById(idPassword).value    = "";
 
-                            document.getElementById("uname").focus();
-                            document.getElementById("uname").style.borderColor = "red";
-                            document.getElementById("psw").style.borderColor = "white";
+                            document.getElementById(idRut).focus();
+                            document.getElementById(idRut).style.borderColor = "red";
+                            document.getElementById(idPassword).style.borderColor = "white";
                             break;
                         
                         // Licence expired
@@ -87,7 +93,7 @@ function validateCredentials(){
                     }
 
                 }else{
-                    sessionStorage.setItem("USERNAME", session.username);
+                    sessionStorage.setItem("USERNAME", rut.username);
                     sessionStorage.setItem("NAME", response.name);
                     sessionStorage.setItem("LASTNAME", response.lastname);
                     sessionStorage.setItem("PERMISSIONS", JSON.stringify(response.permissions));
@@ -130,5 +136,39 @@ function ValidateLicence(){
 
     }else{
         ModalReportEvent("Error", 38, "La licencia ingresada no es válida");
+    }
+}
+
+function RecoveryPass(){
+    rut = new Rut(document.getElementById(idRecovery).value, true);
+    
+    if(rut.isValid(idRecovery)){
+        $("#recoveryPass").modal('toggle');
+
+        ShowSpinner();
+
+        let data    = new FormData();
+        data.append("username", rut.username);
+        
+        $.ajax({
+            type:           "POST",
+            url:            "backend/recoveryPass.php",
+            data:           data,
+            contentType:    false,
+            processData:    false,
+            error:          (error)=>{console.log(error)},
+            success:        (response)=>{
+                setTimeout(()=>{
+                    CloseSpinner();
+
+                    if(response.ERROR){
+                        ModalReportEvent("Error", response.ERRNO, response.MESSAGE);
+                        
+                    }else{
+                        ModalReportEvent("Operación Exitosa", "", response.MESSAGE);
+                    }
+                }, delay);
+            }
+        });
     }
 }

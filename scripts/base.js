@@ -45,9 +45,12 @@ function ShowNewFeatures(){
     $('#newFeatureHeader').html(headerFeature);
     $('#newFeatureBody').html(bodyFeature);
 
-    var today       = new Date();
+    let lastUpdate  = new Date(yearUpdate + "/" + monthUpdate + "/" + dayUpdate);
+    let today       = new Date();
 
-    if( (today.getDate() - dayUpdate) <= 2 && (today.getDate() - dayUpdate) >= 0 ){
+    let dayDiff     = Math.round((today.getTime() - lastUpdate.getTime()) / (1000*60*60*24));
+
+    if( dayDiff > 0 && dayDiff <= 2 ){
         $("#ModalNewFeatures").modal("show");
     }
 
