@@ -2,10 +2,10 @@
  * Only modify these parameters, to avoid any error
  * */
 
- var dayUpdate       = 30;
- var monthUpdate     = "06";
+ var dayUpdate       = 15;
+ var monthUpdate     = "07";
  var yearUpdate      = "2021";
- var version         = "1.5";
+ var version         = "1.6";
 
 
 /* By default, the base.js will load the home´s content */
@@ -174,7 +174,7 @@ function ShowNewFeatures(){
         "características:"
     
     var bodyFeature     = "<b>* Optimización:</b> Se ha aplicado optimizaciones al sistema.<br><br>";
-   // "<b>* Mantenciones:</b> Todo usuario con permisos de operario podrá indicar al sistema si una actividad tiene una importancia de tipo normal o urgente.";
+                            "<b>* Mantenciones:</b> Se puede sugerir actividades a las guías de mantenciones respectivas.";
 
     $('#versionSystem').html(versionSystem);
     $('#newFeatureHeader').html(headerFeature);
