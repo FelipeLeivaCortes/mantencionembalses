@@ -65,7 +65,7 @@ function validateCredentials(){
                             try{
                                 document.getElementById("bodyModalReportEvent").children[1].remove();
                             }catch(e){
-                                console.log(e);
+                                console.log("No se puede eliminar un objeto inexistente");
                             }
                             
                             var link        = document.createElement("a");
@@ -111,30 +111,42 @@ function ValidateLicence(){
     var hash   = document.getElementById("hash").value;
 
     if(hash.length == 96){
-        var rut         = document.getElementById("uname").value;
-        var username    = ParseRut(rut);
-        var Variables   = "username=" + username + "&hash=" + hash;
+        rut         = new Rut(document.getElementById(idRut).value, true);
+        
+        if(!rut.isValid(idRut)){ delete rut; return; };
 
-        $.post("backend/updateLicence.php", Variables, function(DATA){
-            var delay = 1000;
+        $('#renovateLicenceModal').modal("toggle");
+        ShowSpinner();
 
-            ShowSpinner(delay);
-            setTimeout(function(){
-                $('#renovateLicenceModal').modal("toggle");
+        let data    = new FormData();
+        data.append("username", rut.username);
+        data.append("hash", hash);
 
-                if(DATA.ERROR){
-                    ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);    
-                    document.getElementById("hash").value = "";
-                
-                }else{
-                   
-                    ModalReportEvent("Operación exitosa", "", DATA.MESSAGE);
-                }
-            }, delay);
+        $.ajax({
+            url:            "backend/updateLicence.php",
+            type:           "POST",
+            data:           data,
+            contentType:    false,
+            processData:    false,
+            error:          (error)=>{console.log(error)},
+            success:        (response)=>{
+                setTimeout(()=>{
+                    CloseSpinner();
 
+                    if(response.ERROR){
+                        document.getElementById("hash").value = "";
+                        ModalReportEvent("Error", response.ERRNO, response.MESSAGE);
+                    
+                    }else{
+                        ModalReportEvent("Operación exitosa", "", response.MESSAGE);
+                    }
+
+                }, delay);
+            }
         });
 
     }else{
+        document.getElementById("hash").value = "";
         ModalReportEvent("Error", 38, "La licencia ingresada no es válida");
     }
 }

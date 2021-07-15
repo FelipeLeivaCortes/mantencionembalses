@@ -55,6 +55,12 @@
             $QUERY  ->  execute();
 
             if( $QUERY->affected_rows == 1 ){
+
+                $QUERY  ->  free_result();
+                $QUERY  =   $LINK -> prepare("DELETE FROM sugerencia WHERE idRecord = ?");
+                $QUERY  ->  bind_param('i', $idRecord);
+                $QUERY  ->  execute();
+
                 $DATA["ERROR"] 		= false;
                 $DATA["MESSAGE"]	= "Se ha eliminado el registro exitosamente";
         

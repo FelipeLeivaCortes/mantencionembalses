@@ -1,8 +1,7 @@
-var selDiv = "";
-var storedFiles = [];
+var selDiv              = "";
+var storedFiles         = [];
 
-function initMaintances(){
-    
+async function initMaintances(){
     $("body").on("click", ".selFile", removeFile);
     $("#inputFiles").on("change", handleInputs);
     $("#btnStoreimages").on("click", sendDocuments);
@@ -10,10 +9,11 @@ function initMaintances(){
 
     setTimeout(()=>{
         CloseSpinner();
-    }, 500);
+    }, delay);
+
 }
 
-function getRecord(idRecord, onlyRead){
+async function getRecord(idRecord){
 
     if( document.getElementById("containerTable") != null ){
         document.getElementById("containerTable").remove();
@@ -23,282 +23,466 @@ function getRecord(idRecord, onlyRead){
     let isAdmin = document.getElementById("user-role").innerHTML == 'Administrador' ? "1" : "0";
     
     let record  = new Guide(idRecord,"",[],"");
-    
-    //if(!record.isValidId()){ delete record; return }
 
-    record.get(
+    let status  = await record.get(
         sessionStorage.getItem('USERNAME'),
         isAdmin
     );
 
-    ShowSpinner();
+    if(status){
+        ShowSpinner();
 
-    setTimeout(()=>{
-        if(record.lastOperation){
-            sessionStorage.setItem("ID_RECORD", idRecord);
-            document.getElementById("idRecord").value       = "";
+        sessionStorage.setItem("ID_RECORD", idRecord);
+        document.getElementById("idRecord").value       = "";
 
-            var table   = "";
-            let types   = [];
+        var table       = "";
+        let types       = [];
+        let idFather    = "body-container";
+        let idTable     = "tablePendingRecords";
 
-            switch(isAdmin){
-                case "1":
-                    document.getElementById("userMandated").value   = record.username;
-                    document.getElementById("dateStart").value      = record.dateEmitted;
+        switch(isAdmin){
+            case "1":
+                document.getElementById("userMandated").value   = record.username;
+                document.getElementById("dateStart").value      = record.dateEmitted;
 
-                    types   = ["Text","Text","Text","Text","Text"];
+                types   = ["Text","Text","Text","Text","Text"];
 
-                    table   = new Table(
-                        "tablePendingRecords",
-                        types,
-                        7
-                    );
-                    table.clear();
+                table   = new Table(
+                    idTable,
+                    types,
+                    7
+                );
+                table.clear();
 
-                    for(let i=0; i<record.activities.length; i++){
-                        let data    = [];
+                for(let i=0; i<record.activities.length; i++){
+                    let data    = [];
 
-                        let observation = record.observations[i] == "" ? "No Presenta" : record.observations[i];
+                    let observation = record.observations[i] == "" ? "No Presenta" : record.observations[i];
 
-                        let state       = record.states[i] == "1" ? "Realizada" : "Pendiente"; 
-                        let annexe      = "";
+                    let state       = record.states[i] == "1" ? "Realizada" : "Pendiente"; 
+                    let annexe      = "";
 
-                        if(record.annexes[i]){
-                            types.push("Link");
-                            types.push("Text");
-                            annexe  = { content:     "Ver Anexos",
-                                        function:   "javascript:showImages(" + record.activities[i].id + "," + record.id + ")",
-                                    }
-        
-                        }else{
-                            types.push("Text");
-                            types.push("Text");
-                            annexe  = "No Presenta";
+                    if(record.annexes[i]){
+                        types.push("Link");
+                        types.push("Text");
+                        annexe  = { content:     "Ver Anexos",
+                                    function:   "javascript:showImages(" + record.activities[i].id + "," + record.id + ")",
+                                }
+    
+                    }else{
+                        types.push("Text");
+                        types.push("Text");
+                        annexe  = "No Presenta";
+                    }
+
+                    let importance  = record.importances[i] == "0" ? "Normal" : "Urgente";
+    
+                    data    = [ i + 1,
+                                record.activities[i].name,
+                                observation,
+                                record.activities[i].location,
+                                state,
+                                annexe,
+                                importance
+                            ];
+    
+                    table.addRow(types, data, "");
+                }
+                
+                table.encapsulate();
+
+                document.getElementById("printPdfBtn").setAttribute("onclick", "printRecord(" + record.id + ")");
+
+                $('#searchRecordForm').modal('show');
+
+                break;
+
+            case "0":
+                let activities  = await getActivities(idRecord);
+                
+                if(activities != ""){
+                    let idActivityList      = "activityList";
+                    let idActivitiesAdded   = "activitiesAdded";
+
+                    let activityList        = document.getElementById(idActivityList);
+                    let activitiesAdded     = document.getElementById(idActivitiesAdded);
+                    let buttonAdd           = document.getElementById("addActivity");
+                    let buttonRemove        = document.getElementById("removeActivity");
+                    let buttonSuggestions   = document.getElementById("sendSuggestion");
+
+                    clearSelect(idActivityList);
+                    clearSelect(idActivitiesAdded);
+
+                    for(let i=0; i<activities.length; i++){
+                        let option  = document.createElement("option");
+                        option.text = activities[i].name;
+                        option.id   = "optionList:" + activities[i].id;
+
+                        activityList.add(option);
+                    }
+
+                    buttonRemove.disabled       = true;
+                    buttonSuggestions.disabled  = true;
+
+                    buttonAdd.addEventListener("click", (e)=>{
+                        e.preventDefault();
+
+                        try{
+                            let option          = document.createElement("option");
+                            let idAux           = activityList.options[activityList.selectedIndex].id;
+                            
+                            option.id           = "optionAdded:" + idAux.split(":")[1];
+                            option.text         = activityList.options[activityList.selectedIndex].value;
+                            
+                            activitiesAdded.add(option);
+                            activityList.options[activityList.selectedIndex].remove();
+                            SortSelect(activitiesAdded);
+
+                            buttonRemove.disabled       = false;
+                            buttonSuggestions.disabled  = false;
+
+                            if(activityList.length == 0){
+                                buttonAdd.disabled  = true;
+                            }
+
+                        }catch(error){
+                            console.log("No se ha seleccionado ninguna actividad");
+                        }
+                        
+                    }, false);
+
+                    buttonRemove.addEventListener("click", (e)=>{
+                        e.preventDefault();
+
+                        try{
+                            let option          = document.createElement("option");
+                            let idAux           = activitiesAdded.options[activitiesAdded.selectedIndex].id;
+                            
+                            option.id           = "optionList:" + idAux.split(":")[1];
+                            option.text         = activitiesAdded.options[activitiesAdded.selectedIndex].value;
+                            
+                            activityList.add(option);
+                            activitiesAdded.options[activitiesAdded.selectedIndex].remove();
+                            
+                            SortSelect(activityList);
+
+                            buttonAdd.disabled  = false;
+
+                            if(activitiesAdded.length == 0){
+                                buttonRemove.disabled       = true;
+                                buttonSuggestions.disabled  = true;
+                            }
+
+                        }catch(error){
+                            console.log("No se ha seleccionado ninguna actividad");
+                        }
+                        
+                    }, false);
+
+                    buttonSuggestions.addEventListener("click", (e)=>{
+                        e.preventDefault();
+
+                        let dateSuggest        = document.getElementById("dateRequired").value;
+                        let activitiesSuggest   = [];
+
+                        if(dateSuggest == ""){
+                            ModalReportEvent("Error", "N", "Debe indicar la fecha estimada de la sugerencia");
+                            return;
                         }
 
-                        let importance  = record.importances[i] == "0" ? "Normal" : "Urgente";
-        
-                        data    = [ i + 1,
-                                    record.activities[i].name,
-                                    observation,
-                                    record.activities[i].location,
-                                    state,
-                                    annexe,
-                                    importance
-                                ];
-        
-                        table.addRow(types, data, "");
-                    }
-                    
-                    table.encapsulate();
+                        if(compareDateToToday("dateRequired")){
+                            ModalReportEvent("Error", "N + 1", "La fecha de una sugerencia no puede ser anterior o igual al dia de hoy");
+                            return;
+                        }
 
-                    document.getElementById("printPdfBtn").setAttribute("onclick", "printRecord(" + record.id + ")");
+                        $("#suggestActivityForm").modal("toggle");
+                        ShowSpinner();
 
-                    $('#searchRecordForm').modal('show');
+                        for(let i=0; i<activitiesAdded.length; i++){
+                            activitiesSuggest[i]    = activitiesAdded.options[i].id.split(":")[1];
+                        }
 
-                    break;
+                        let data    = new FormData();
+                        data.append("idRecord", sessionStorage.getItem("ID_RECORD"));
+                        data.append("idActivities", activitiesSuggest);
+                        data.append("dateSuggest", dateSuggest);
 
-                case "0":
-                    let idTable = "tablePendingRecords";
+                        $.ajax({
+                            url:            "backend/addSuggest.php",
+                            type:           "POST",
+                            data:           data,
+                            processData:    false,
+                            contentType:    false,
+                            error:          (error)=>{console.log(error)},
+                            success:        (response)=>{
+                                setTimeout(()=>{
+                                    CloseSpinner();
 
-                    try{
-                        document.getElementById("container:" + idTable).remove();
-                    }catch(e){
-                        console.log("No se puede eliminar un elemento inexistente");
-                    }
+                                    if(response.ERROR){
+                                        ModalReportEvent("Error", response.ERRNO, response.MESSAGE);
 
-                    let header  = {
-                        0:  {   name:   "N°",
-                                width:  "5%"      },
-                        1:  {   name:   "Actividad",
-                                width:  "10%"   },
-                        2:  {   name:   "Observación",
-                                width:  "10%"   },
-                        3:  {   name:   "Ubicación",
-                                width:  "20%"      },
-                        4:  {   name:   "Estado",
-                                width:  "15%"      },
-                        5:  {   name:   "Anexos",
-                                width:  "15%"      },
-                        6:  {   name:   "Importancia",
-                                width:  "15%"      },
-                        length:     7,
-                        table:  {
-                                    width:  "width: 120%",
-                                },     
-                        father: {   id:     "body-container",
-                                    style:  "height: 300px; overflow: scroll"
-                                }
-                    }
+                                    }else{
+                                        for(let i=0; i<activitiesAdded.length; i++){
+                                            let option          = document.createElement("option");
+                                            let idAux           = activitiesAdded.options[i].id;
+                                            
+                                            option.id           = "optionList:" + idAux.split(":")[1];
+                                            option.text         = activitiesAdded.options[i].value;
+                                            
+                                            activityList.add(option);
+                                        }
 
-                    table   = new Table(
-                        idTable,
-                        header
-                    );
+                                        clearSelect(idActivitiesAdded);
+                                        SortSelect(activityList);
 
-                    types   = ["Text","Text","TextArea","Text","Select","Button","Select"];
+                                        buttonRemove.disabled       = true;
+                                        buttonSuggestions.disabled  = true;
 
-                    for(let i=0; i<record.activities.length; i++){
-                        let data        = [];
-                        let state       = { type:       "state",
+                                        document.getElementById("dateRequired").value   = "";
+
+                                        ModalReportEvent("Operación Exitosa", "", response.MESSAGE);
+                                    }
+                                }, delay);
+                            }
+                        });
+                    });
+                }
+
+                try{
+                    document.getElementById("container:" + idTable).remove();
+                }catch(e){
+                    console.log("No se puede eliminar el container table porque no existe");
+                }
+
+                try{
+                    document.getElementById("containerButtons").remove();
+                }catch(e){
+                    console.log("No se puede eliminar el containerButtons porque no existe");
+                }
+
+                let header  = {
+                    0:  {   name:   "N°",
+                            width:  "5%"      },
+                    1:  {   name:   "Actividad",
+                            width:  "10%"   },
+                    2:  {   name:   "Observación",
+                            width:  "10%"   },
+                    3:  {   name:   "Ubicación",
+                            width:  "20%"      },
+                    4:  {   name:   "Estado",
+                            width:  "20%"      },
+                    5:  {   name:   "Anexos",
+                            width:  "15%"      },
+                    6:  {   name:   "Importancia",
+                            width:  "15%"      },
+                    length:     7,
+                    table:  {
+                                width:  "width: 120%",
+                            },     
+                    father: {   id:     idFather,
+                                style:  "height: 250px; overflow: scroll"
+                            }
+                }
+
+                table   = new Table(
+                    idTable,
+                    header,
+                    header.length,
+                    false
+                );
+
+                types   = ["Text","Text","TextArea","Text","Select","Button","Select"];
+
+                for(let i=0; i<record.activities.length; i++){
+                    let data            = [];
+                    let state           = { type:       "state",
                                             value:      record.states[i],
                                             options:    ["Realizada", "Pendiente"]
                                         };
-                        let button      = { 
+                    let buttonAnnexes   = { 
                             0:  {   text:       "Adjuntar Documento",
                                     styleBtn:   "",
                                     classBtn:   "btn btn-primary btn-sm",
                                     classIcon:  "icon-image icon-space",
                                     action:     "javascript:openAttachFile(" + record.activities[i].id + ");"},
                             items:  1,
-                        };
+                            };
 
-                        let importance  = { type:       "importance",
+                    let importance      = { type:       "importance",
                                             value:      record.importances[i],
                                             options:    ["Normal", "Urgente"]
                                         };
-        
-                        data            = [ i + 1,
-                                            record.activities[i].name,
-                                            record.observations[i],
-                                            record.activities[i].location,
-                                            state,
-                                            button,
-                                            importance
-                                        ];
-        
-                        table.addRow(types, data, "");
+    
+                    data            = [ i + 1,
+                                        record.activities[i].name,
+                                        record.observations[i],
+                                        record.activities[i].location,
+                                        state,
+                                        buttonAnnexes,
+                                        importance
+                                    ];
+    
+                    table.addRow(types, data, "");
 
-                        setTimeout(()=>{
-                            let select = table.table.children[1].rows[i];
+                    setTimeout(()=>{
+                        let select = table.table.children[1].rows[i];
 
-                            if(record.activities[i].name == 'realizar piezometría'){
-                                select.cells[4].children[0].setAttribute("id", "selectPiezometria");
-                                select.cells[4].children[0].addEventListener("change", function(){
-                                    if( this.value == 'Realizada' ){
-                                        $('#updatePiezometriaForm').modal('show');
-                                    }
-                                });
-        
-                                $("#updatePiezometriaForm").on('hidden.bs.modal', function (){
-                                    document.getElementById("selectPiezometria").value  = "Pendiente";
-                                });
-                            }
+                        if(record.activities[i].name == 'realizar piezometría'){
+                            select.cells[4].children[0].setAttribute("id", "selectPiezometria");
+                            select.cells[4].children[0].addEventListener("change", function(){
+                                if( this.value == 'Realizada' ){
+                                    $('#updatePiezometriaForm').modal('show');
+                                }
+                            });
+    
+                            $("#updatePiezometriaForm").on('hidden.bs.modal', function (){
+                                document.getElementById("selectPiezometria").value  = "Pendiente";
+                            });
+                        }
 
-                            if(record.states[i] == "1"){
-                                let disabled    = true;
+                        if(record.states[i] == "1"){
+                            let disabled    = true;
 
-                                select.cells[2].children[0].disabled = disabled;
-                                select.cells[4].children[0].disabled = disabled;
-                                select.cells[5].children[0].disabled = disabled;
-                                select.cells[6].children[0].disabled = disabled;
-                            
-                            }
-                        }, 500);
-                    }
+                            select.cells[2].children[0].disabled = disabled;
+                            select.cells[4].children[0].disabled = disabled;
+                            select.cells[5].children[0].disabled = disabled;
+                            select.cells[6].children[0].disabled = disabled;
+                        
+                        }
+                    }, 500);
+                }
+                
+                table.encapsulate();
+
+                /**
+                 * This container is showed only when the record is incomplete
+                 */
+                if(record.state == "0"){
+                    let containerButtons    = document.createElement("div");
+                    let containerSave       = document.createElement("div");
+                    let containerSuggest    = document.createElement("div");
+
+                    containerButtons.setAttribute("id", "containerButtons");
+                    containerButtons.setAttribute("class", "row");
+                    containerButtons.setAttribute("class", "container-fluid d-flex justify-content-center");
+                    containerButtons.setAttribute("style", "margin-top: 3%;");
+                    containerSave.setAttribute("class", "col6");
+                    containerSuggest.setAttribute("class", "col6");
                     
-                    table.encapsulate();
+                    let buttonSave          = document.createElement("button");
+                    let buttonSuggest       = document.createElement("button");
+                    let iconSave            = document.createElement("span");
+                    let iconSuggest         = document.createElement("span");
+                    let textSave            = document.createTextNode("Guardar");
+                    let textSuggest         = document.createTextNode("Sugerir Actividades");
 
-                    if(record.state == "0"){
-                        var containerButton     = document.createElement("div");
-                        var button              = document.createElement("button");
-                        var span                = document.createElement("span");
-                        var textButton          = document.createElement("textNode");
+                    buttonSave.setAttribute("class", "btn btn-primary");
+                    buttonSave.setAttribute("style", "margin-rright: 2%;");
+                    buttonSuggest.setAttribute("class", "btn btn-primary");
+                    buttonSuggest.setAttribute("style", "margin-left: 2%;");
+                    iconSave.setAttribute("class", "icon-save icon-space");
+                    iconSuggest.setAttribute("class", "icon-info icon-space");
 
-                        textButton.textContent  = "Guardar";
+                    buttonSave.appendChild(iconSave);
+                    buttonSave.appendChild(textSave);
 
-                        containerButton.setAttribute("class", "container-fluid d-flex justify-content-center");
-                        span.setAttribute("class", "icon-edit");
-                        button.setAttribute("class", "btn btn-primary");
-                        button.setAttribute("data-toggle", "modal");
+                    buttonSuggest.appendChild(iconSuggest);
+                    buttonSuggest.appendChild(textSuggest);
 
-                        button.onclick  = function(){
-                            let prefixTable         = table.table.children[1];
+                    containerSave.appendChild(buttonSave);
+                    containerSuggest.appendChild(buttonSuggest);
 
-                            let arrayObservations   = [];
-                            let arrayStates         = [];
-                            let arrayImportances    = [];
+                    containerButtons.appendChild(containerSave);
+                    containerButtons.appendChild(containerSuggest);
 
-                            for(var i=0; i<prefixTable.children.length; i++){
-                                let auxObservation     = prefixTable.children[i].cells[2].children[0].value.replace(/\n/g, "");
-                                let observation         = auxObservation.replace(/,/g, "|");
-                                arrayObservations.push(observation);
+                    document.getElementById(idFather).appendChild(containerButtons);
 
-                                switch(prefixTable.children[i].cells[4].children[0].value){
-                                    case "Pendiente":
-                                        arrayStates.push("0");
-                                        break;
+                    buttonSave.onclick      = function(){
+                        let prefixTable         = table.table.children[1];
 
-                                    case "Realizada":
-                                        arrayStates.push("1");
-                                        break;
+                        let arrayObservations   = [];
+                        let arrayStates         = [];
+                        let arrayImportances    = [];
 
-                                    default:
-                                        ModalReportEvent("Error", 63, "El estado de la fila " + (i + 1) + " ha sido modificado incorrectamente");
-                                        return;
-                                }
+                        for(var i=0; i<prefixTable.children.length; i++){
+                            let auxObservation     = prefixTable.children[i].cells[2].children[0].value.replace(/\n/g, "");
+                            let observation         = auxObservation.replace(/,/g, "|");
+                            arrayObservations.push(observation);
 
-                                switch(prefixTable.children[i].cells[6].children[0].value){
-                                    case "Normal":
-                                        arrayImportances.push("0");
-                                        break;
+                            switch(prefixTable.children[i].cells[4].children[0].value){
+                                case "Pendiente":
+                                    arrayStates.push("0");
+                                    break;
 
-                                    case "Urgente":
-                                        arrayImportances.push("1");
-                                        break;
+                                case "Realizada":
+                                    arrayStates.push("1");
+                                    break;
 
-                                    default:
-                                        ModalReportEvent("Error", 93, "La importancia de la actividad en la fila " + (i + 1) + " ha sido modificado incorrectamente");
-                                        return;
-                                }
+                                default:
+                                    ModalReportEvent("Error", 63, "El estado de la fila " + (i + 1) + " ha sido modificado incorrectamente");
+                                    return;
                             }
 
-                            document.getElementById("headerEvent").innerHTML    = " Actualizar guía de mantención";
-                            document.getElementById("bodyEvent").innerHTML      = "¿Está seguro que desea guardar los cambios?";
+                            switch(prefixTable.children[i].cells[6].children[0].value){
+                                case "Normal":
+                                    arrayImportances.push("0");
+                                    break;
 
-                            document.getElementById("btnConfirm").onclick       = function(){
-                                $('#ModalConfirmEvent').modal('toggle');
-                                
-                                piezometriaData     = sessionStorage.getItem("piezometriaData");
-                                piezometriaData == null ? [] : sessionStorage.removeItem("piezometriaData");
-                            
-                                record.observations = arrayObservations;
-                                record.states       = arrayStates;
-                                record.piezometrias = piezometriaData;
-                                record.importances  = arrayImportances;
+                                case "Urgente":
+                                    arrayImportances.push("1");
+                                    break;
 
-                                record.update();
-                            
-                                setTimeout(()=>{
-                                    if(record.lastOperation){
-                                        document.getElementById("container:" + idTable).remove();
-                                    }
-                                }, 1000);
+                                default:
+                                    ModalReportEvent("Error", 93, "La importancia de la actividad en la fila " + (i + 1) + " ha sido modificado incorrectamente");
+                                    return;
                             }
-                            
-                            $('#ModalConfirmEvent').modal('show');
-                        };
+                        }
 
-                        button.appendChild(textButton);
-                        button.appendChild(span);
-                        containerButton.appendChild(button);
-                        document.getElementById("container:" + idTable).appendChild(containerButton);
+                        document.getElementById("headerEvent").innerHTML    = " Actualizar guía de mantención";
+                        document.getElementById("bodyEvent").innerHTML      = "¿Está seguro que desea guardar los cambios?";
+
+                        document.getElementById("btnConfirm").onclick       = async function(){
+                            $('#ModalConfirmEvent').modal('toggle');
+                            
+                            piezometriaData     = sessionStorage.getItem("piezometriaData");
+                            piezometriaData == null ? [] : sessionStorage.removeItem("piezometriaData");
+                        
+                            record.observations = arrayObservations;
+                            record.states       = arrayStates;
+                            record.piezometrias = piezometriaData;
+                            record.importances  = arrayImportances;
+
+                            let status  = await record.update();
+                        
+                            if(status){
+                                document.getElementById("container:" + idTable).remove();
+                            }
+                        }
+                        
+                        $('#ModalConfirmEvent').modal('show');
+                    };
+
+                    buttonSuggest.onclick   = function(){
+                        showSuggestActivity();
                     }
+                }
 
-                    break;
+                break;
 
-                default:
-                    ModalReportEvent("Error", 100, "Opción no válida");
-                    break;
-            }
+            default:
+                ModalReportEvent("Error", 100, "Opción no válida");
+                break;
         }
-    }, 1000);
+
+        setTimeout(()=>{
+            CloseSpinner();
+        }, delay);
+    }
 };
 
-
-
-
-
+function showSuggestActivity(){
+    $("#suggestActivityForm").modal("show");
+}
 
 
 

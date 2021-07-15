@@ -95,53 +95,44 @@ async function AddUser(){
 
     ShowSpinner();
 
-    user.add();
+    let state   = await user.add();
 
-    setTimeout(()=>{
-        if(user.lastOperation){
-            let state = false;
+    if(state){
+        let disabled = false;
 
-            document.getElementById("addAdministrator").disabled    = state;
-            document.getElementById("addMechanic").disabled         = state;
-            document.getElementById("addElectrician").disabled      = state;
-            document.getElementById("addGardener").disabled         = state;
+        document.getElementById("addAdministrator").disabled    = disabled;
+        document.getElementById("addMechanic").disabled         = disabled;
+        document.getElementById("addElectrician").disabled      = disabled;
+        document.getElementById("addGardener").disabled         = disabled;
 
-            $('#addUname').val('');
-            $('#addName').val('');
-            $('#addLastname').val('');
-            $('#addEmail').val('');
-            $('#addPhone').val('');
-            
-            $("#addAdministrator").prop("checked", false);
-            $("#addMechanic").prop("checked", false);
-            $("#addElectrician").prop("checked", false);
-            $("#addGardener").prop("checked", false);
+        $('#addUname').val('');
+        $('#addName').val('');
+        $('#addLastname').val('');
+        $('#addEmail').val('');
+        $('#addPhone').val('');
+        
+        $("#addAdministrator").prop("checked", false);
+        $("#addMechanic").prop("checked", false);
+        $("#addElectrician").prop("checked", false);
+        $("#addGardener").prop("checked", false);
 
-            var active = false;
+        table       = new Table("ListUsers", "","", true);
 
-            document.getElementById("addAdministrator").disabled    = active;
-            document.getElementById("addMechanic").disabled         = active;
-            document.getElementById("addElectrician").disabled      = active;
-            document.getElementById("addGardener").disabled         = active;
+        let phone   = user.phone == "" ? 0 : user.phone; 
 
-            table       = new Table("ListUsers", "","", true);
+        let types   = ["Text","Text","Text","Text","Text","Text","Text"];
+        let data    = [ table.rows,
+                        rut.rut,
+                        GeneratePermission(user.permissions),
+                        user.name,
+                        user.lastname,
+                        user.email,
+                        phone
+                    ];
 
-            let phone   = user.phone == "" ? 0 : user.phone; 
-
-            let types   = ["Text","Text","Text","Text","Text","Text","Text"];
-            let data    = [ table.rows,
-                            rut.rut,
-                            GeneratePermission(user.permissions),
-                            user.name,
-                            user.lastname,
-                            user.email,
-                            phone
-                        ];
-
-            table.addRow(types, data, user.username);
-            table.encapsulate();
-        }
-    }, 5000);
+        table.addRow(types, data, user.username);
+        table.encapsulate();
+    }
 }
 
 function searchUser(Action){
@@ -151,8 +142,7 @@ function searchUser(Action){
     $('#searchUserForm').modal('show');
 }
 
-function getUser(){
-
+async function getUser(){
     let rut         = new Rut(
         document.getElementById("searchUname").value,
         true,
@@ -161,13 +151,13 @@ function getUser(){
     if(!rut.isValid("searchUname")){ delete rut; return }
 
     let newUser     = new User(0,0,"","","","",0,0);
-    newUser.get(rut.username);
+    let state       = await newUser.get(rut.username);
     
     $('#searchUserForm').modal('toggle');
     var Action  = sessionStorage.getItem('SearchUser');
     sessionStorage.removeItem('SearchUser');
 
-    setTimeout(()=>{
+    if(state){
         if( Action == 'deleteUser' ){
             document.getElementById("userToDelete").innerHTML   = newUser.name + " " + newUser.lastname;
             $('#deleteUserForm').modal('show');
@@ -205,9 +195,7 @@ function getUser(){
             $('#editUserForm').modal('show');
             sessionStorage.setItem("idUsername", newUser.id);
         }
-
-    }, 500);
-
+    }
 }
 
 async function UpdateUser(){
@@ -238,25 +226,23 @@ async function UpdateUser(){
     if(!user.isValidEmail("resultEmail")){ delete user; return }
     if(!user.isValidPhone("resultPhone")){ delete user; return }
 
-    user.update();
+    ShowSpinner();
 
-    setTimeout(()=>{
-        if( user.lastOperation ){
-            let state = false;
+    let state   = await user.update();
 
-            document.getElementById("editAdministrator").disabled    = state;
-            document.getElementById("editMechanic").disabled         = state;
-            document.getElementById("editElectrician").disabled      = state;
-            document.getElementById("editGardener").disabled         = state;
+    if(state){
+        let disabled = false;
 
-            GetUsers();
-        }
+        document.getElementById("editAdministrator").disabled    = disabled;
+        document.getElementById("editMechanic").disabled         = disabled;
+        document.getElementById("editElectrician").disabled      = disabled;
+        document.getElementById("editGardener").disabled         = disabled;
 
-    }, 1000);
-    
+        GetUsers();
+    }    
 }
 
-function DeleteUser(){
+async function DeleteUser(){
     $('#deleteUserForm').modal('toggle');
 
     let rut         = new Rut(
@@ -268,25 +254,24 @@ function DeleteUser(){
 
     if(!rut.isValid("searchUname")){ delete rut; delete user; return }
    
-    user.delete();
+    ShowSpinner();
 
-    setTimeout(()=>{
-        if( user.lastOperation ){
-            let row     = document.getElementById("row:" + rut.username);
-            let parent  = row.parentElement;
-            let limit   = parent.children.length;
-            let index   = parseInt(row.cells[0].textContent);
+    let state   = await user.delete();
 
-            row.remove();
+    if(state){
+        let row     = document.getElementById("row:" + rut.username);
+        let parent  = row.parentElement;
+        let limit   = parent.children.length;
+        let index   = parseInt(row.cells[0].textContent);
 
-            for(let i=index; i<limit - 1; i++){
-                parent.children[i].cells[0].textContent = i;
-            }
+        row.remove();
 
-            if(sessionStorage.getItem("USERNAME") == rut.username){ Logout() }else{ GetUsers() }
+        for(let i=index; i<limit - 1; i++){
+            parent.children[i].cells[0].textContent = i;
         }
-    }, (delay * 3));
-    
+
+        if(sessionStorage.getItem("USERNAME") == rut.username){ Logout() }else{ GetUsers() }
+    }
 }
 
 function filterPermissions(Parameter, Event){

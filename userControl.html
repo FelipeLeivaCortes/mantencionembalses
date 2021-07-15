@@ -44,75 +44,79 @@
             
                 <!-- Modal body -->
                 <div class="modal-body">
-                    <form>
-                        <fieldset enabled>
-                            <div class="form-group">
-                                <label for="addUname">Rut</label>
+                    <form class="form-horizontal" role="form">
+                        <div class="form-group">
+                            <label for="addUname" class="col-3 control-label">Rut</label>
+                            <div class="col-9">
                                 <input id="addUname" type="text" class="form-control" placeholder="Rut">
                             </div>
-                          
-                            <div class="form-group">
-                                <label for="addName">Nombre</label>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="addName" class="col-3 control-label">Nombre</label>
+                            <div class="col-9">
                                 <input id="addName" type="text" class="form-control" placeholder="Nombre">
                             </div>
+                        </div>
 
-                            <div class="form-group">
-                                <label for="addLastname">Apellido</label>
+                        <div class="form-group">
+                            <label for="addLastname" class="col-3 control-label">Apellido</label>
+                            <div class="col-9">
                                 <input id="addLastname" type="text" class="form-control" placeholder="Apellido">
                             </div>
+                        </div>
 
-                            <div class="form-group">
-                                <label for="addEmail">Correo</label>
+                        <div class="form-group">
+                            <label for="addEmail" class="col-3 control-label">Correo</label>
+                            <div class="col-9">
                                 <input id="addEmail" type="text" class="form-control" placeholder="Correo">
                             </div>
+                        </div>
 
-                            <div class="form-group">
-                                <div class="form-group">
-                                    <label for="addPhone">Celular (Opcional)</label>
-                                    <div class="input-group mb-2">
-                                        <div class="input-group-prepend">
-                                          <div class="input-group-text">+569</div>
+                        <div class="form-group">
+                            <label for="addPhone" class="col-3 control-label">Celular (Opcional)</label>
+                            <div class="col-9">
+                                <div class="input-group-prepend">
+                                  <div class="input-group-text">+569</div>
+                                  <input id="addPhone" type="text" class="form-control" placeholder="Teléfono">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="" class="col-3 control-label">Permisos</label>
+                            <div class="custom-control custom-checkbox col-9">
+                                <ul class="list-group">
+                                    <li class="list-group-item">
+                                        <div style="margin-left: 2%;">
+                                            <input id="addAdministrator" type="checkbox" class="custom-control-input">
+                                            <label for="addAdministrator" class="custom-control-label">Administrador</label>
                                         </div>
-                                        <input id="addPhone" type="text" class="form-control" placeholder="Teléfono">
-                                      </div>
-                                </div>
+                                    </li>
+                                    
+                                    <li class="list-group-item">
+                                        <div style="margin-left: 2%;">
+                                            <input type="checkbox" class="custom-control-input" id="addMechanic">
+                                            <label class="custom-control-label" for="addMechanic">Mecánico </label>
+                                        </div>
+                                    </li>
+                                    
+                                    <li class="list-group-item">
+                                        <div style="margin-left: 2%;">
+                                            <input type="checkbox" class="custom-control-input" id="addElectrician">
+                                            <label class="custom-control-label" for="addElectrician">Electricista </label>
+                                        </div>
+                                    </li>
+                                    
+                                    <li class="list-group-item">
+                                        <div style="margin-left: 2%;">
+                                            <input type="checkbox" class="custom-control-input" id="addGardener">
+                                            <label class="custom-control-label" for="addGardener">Jardinero </label>
+                                        </div>
+                                    </li>
+                                </ul>
                             </div>
-
-                            <div class="form-group">
-                                <label for="">Permisos</label>
-                                <div class="custom-control custom-checkbox ">
-                                    <ul class="list-group ">
-                                        <li class="list-group-item">
-                                            <div style="margin-left: 2%;">
-                                                <input type="checkbox" class="custom-control-input" id="addAdministrator">
-                                                <label class="custom-control-label" for="addAdministrator">Administrador </label>
-                                            </div>
-                                        </li>
-                                        
-                                        <li class="list-group-item">
-                                            <div style="margin-left: 2%;">
-                                                <input type="checkbox" class="custom-control-input" id="addMechanic">
-                                                <label class="custom-control-label" for="addMechanic">Mecánico </label>
-                                            </div>
-                                        </li>
-                                        
-                                        <li class="list-group-item">
-                                            <div style="margin-left: 2%;">
-                                                <input type="checkbox" class="custom-control-input" id="addElectrician">
-                                                <label class="custom-control-label" for="addElectrician">Electricista </label>
-                                            </div>
-                                        </li>
-                                        
-                                        <li class="list-group-item">
-                                            <div style="margin-left: 2%;">
-                                                <input type="checkbox" class="custom-control-input" id="addGardener">
-                                                <label class="custom-control-label" for="addGardener">Jardinero </label>
-                                            </div>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </fieldset>
+                        </div>
                     </form>
                 </div>
             
@@ -172,73 +176,79 @@
 
                 <!-- Modal body -->
                 <div class="modal-body">
-                    <form>
-                        <fieldset enabled>
-                            <div class="form-group">
-                                <label for="usernamePrevious">Rut</label>
+                    <form class="form-horizontal" role="form">
+                        <div class="form-group">
+                            <label for="usernamePrevious" class="col-3 control-label">Rut</label>
+                            <div class="col-9">
                                 <input id="usernamePrevious" type="text" class="form-control" placeholder="Rut">
                             </div>
-                        
-                            <div class="form-group">
-                                <label for="resultName">Nombre</label>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="resultName" class="col-3 control-label">Nombre</label>
+                            <div class="col-9">
                                 <input id="resultName" type="text" class="form-control" placeholder="Nombre">
                             </div>
+                        </div>
 
-                            <div class="form-group">
-                                <label for="resultLastname">Apellido</label>
+                        <div class="form-group">
+                            <label for="resultLastname" class="col-3 control-label">Apellido</label>
+                            <div class="col-9">
                                 <input id="resultLastname" type="text" class="form-control" placeholder="Apellido">
                             </div>
+                        </div>
 
-                            <div class="form-group">
-                                <label for="resultEmail">Correo</label>
+                        <div class="form-group">
+                            <label for="resultEmail" class="col-3 control-label">Correo</label>
+                            <div class="col-9">
                                 <input id="resultEmail" type="text" class="form-control" placeholder="Correo">
                             </div>
+                        </div>
 
-                            <div class="form-group">
-                                <label for="resultPhone">Celular (Opcional)</label>
-                                <div class="input-group mb-2">
-                                    <div class="input-group-prepend">
-                                        <div class="input-group-text">+569</div>
-                                    </div>
-                                    <input id="resultPhone" type="text" class="form-control" placeholder="Teléfono">
-                                    </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="">Permisos</label>
-                                <div class="custom-control custom-checkbox ">
-                                    <ul class="list-group">
-                                        <li class="list-group-item">
-                                            <div style="margin-left: 2%;">
-                                                <input type="checkbox" class="custom-control-input" id="editAdministrator">
-                                                <label class="custom-control-label" for="editAdministrator">Administrador </label>
-                                            </div>
-                                        </li>
-                                        
-                                        <li class="list-group-item">
-                                            <div style="margin-left: 2%;">
-                                                <input type="checkbox" class="custom-control-input" id="editMechanic">
-                                                <label class="custom-control-label" for="editMechanic">Mecánico </label>
-                                            </div>
-                                        </li>
-                                        
-                                        <li class="list-group-item">
-                                            <div style="margin-left: 2%;">
-                                                <input type="checkbox" class="custom-control-input" id="editElectrician">
-                                                <label class="custom-control-label" for="editElectrician">Electricista </label>
-                                            </div>
-                                        </li>
-                                        
-                                        <li class="list-group-item">
-                                            <div style="margin-left: 2%;">
-                                                <input type="checkbox" class="custom-control-input" id="editGardener">
-                                                <label class="custom-control-label" for="editGardener">Jardinero </label>
-                                            </div>
-                                        </li>
-                                    </ul>
+                        <div class="form-group">
+                            <label for="resultPhone" class="col-3 control-label">Celular (Opcional)</label>
+                            <div class="col-9">
+                                <div class="input-group-prepend">
+                                  <div class="input-group-text">+569</div>
+                                  <input id="resultPhone" type="text" class="form-control" placeholder="Teléfono">
                                 </div>
                             </div>
-                        </fieldset>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="" class="col-3 control-label">Permisos</label>
+                            <div class="custom-control custom-checkbox col-9">
+                                <ul class="list-group">
+                                    <li class="list-group-item">
+                                        <div style="margin-left: 2%;">
+                                            <input id="editAdministrator" type="checkbox" class="custom-control-input">
+                                            <label for="editAdministrator" class="custom-control-label">Administrador</label>
+                                        </div>
+                                    </li>
+                                    
+                                    <li class="list-group-item">
+                                        <div style="margin-left: 2%;">
+                                            <input type="checkbox" class="custom-control-input" id="editMechanic">
+                                            <label class="custom-control-label" for="editMechanic">Mecánico </label>
+                                        </div>
+                                    </li>
+                                    
+                                    <li class="list-group-item">
+                                        <div style="margin-left: 2%;">
+                                            <input type="checkbox" class="custom-control-input" id="editElectrician">
+                                            <label class="custom-control-label" for="editElectrician">Electricista </label>
+                                        </div>
+                                    </li>
+                                    
+                                    <li class="list-group-item">
+                                        <div style="margin-left: 2%;">
+                                            <input type="checkbox" class="custom-control-input" id="editGardener">
+                                            <label class="custom-control-label" for="editGardener">Jardinero </label>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
                     </form>
                 </div>
 
@@ -257,7 +267,7 @@
             <div class="modal-content">
                 <!-- Header Modal -->
                 <div class="modal-header">
-                    <h5><span class="icon-warning"></span> Confirmar Eliminación</h5>
+                    <h5><span class="icon-warning"></span> Confirmar Acción</h5>
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                 </div>
                 

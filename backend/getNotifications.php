@@ -24,69 +24,80 @@
     /***************************************************************************** */
     /***************************************************************************** */
 
-        $arrayRecords       = array();
-        $arrayEvents        = array();
         $arrayOutstanding   = array();
 
         /**
          * Getting the pending and important records
          */ 
-        $QUERY  =   $LINK -> prepare("SELECT id, importancias FROM registro WHERE estado = 0 AND revisada = 0");
-        $QUERY  ->  execute();
-        $QUERY  ->  store_result();
-        $QUERY  ->  bind_result($idRecord, $stringImportance);
+        $data		=	array(
+			"type"			=>	"SELECT",
+			"query"			=>	"SELECT id, importancias FROM registro WHERE estado = ? AND revisada = ?",
+			"parameters"	=>	array(
+									"ii",
+									0,
+									0
+								)
+		);
+		$result1	=	query($LINK, $data, false);
 
-        if( $QUERY->num_rows > 0 ){
+        for($i=0; $i<sizeof($result1); $i++){
+            
+            $arrayImportances   = explode(",", $result1[$i]["importancias"]);
+            $founded            = false;
 
-            while ( $QUERY -> fetch() ){
-				array_push($arrayRecords, [
-				    'id'    => $idRecord,
-				]);
-
-                $arrayImportances   = explode(",", $stringImportance);
-                $founded            = false;
-
-                for($i=0; $i<sizeof($arrayImportances); $i++){
-                    if( $arrayImportances[$i] == "1" ){
-                        $founded    = true;
-                        break;
-                    }
+            for($j=0; $j<sizeof($arrayImportances); $j++){
+                if( $arrayImportances[$j] == "1" ){
+                    $founded    = true;
+                    break;
                 }
+            }
 
-                if( $founded ){
-                    array_push($arrayOutstanding, [
-                        'id'    => $idRecord,
-                    ]);
-                }
-			}
+            if($founded){
+                array_push($arrayOutstanding, [
+                    'id'    => $result1[$i]["id"],
+                ]);
+            }
         }
+
+
+
 
         /**
          * Getting the event´s document
          */
-        $QUERY  ->  free_result();
-        $QUERY  =   $LINK -> prepare("SELECT id, nombre FROM documento WHERE tipo = 'Event' AND archivado = 0;");
-        $QUERY  ->  execute();
-        $QUERY  ->  store_result();
-        $QUERY  ->  bind_result($idDocument, $nameDocument);
+        $data		=	array(
+			"type"			=>	"SELECT",
+			"query"			=>	"SELECT id, nombre FROM documento WHERE tipo = 'Event' AND archivado = ?;",
+			"parameters"	=>	array(
+									"i",
+									0
+								)
+		);
+		$result2	=	query($LINK, $data, false);
 
-        if( $QUERY->num_rows > 0 ){
-            
-            while ( $QUERY -> fetch() ){
-				array_push($arrayEvents, [
-				    'id'    => $idDocument,
-                    'name'  => $nameDocument,
-                    'link'  => "mantencionembalses/".$PATH_FILES.$ID_COMPANY.$PATH_EVENTS.$nameDocument,
-				]);
-			}
+        if(sizeof($result2)>0){
+            for($i=0; $i<sizeof($result2); $i++){
+                $result2[$i]["link"] = "mantencionembalses/".$PATH_FILES.$ID_COMPANY.$PATH_EVENTS.$result2[$i]["nombre"];
+            }
         }
 
-        $DATA["records"]        = $arrayRecords;
-        $DATA["events"]         = $arrayEvents;
-        $DATA["outstanding"]    = $arrayOutstanding;
+        /**
+         * Getting the suggest
+         */
+        $data		=	array(
+			"type"			=>	"SELECT",
+			"query"			=>	"SELECT id, idRecord, fecha FROM sugerencia WHERE revisada = ?;",
+			"parameters"	=>	array(
+									"i",
+									0
+								)
+		);
+		$result3	=	query($LINK, $data, true);
 
-        $QUERY ->  free_result();
-		$LINK   ->  close();
+        $DATA["records"]        = $result1;
+        $DATA["events"]         = $result2;
+        $DATA["outstanding"]    = $arrayOutstanding;
+        $DATA["suggests"]       = $result3;
 	}
 
     header('Content-Type: application/json');

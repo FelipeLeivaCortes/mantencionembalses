@@ -24,24 +24,25 @@
     /***************************************************************************** */
     /***************************************************************************** */
     
-        $id         =   $_POST["id"];
-        
-		$QUERY      =   $LINK -> prepare("DELETE FROM actividad WHERE id = ?");
-		$QUERY      ->	bind_param('i', $id);
-        $QUERY      ->  execute();
-        
-        if( $QUERY->affected_rows == 1 ){
+        $data		=	array(
+            "type"			=>	"DELETE",
+            "query"			=>	"DELETE FROM actividad WHERE id = ?",
+            "parameters"	=>	array(
+                                    "i",
+                                    $_POST["id"]
+                                )
+        );
+        $result1	=	query($LINK, $data, true);
+
+        if($result1 == 1){
             $DATA["ERROR"] 		= false;
-			$DATA["MESSAGE"]	= "Se ha eliminado la actividad exitosamente";
-        
+            $DATA["MESSAGE"]	= "Se ha eliminado la actividad exitosamente";
+
         }else{
             $DATA["ERROR"] 		= true;
             $DATA["ERRNO"]      = 3;
-			$DATA["MESSAGE"]	= "No se pudo llevar a cabo la operación. Comuníquese con el administrador";
-		}
-
-        $QUERY ->  free_result();
-		$LINK   ->  close();
+            $DATA["MESSAGE"]	= "No se pudo llevar a cabo la operación. Comuníquese con el administrador";
+        }
 	}
 
     header('Content-Type: application/json');

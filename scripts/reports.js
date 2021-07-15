@@ -58,7 +58,7 @@ function getPiezometrias(){
             var container   = document.createElement("div");
             container.setAttribute("id", containerId);
             container.style.overflow    = "scroll";
-            container.style.width       = "120%";
+            container.style.width       = "100%";
             container.style.height      = "350px";
 
             var arrayDate       = [];
@@ -449,162 +449,100 @@ function getDocumentEvent(){
         data:           data,
         contentType:    false,
         processData:    false,
-        success:        function(DATA){
+        error:          (error)=>{console.log(error);},
+        success:        (response)=>{ console.log(response);
+            setTimeout(()=>{
+                CloseSpinner();
 
-            var idContainer = "myContainer";
-            var idTable     = "myTable";
-            var table;
-            var divTable;
-
-            try{
-                document.getElementById(idContainer).remove();
-            
-            }catch(e){
-                console.log("The container: " + idContainer + " doesn´t exists");
-
-            }
-
-            if( DATA.ERROR ){
-                setTimeout(() => {
-                    CloseSpinner();
-                    ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
-                }, 500);
-
-            }else{
-                divTable    = document.createElement("div");
-                divTable.setAttribute("class", "table-modal table-reponsive-xl");
-                divTable.setAttribute("style", "width: 120%;");
-                divTable.setAttribute("id", idContainer);
-        
-                table       = document.createElement("table");
-                table.setAttribute("class", "table table-striped");
-                table.setAttribute("id", idTable);
-        
-                var thead                   = document.createElement("thead");
-
-                var rowHead                 = document.createElement("tr");
-
-                var indexHeadCell           = document.createElement("th");
-                var documentHeadCell        = document.createElement("th");
-                var authorHeadCell          = document.createElement("th");
-                var dateHeadCell            = document.createElement("th");
-                var sourceHeadCell          = document.createElement("th");
-                var stateHeadCell           = document.createElement("th");
-
-                indexHeadCell.setAttribute("scope", "col");
-                documentHeadCell.setAttribute("scope", "col");
-                documentHeadCell.setAttribute("style", "width: 40%;");
-                dateHeadCell.setAttribute("scope", "col");
-                sourceHeadCell.setAttribute("scope", "col");
-                stateHeadCell.setAttribute("scope", "col");
-
-                var indexHead       = document.createTextNode("N°");
-                var documentHead    = document.createTextNode("Documento");
-                var authorHead      = document.createTextNode("Responsable");
-                var dateHead        = document.createTextNode("Fecha Emisión");
-                var sourceHead      = document.createTextNode("Fuente");
-                var stateHead       = document.createTextNode("Estado");
-
-                indexHeadCell.appendChild(indexHead);
-                documentHeadCell.appendChild(documentHead);
-                authorHeadCell.appendChild(authorHead);
-                dateHeadCell.appendChild(dateHead);
-                sourceHeadCell.appendChild(sourceHead);
-                stateHeadCell.appendChild(stateHead);
-
-                rowHead.appendChild(indexHeadCell);
-                rowHead.appendChild(documentHeadCell);
-                rowHead.appendChild(authorHeadCell);
-                rowHead.appendChild(dateHeadCell);
-                rowHead.appendChild(sourceHeadCell);
-                rowHead.appendChild(stateHeadCell);
-
-                thead.appendChild(rowHead);
-                table.appendChild(thead);
-            
-                var bodyTable   = document.createElement("tbody");
-
-                // Create the rows
-                for (var i=0; i<DATA.COUNT; i++){
-
-                    // Here is created every row
-                    var row             = document.createElement("tr");
-                    row.setAttribute("id", "row:" + DATA[i].id);
-
-                    // Here is created every cell
-                    var indexCell	    = document.createElement("td");
-                    var documentCell    = document.createElement("td");
-                    var authorCell      = document.createElement("td");
-                    var dateCell        = document.createElement("td");
-                    var sourceCell      = document.createElement("td");
-                    var stateCell       = document.createElement("td");
-                    
-                    // Here is storaged the content into a node
-                    var index           = document.createTextNode( i + 1 );
-                    var documentLink    = document.createElement("a");
-                    var documentText    = document.createTextNode(DATA[i].name);
-                    var author          = document.createTextNode(DATA[i].author);
-                    var dateEmitted     = document.createTextNode( FormatDate(DATA[i].date) );
-                    var source          = document.createTextNode(DATA[i].source);
-                    var state           = document.createTextNode("");
-                    var iconState       = document.createElement("span");
-
-                    if( DATA[i].state == 0 ){
-                        iconState.setAttribute("class", "icon-lock-open icon-space");
-                        state.textContent   = "Disponible";
-
-                    }else if( DATA[i].state == 1 ){
-                        iconState.setAttribute("class", "icon-lock icon-space");
-                        state.textContent   = "Archivado";
-
-                    }else{
-                        iconState.setAttribute("class", "icon-circle-with-cross icon-space");
-                        state.textContent   = "Error";
-
-                    }
-
-                    documentLink.href   = "javascript:openModalAboutDocument(" + DATA[i].id + "," +
-                        DATA[i].state + ",'" + DATA.fakepath + "','" + DATA[i].name + "','" + 
-                        DATA[i].description  + "', 'Event');";
-                    documentLink.appendChild(documentText);
-
-                    // Here is inserted the content into the cells
-                    indexCell.appendChild(index);
-                    documentCell.appendChild(documentLink);
-                    authorCell.appendChild(author);
-                    dateCell.appendChild(dateEmitted);
-                    sourceCell.appendChild(source);
-                    stateCell.appendChild(iconState);
-                    stateCell.appendChild(state);
-
-                    // Here is inserted the cells into a row
-                    row.appendChild(indexCell);
-                    row.appendChild(documentCell);
-                    row.appendChild(authorCell);
-                    row.appendChild(dateCell);
-                    row.appendChild(sourceCell);
-                    row.appendChild(stateCell);
-                    
-                    // Here is inserted the row into the table´s body
-                    bodyTable.appendChild(row);
+                let idFather    = "body-container";
+                let idTable     = "myTable";
+                
+                try{
+                    document.getElementById("container:" + idTable).remove();
+                }catch(e){
+                    console.log("No se puede eliminar un elemento inexistente");
                 }
 
+                if(response.ERROR){
+                    ModalReportEvent("Error", response.ERRNO, response.MESSAGE);
                 
-                // Here is inserted the body´s table into the table
-                table.appendChild(bodyTable);
-                divTable.appendChild(table);
-                
-                document.getElementById("body-container").appendChild(divTable);
+                }else{
+                    let types   = ["Text","Link","Text","Text","Text", "Cell"];
+                    let header  = {
+                        0:  {   name:   "N°",
+                                width:  "5%"      },
+                        1:  {   name:   "Documento",
+                                width:  "10%"   },
+                        2:  {   name:   "Responsable",
+                                width:  "15%"   },
+                        3:  {   name:   "Fecha Emisión",
+                                width:  "15%"      },
+                        4:  {   name:   "Fuente",
+                                width:  "15%"      },
+                        5:  {   name:   "Estado",
+                                width:  "15%"      },
+                        length:     6,
+                        table:  {
+                                    width:  "width: 100%",
+                                },     
+                        father: {   id:     idFather,
+                                    style:  "height: 300px; overflow: scroll"
+                                }
+                    }
+    
+                    table   = new Table(
+                        idTable,
+                        header,
+                        header.length,
+                        false
+                    );
 
-                setTimeout(() => {
-                    CloseSpinner();
-                }, 500);
-            }
-        },
-        error:          function(DATA){
-            console.log(DATA);
+                    for(let i=0; i<response.count; i++){
+                        let data    = [];
+                        let link    = { content:    response[i].name,
+                                        function:   "javascript:openModalAboutDocument(" + response[i].id + "," + response[i].state + ",'" + 
+                                                        response.fakepath + "','" + response[i].name + "','" + response[i].description  + "', 'Event');",
+                                    };
+                        let cell;
+
+                        if(response[i].state == 0){
+                            cell  = { 
+                                0:  {   text:       "Disponible",
+                                        classIcon:  "icon-lock-open icon-space"
+                                    },
+                                items:  1,
+                            };
+                        }else if(response[i].state == 1){
+                            cell  = { 
+                                0:  {   text:       "Archivado",
+                                        classIcon:  "icon-lock icon-space"
+                                    },
+                                items:  1,
+                            };
+                        }else{
+                            cell  = { 
+                                0:  {   text:       "Error",
+                                        classIcon:  "icon-info icon-space"
+                                    },
+                                items:  1,
+                            };
+                        }
+
+                        data    = [ i + 1,
+                                    link,
+                                    response[i].author,
+                                    FormatDate(response[i].date),
+                                    response[i].source,
+                                    cell
+                        ];                        
+        
+                        table.addRow(types, data, "row:" + response[i].id);
+                    }
+                    
+                    table.encapsulate();
+                }
+            }, delay);
         }
-
     });
 };
 

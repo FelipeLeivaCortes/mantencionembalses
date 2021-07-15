@@ -1,155 +1,100 @@
 function initRecords(){
-    $.post("backend/getPendingRecords.php", "", function(DATA){
-        if( DATA.ERROR ){
-            setTimeout(function(){
+    $.ajax({
+        url:            "backend/getPendingRecords.php",
+        type:           "POST",
+        data:           "",
+        contentType:    false,
+        processData:    false,
+        error:          (error)=>{console.log(error)},
+        success:        (response)=>{
+            setTimeout(()=>{
                 CloseSpinner();
-                ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
-            }, 500);
 
-        }else{
-            var table, divTable, tableId, divId;
-            
-            tableId     = "pendingRecordTable";
-            divId       = "pendingRecordContainer";
-
-            divTable    = document.createElement("div");
-            divTable.setAttribute("class", "table-modal table-reponsive-xl");
-            divTable.setAttribute("id", divId);
-    
-            table       = document.createElement("table");
-            table.setAttribute("class", "table table-striped");
-            table.setAttribute("id", tableId);
-    
-            var thead                   = document.createElement("thead");
-
-            var rowHead                 = document.createElement("tr");
-
-            var indexHeadCell           = document.createElement("th");
-            var idHeadCell              = document.createElement("th");
-            var dateStartHeadCell       = document.createElement("th");
-            var daysLateHeadCell        = document.createElement("th");
-            var stateHeadCell           = document.createElement("th");
-            var actionHeadCell          = document.createElement("th");
-
-            indexHeadCell.setAttribute("scope", "col");
-            idHeadCell.setAttribute("scope", "col");
-            dateStartHeadCell.setAttribute("scope", "col3");
-            daysLateHeadCell.setAttribute("scope", "col");
-            stateHeadCell.setAttribute("scope", "col");
-            actionHeadCell.setAttribute("scope", "col");
-
-            var indexHead       = document.createTextNode("N°");
-            var idHead          = document.createTextNode("N° Guía");
-            var dateStartHead   = document.createTextNode("Fecha de Inicio");
-            var daysLateHead    = document.createTextNode("Días de Atraso");
-            var stateHead       = document.createTextNode("Estado");
-            var actionHead      = document.createTextNode("Acción");
-
-            indexHeadCell.appendChild(indexHead);
-            idHeadCell.appendChild(idHead);
-            dateStartHeadCell.appendChild(dateStartHead);
-            daysLateHeadCell.appendChild(daysLateHead);
-            stateHeadCell.appendChild(stateHead);
-            actionHeadCell.appendChild(actionHead);
-
-            rowHead.appendChild(indexHeadCell);
-            rowHead.appendChild(idHeadCell);
-            rowHead.appendChild(dateStartHeadCell);
-            rowHead.appendChild(daysLateHeadCell);
-            rowHead.appendChild(stateHeadCell);
-            rowHead.appendChild(actionHeadCell);
-
-            thead.appendChild(rowHead);
-            table.appendChild(thead);
-        
-            var bodyTable   = document.createElement("tbody");
-
-            // Create the rows
-            for (var i=0; i<DATA.COUNT; i++){
-
-                // Here is created every row
-                var row             = document.createElement("tr");
-
-                // Here is created every cell
-                var indexCell	    = document.createElement("td");
-                var idCell          = document.createElement("td");
-                var dateStartCell   = document.createElement("td");
-                var daysLateCell    = document.createElement("td");
-                var stateCell       = document.createElement("td");
-                var actionCell      = document.createElement("td");
+                if(response.ERROR){
+                    ModalReportEvent("Advertencia", response.ERRNO, response.MESSAGE);
                 
-                // Here is storaged the content into a node
-                var index           = document.createTextNode( i + 1 );
-                var id              = document.createElement( "a" );
-                var link            = document.createTextNode( DATA[i].id );
-                var dateStart       = document.createTextNode( FormatDate( DATA[i].dateStart ) );
-                var daysLate        = document.createTextNode("");
-                var iconState       = document.createElement("span");
-                var textState       = document.createTextNode("");
-                var textAction      = document.createTextNode("");
-               
-                
-                if( DATA[i].state == 0 ){
-                    var iconButton      = document.createElement("span");
-                    var deleteButton    = document.createElement("button");
-
-                    textAction.textContent  = "Anular";
-                    iconButton.setAttribute("class", "icon-circle-with-cross icon-space");
-                    deleteButton.setAttribute("class", "btn btn-danger");
-                    deleteButton.setAttribute("style", "margin-top: 5%; margin-bottom: 5%;");
-                    deleteButton.setAttribute("onclick", "javascript:openModalDeleteRecord(" + DATA[i].id + ");");
-
-                    deleteButton.appendChild(iconButton);
-                    deleteButton.appendChild(textAction);
-
-                    daysLate.textContent    = DATA[i].daysLate;
-                    iconState.setAttribute("class", "icon-warning icon-space");
-                    textState.textContent   = "Pendiente";
-
-                    actionCell.appendChild(deleteButton);
-
                 }else{
-                    textAction.textContent  = "No Aplica";
+                    let types       = [];
+                    let idFather    = "body-container";
+                    let idTable     = "pendingRecordTable";
+    
+                    let header  = {
+                        0:  {   name:   "N°",
+                                width:  "5%"      },
+                        1:  {   name:   "N° Guía",
+                                width:  "10%"   },
+                        2:  {   name:   "Fecha de Inicio",
+                                width:  "15%"   },
+                        3:  {   name:   "Días de Atraso",
+                                width:  "15%"      },
+                        4:  {   name:   "Estado",
+                                width:  "15%"      },
+                        5:  {   name:   "Acción",
+                                width:  "15%"      },
+                        length:     6,
+                        table:  {
+                                    width:  "width: 100%",
+                                },     
+                        father: {   id:     idFather,
+                                    style:  "height: 300px; overflow: scroll"
+                                }
+                    }
+    
+                    table   = new Table(
+                        idTable,
+                        header,
+                        header.length,
+                        false
+                    );
+    
+                    types   = ["Text","Link","Text","Text","Text"];
 
-                    daysLate.textContent    = "Realizada";
-                    iconState.setAttribute("class", "icon-check icon-space");
-                    textState.textContent   = "Realizada";
+                    for(let i=0; i<response.count; i++){
+                        let data    = [];
+                        let late;
+                        let state;
+                        let button;
 
-                    actionCell.appendChild(textAction);
+                        let link    = { content:    response[i].id,
+                                        function:   "javascript:configureGettingRecord('" + response[i].id + "')",                
+                                    };
+
+                        if(response[i].state == 0){
+                            types.push("Button");
+                            late    = response[i].daysLate;
+                            state   = "Pendiente";
+                            button  = { 
+                                0:  {   text:       "Anular",
+                                        styleBtn:   "",
+                                        classBtn:   "btn btn-danger btn-sm",
+                                        classIcon:  "icon-circle-with-cross icon-space",
+                                        action:     "javascript:openModalDeleteRecord(" + response[i].id + ");"
+                                    },
+                                items:  1,
+                            };
+                        
+                        }else{
+                            types.push("Text");
+                            late    = "No Aplica";
+                            state   = "Realizada";
+                            button  = "No Aplica";
+
+                        }
+
+                        data    = [ i + 1,
+                                    link,
+                                    FormatDate(response[i].dateStart),
+                                    late,
+                                    state,
+                                    button
+                        ];                        
+        
+                        table.addRow(types, data, "row:" + response[i].id);
+                    }
+                    
+                    table.encapsulate();
                 }
-
-                // Setting the cells to show the details
-                id.appendChild(link);
-                id.href     = "javascript:getRecord(" + DATA[i].id + "," + true + ")";
-
-                // Here is inserted the content into the cells
-                indexCell.appendChild(index);
-                idCell.appendChild(id);
-                dateStartCell.appendChild(dateStart);
-                daysLateCell.appendChild(daysLate);
-                stateCell.appendChild(iconState);
-                stateCell.appendChild(textState);
-
-                // Here is inserted the cells into a row
-                row.appendChild(indexCell);
-                row.appendChild(idCell);
-                row.appendChild(dateStartCell);
-                row.appendChild(daysLateCell);
-                row.appendChild(stateCell);
-                row.appendChild(actionCell);
-                
-                // Here is inserted the row into the table´s body
-                bodyTable.appendChild(row);
-            }
-
-            // Here is inserted the body´s table into the table
-            table.appendChild(bodyTable);
-            divTable.appendChild(table);
-            document.getElementById("body-container").appendChild(divTable);
-                
-            setTimeout(() => {
-                CloseSpinner();
-            }, 500);
+            }, delay);
         }
     });
 }
@@ -160,11 +105,11 @@ function openModalDeleteRecord(idRecord){
     $('#deleteGuideForm').modal('show');
 }
 
-function DeleteRecord(idRecord){
+function DeleteRecord(id){
     $("#deleteGuideForm").modal("toggle");
 
     var formData    = new FormData();
-    formData.append("idRecord", idRecord);
+    formData.append("idRecord", id);
 
     $.ajax({
         url:            "backend/deleteRecord.php",
@@ -172,39 +117,44 @@ function DeleteRecord(idRecord){
         data:           formData,
         contentType:    false,
         processData:    false,
-        success:        function(DATA){
-            if( DATA.ERROR ){
-                ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
+        error:          (error)=>{console.log(error);},
+        success:        (response)=>{
+            if(response.ERROR){
+                ModalReportEvent("Error", response.ERRNO, response.MESSAGE);
             
             }else{
-                var table           = document.getElementById("pendingRecordTable");
-                var index           = 0;
+                let idTable = "pendingRecordTable";
+                let table   = document.getElementById(idTable);
+                let target  = "row:" + id;
+                let index   = 0;
 
-                for(var i=0; i<table.children[1].children.length; i++){
-                    var targetId    = parseInt(table.children[1].children[i].cells[1].textContent);
+                if( table.children[1].children.length > 1 ){
+                    for(var i=0; i<table.children[1].children.length; i++){
+                        if( target == table.children[1].children[i].id ){
+                            table.children[1].children[i].remove();
+                            index   = i;
 
-                    if(targetId == idRecord){
-                        table.children[1].children[i].remove();
-                        index = i;
+                            break;
+                        }
                     }
+
+                    for(var j=index; j<table.children[1].children.length; j++){
+                        table.children[1].children[j].cells[0].textContent  = j + 1;
+                    }
+    
+                }else{
+                    document.getElementById("container:" + idTable).remove();
                 }
 
-                for(var j=index; j<table.children[1].children.length; j++){
-                    table.children[1].children[j].cells[0].textContent = j + 1;
-                }
-                
-                ModalReportEvent("Operación exitosa", "", DATA.MESSAGE);
+                ModalReportEvent("Operación Exitosa", "", response.MESSAGE);
             }
-        },
-        error:          function(DATA){
-            console.log(DATA);
         }
     });
 }
 
 function configureGettingRecord(idRecord){
     idRecord    = idRecord == -1 ?  document.getElementById("idRecord").value : idRecord;
-    getRecord(idRecord, true);
+    getRecord(idRecord);
     
 }
 
@@ -306,21 +256,3 @@ function printRecord(idRecord){
     ClearTable('tablePendingRecords');
     document.getElementById("printPdfBtn").disabled = false;
 }
-
-/*              TRASH
-
-function deleteRecord(id){
-    $('#rejectMaintanceForm').modal('toggle');
-    
-    $.post("backend/deleteRecord.php", "id=" + id, function(DATA){
-        if(DATA.ERROR){
-            ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
-            
-        }else{
-            ModalReportEvent("Operación Exitosa", "", DATA.MESSAGE);
-
-            
-        }
-        
-    });
-} */

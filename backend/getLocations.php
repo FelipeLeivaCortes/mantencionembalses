@@ -24,29 +24,28 @@
     /***************************************************************************** */
     /***************************************************************************** */
 
-        $QUERY  =   $LINK -> prepare("SELECT nombre FROM sector ORDER BY nombre ASC");
-        $QUERY  ->  execute();
-        $QUERY  ->  store_result();
-        $QUERY  ->  bind_result($location);
-        
-        if( $QUERY->num_rows == 0 ){
-            $DATA["ERROR"]      = true;
+        $data		=	array(
+            "type"			=>	"SELECT",
+            "query"			=>	"SELECT nombre FROM sector ORDER BY nombre ASC;",
+            "parameters"	=>	""
+        );
+        $result1	=	query($LINK, $data, true);
+
+        if(sizeof($result1) == 0){
+            $DATA["ERROR"] 		= true;
             $DATA["ERRNO"]      = 8;
-            $DATA["MESSAGE"]    = "No se han encontrado resultados en su búsqueda";
+            $DATA["MESSAGE"]	= "No se han encontrado resultados en su búsqueda";
         
         }else{
-            $DATA["ERROR"]  = false;
-            $DATA["count"]  = $QUERY->num_rows;
+            $DATA["ERROR"]      = false;
+            $DATA["count"]      = sizeof($result1);
 
-            while ( $QUERY -> fetch() ){
-				array_push($DATA, [
-				    'location'  => $location,
+            for($i=0; $i<sizeof($result1); $i++){
+                array_push($DATA, [
+				    'location'  => $result1[$i]["nombre"]
 				]);
-			}
+            }	
         }
-
-        $QUERY ->  free_result();
-		$LINK   ->  close();
 	}
 
     header('Content-Type: application/json');

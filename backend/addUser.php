@@ -37,31 +37,48 @@
         	$phone  = "";
 		}
 	
-		$QUERY   =   $LINK -> prepare("SELECT id FROM usuario WHERE rut = ?");
-		$QUERY   ->  bind_param('i', $username);
-    	$QUERY   ->  execute();
-    	$QUERY   ->  store_result();
-        $QUERY   ->  bind_result($rut);
-		$QUERY   ->  fetch();
+		$data		=	array(
+			"type"			=>	"SELECT",
+			"query"			=>	"SELECT id FROM usuario WHERE rut = ?",
+			"parameters"	=>	array(
+									"i",
+									$username
+								)
+		);
+		$result1	=	query($LINK, $data, false);	
 	
-		if( $QUERY->num_rows >= 1 ){
-        	$DATA["ERROR"]      = true;
+		if(sizeof($result1) >= 1){
+			$DATA["ERROR"]      = true;
         	$DATA["ERRNO"]      = 2;
         	$DATA["MESSAGE"]    = "El rut ingresado ya está registrado en la base de datos";
-		
+
 	    }else{
-			$QUERY -> free_result();
+			$password   =   substr($username, 0, 4);
+			$data		=	array(
+				"type"			=>	"INSERT",
+				"query"			=>	"INSERT INTO usuario (idEmpresa, rut, clave, permisos, nombre, apellido, correo, telefono, estado) 
+										VALUES (?, ?, AES_ENCRYPT(?, ?), ?, ?, ?, ?, ?, 1)",
+				"parameters"	=>	array(
+										"iissssssi",
+										$ID_COMPANY,
+										$username,
+										$password,
+										$KEY,
+										$permissions,
+										$name,
+										$lastname,
+										$email,
+										$phone
+									)
+			);
+			$result2	=	query($LINK, $data, true);
 
-# PREPARE THE QUERY FOR INSERT THE NEW USER INTO THE DATABASE    		
-# The default password is the first fours numbers of the rut.
-
-    		$password   =   substr($username, 0, 4);
-    		$QUERY 	    =   $LINK -> prepare("INSERT INTO usuario (idEmpresa, rut, clave, permisos, nombre, apellido, correo, telefono, estado) 
-    		                                    VALUES (?, ?, AES_ENCRYPT(?, ?), ?, ?, ?, ?, ?, 1)");
-    		$QUERY	    ->	bind_param('iissssssi', $ID_COMPANY, $username, $password, $KEY, $permissions, $name, $lastname, $email, $phone);
-            $QUERY      ->  execute();
-
-			if( $QUERY->affected_rows == 1 ){
+			if($result2 == 0){
+				$DATA["ERROR"]	= true;
+				$DATA["ERRNO"]	= 3;
+				$DATA["MESSAGE"]	= "No se pudo llevar a cabo la operación. Comuníquese con el administrador";
+			
+			}else if($result2 == 1){
 				$subject		=  "Bienvenido al Sistema";
 				$body			=  '<html>
 										<head>
@@ -81,26 +98,12 @@
 				
 				$errorSendMail	= sendMail($email, $subject, $body);					
 				
-				if( !$errorSendMail ){
-					$DATA["ERROR"] 		= false;
-					$DATA["MESSAGE"]	= "Se ha agregado el usuario ".$name." ".$lastname." exitosamente";
-
-				}else{
-					$DATA["ERROR"] 		= false;
-					$DATA["MESSAGE"]	= "Se ha agregado el usuario ".$name." ".$lastname." exitosamente, pero no se ha podido enviar mensaje de bienvenida";
-
-				}
+				$DATA["ERROR"] 		= false;
+				$DATA["MESSAGE"]	= !$errorSendMail ? "Se ha agregado el usuario ".$name." ".$lastname." exitosamente" : "Se ha agregado el usuario ".$name." ".$lastname.
+										" exitosamente, pero no se ha podido enviar mensaje de bienvenida";
 	
-			}else{
-				$DATA["ERROR"]	= true;
-				$DATA["ERRNO"]	= 3;
-				$DATA["MESSAGE"]	= "No se pudo llevar a cabo la operación. Comuníquese con el administrador";
-			
 			}
 	    }
-
-        $QUERY  -> free_result();
-	   	$LINK   -> close();
 	}
 
     header('Content-Type: application/json');

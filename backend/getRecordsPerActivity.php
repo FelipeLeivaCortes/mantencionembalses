@@ -26,55 +26,68 @@
     
         $idActivity = $_POST["idActivity"];
 
-        $QUERY  =   $LINK -> prepare("SELECT nombre, area, ultimaMantencion FROM actividad WHERE id = ?;");
-        $QUERY  ->	bind_param('i', $idActivity);
-        $QUERY  ->  execute();
-        $QUERY  ->  store_result();
-        $QUERY  ->  bind_result($nameActivity, $areaActivity, $lastMaintance);
-        $QUERY  ->  fetch();
+        $data		=	array(
+            "type"			=>	"SELECT",
+            "query"			=>	"SELECT nombre, area, ultimaMantencion FROM actividad WHERE id = ?;",
+            "parameters"	=>	array(
+                                    "i",
+                                    $idActivity
+            )
+        );
+        $result1	=	query($LINK, $data, false);
 
-        if( $QUERY->num_rows == 1 ){
-            $QUERY  ->  free_result();
-            $QUERY  =   $LINK -> prepare("SELECT id, actividades FROM registro");
-            $QUERY  ->  execute();
-            $QUERY  ->  store_result();
-            $QUERY  ->  bind_result($idRecord, $activityList);
+        if(sizeof($result1) == 0){
+            $DATA["ERROR"]      = true;
+            $DATA["ERRNO"]      = 8;
+            $DATA["MESSAGE"]    = "No se han encontrado resultados en su búsqueda";
 
-            if( $QUERY->num_rows == 0 ){
+        }else if(sizeof($result1) > 1){
+            $DATA["ERROR"]      = true;
+            $DATA["ERRNO"]      = 5;
+            $DATA["MESSAGE"]    = "Se han encontrado duplicidades en los datos. Comuníquese con el administrador";
+        
+        }else{
+            $data		=	array(
+                "type"			=>	"SELECT",
+                "query"			=>	"SELECT id, actividades FROM registro",
+                "parameters"	=>	""
+            );
+            $result2	=	query($LINK, $data, false);
+    
+            if(sizeof($result2) == 0){
                 $DATA["ERROR"]      = true;
-                $DATA["ERRNO"]      = 71;
-                $DATA["MESSAGE"]    = "No se han encontrado registros de mantenciones en el sistema";
+                $DATA["ERRNO"]      = 8;
+                $DATA["MESSAGE"]    = "No se han encontrado resultados en su búsqueda";
 
             }else{
                 $arrayIdRecord      = array();
                 $arrayIndex         = array();
                 $index              = 0;
 
-                while ( $QUERY->fetch() ){
-                    $arrayIdActivities  = explode(",", $activityList);
+                // MATCHING THE ACTIVITY WITH THE ACTIVITIES RECORDED IN THE RECORDS
+                for($i=0; $i<sizeof($result2); $i++){
+                    $arrayIdActivities  = explode(",", $result2[$i]["actividades"]);
                     
-                    for($i=0; $i<sizeof($arrayIdActivities); $i++){
-                        $idActivityAux  = intval($arrayIdActivities[$i]);
-                        
-                        if( $idActivity == $idActivityAux ){
-                            $arrayIdRecord[$index]  = $idRecord;
-                            $arrayIndex[$index]     = $i;
+                    for($j=0; $j<sizeof($arrayIdActivities); $j++){
+
+                        if($idActivity == intval($arrayIdActivities[$j])){
+                            $arrayIdRecord[$index]  = $result2[$i]["id"];
+                            $arrayIndex[$index]     = $j;
 
                             $index++;
                         }
                     }
                 }
-                
-                if( sizeof($arrayIdRecord) == 0 ){
+
+                if(sizeof($arrayIdRecord) == 0){
                     $DATA["ERROR"]      = true;
                     $DATA["ERRNO"]      = 34;
                     $DATA["MESSAGE"]    = "La actividad no tiene asociada ningún registro de mantenimiento";
 
                 }else{
-                    $QUERY          ->  free_result();
                     $error          =   false;
 
-                    for( $i=0; $i<sizeof($arrayIdRecord); $i++ ){
+                    for($i=0; $i<sizeof($arrayIdRecord); $i++){
                         $idRecord   = intval($arrayIdRecord[$i]);
                         $index      = intval($arrayIndex[$i]);
                         
@@ -98,7 +111,7 @@
                         $QUERY2  ->  bind_result($name, $lastname);
                         $QUERY2  ->  fetch();
 
-                        if ( $QUERY1->num_rows == 1 && $QUERY2->num_rows == 1 ){                            
+                        if($QUERY1->num_rows == 1 && $QUERY2->num_rows == 1){
                             $arrayStateActivity    = explode(",", $stateActivity);
 
                             if( $lastMaintance == $defaultDate ){
@@ -120,7 +133,7 @@
                                 'idRecord'          => $idRecord,
                                 'name'              => $name,
                                 'lastname'          => $lastname,
-                                'lastMaintance'     => $lastMaintance,
+                                'lastMaintance'     => $result1[0]["ultimaMantencion"],
                                 'statusActivity'    => $stateActivity,
                                 'annexes'           => $annexes,
                             ]);
@@ -135,26 +148,16 @@
                         }
                     }
 
-                    if( !$error ){
+                    if(!$error){
                         $DATA["ERROR"]      = false;
                         $DATA["COUNT"]      = sizeof($arrayIdRecord);
 
-                        $DATA["nameActivity"]   = $nameActivity;
-                        $DATA["areaActivity"]   = $areaActivity;
+                        $DATA["nameActivity"]   = $result1[0]["nombre"];
+                        $DATA["areaActivity"]   = $result1[0]["area"];
                     }
-                    
                 }
             }
-
-        }else{
-            $DATA["ERROR"]      = true;
-            $DATA["ERRNO"]      = 72;
-            $DATA["MESSAGE"]    = "La actividad con id: no existe. Comuníquese con el administrador";
-
         }
-
-        $QUERY ->  free_result();
-		$LINK   ->  close();
 	}
 
     header('Content-Type: application/json');

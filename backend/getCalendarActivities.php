@@ -31,138 +31,214 @@
         $codeArea   = "";
         $workers    = array();
 
-        if( $area == 'Mecánica' ){
-            $codeArea   = '0100';
-        
-        }else if( $area == 'Eléctrica' ){
-            $codeArea   = '0010';
-        
-        }else if( $area == 'Jardinería' ){
-            $codeArea   = '0001';
-        
+        switch($area){
+            case "Mecánica":
+                $codeArea   = "0100";
+                break;
+            case "Eléctrica":
+                $codeArea   = "0010";
+                break;
+            case "Jardinería":
+                $codeArea   = "0001";
+                break;
+            default:
+                $codeArea   = "error";
+                break;
         }
 
-        $QUERY  =   $LINK->prepare("SELECT rut, nombre, apellido FROM usuario WHERE permisos = ? AND idEmpresa = ?;");
-        $QUERY  ->  bind_param("si", $codeArea, $ID_COMPANY);
-        $QUERY  ->  execute();
-        $QUERY  ->  store_result();
-        $QUERY  ->  bind_result($username, $nameUser, $lastnameUser);
+        $data		=	array(
+            "type"			=>	"SELECT",
+            "query"			=>	"SELECT rut, nombre, apellido FROM usuario WHERE permisos = ? AND idEmpresa = ?;",
+            "parameters"	=>	array(
+                                    "si",
+                                    $codeArea,
+                                    $ID_COMPANY
+            )
+        );
+        $result1	=	query($LINK, $data, false);
 
-        if( $QUERY->num_rows == 0 ){
-            $DATA["WARNING"]    = "No se han encontrado especialistas del área ".$area.". Puede derivar la actividad a otro profesional, aunque por temas de seguridad no se recomienda";
+        if(sizeof($result1) == 0){
+            $DATA["WARNING"]    = "No se han encontrado especialistas del área ".$area.". 
+                                    Puede derivar la actividad a otro profesional, aunque por temas de seguridad no se recomienda";
 
-            $QUERY  ->  free_result();
-            $QUERY  =   $LINK->prepare("SELECT rut, nombre, apellido, permisos FROM usuario WHERE permisos != '1000' AND idEmpresa = ?;");
-            $QUERY  ->  bind_param("i", $ID_COMPANY);
-            $QUERY  ->  execute();
-            $QUERY  ->  store_result();
-            $QUERY  ->  bind_result($username, $nameUser, $lastnameUser, $permission);
+            $data		=	array(
+                "type"			=>	"SELECT",
+                "query"			=>	"SELECT rut, nombre, apellido, permisos FROM usuario WHERE permisos != '1000' AND idEmpresa = ?;",
+                "parameters"	=>	array(
+                                        "i",
+                                        $ID_COMPANY
+                                    )
+            );
+            $result2	=	query($LINK, $data, false);
 
-            if( $QUERY->num_rows == 0 ){
+            if(sizeof($result2) == 0){
                 $DATA["ERROR"]      = true;
                 $DATA["ERRNO"]      = 68;
                 $DATA["MESSAGE"]    = "No se han encontrado profesionales para realizar la actividad";
 
             }else{
-                while( $QUERY->fetch() ){
+                for($i=0; $i<sizeof($result2); $i++){
                     array_push($workers, [
-                        'username'      => $username,
-                        'nameUser'      => $nameUser,
-                        'lastnameUser'  => $lastnameUser,
-                        'permission'    => $permission,
+                        'username'      => $result2[$i]["rut"],
+                        'nameUser'      => $result2[$i]["nombre"],
+                        'lastnameUser'  => $result2[$i]["apellido"],
+                        'permission'    => $result2[$i]["permisos"],
                     ]);
                 }
-
             }
-        
-        }else{
+        }else if(sizeof($result1) == 1){
             $DATA["WARNING"]    = "";
 
-            while( $QUERY->fetch() ){
-                array_push($workers, [
-                    'username'      => $username,
-                    'nameUser'      => $nameUser,
-                    'lastnameUser'  => $lastnameUser,
-                    'permission'    => $codeArea,
-                ]);
-            }
+            array_push($workers, [
+                'username'      => $result1[0]["rut"],
+                'nameUser'      => $result1[0]["nombre"],
+                'lastnameUser'  => $result1[0]["apellido"],
+                'permission'    => $codeArea,
+            ]);
+        }else{
+            $DATA["ERROR"]      = true;
+            $DATA["ERRNO"]      = 5;
+            $DATA["MESSAGE"]    = "Se han encontrado duplicidades en los datos. Comuníquese con el administrador";
         }
-
-        if( sizeof($workers) > 0 ){
-            $LINK                   = new mysqli($URL, $USERNAME, $PASSWORD, $DATABASE);
-
-            $found                  = false;
+        
+        if(sizeof($workers) > 0){
+            $activitiesSuggested    = array();
             $activitiesUnavailable  = array();
             $index                  = 0;
+            $today                  = date('Y-m-d');
 
-            $QUERY  =   $LINK->prepare("SELECT actividades, estados FROM registro WHERE estado = '0';");
-            $QUERY  ->  execute();
-            $QUERY  ->  store_result();
-            $QUERY  ->  bind_result($idActivities, $stateActivities);
+            $suggestions["id"]      = 0;
+            $suggestions["data"]    = $activitiesSuggested;
 
-            while( $QUERY->fetch() ){
-                $arrayAuxId         = explode(",", $idActivities);
-                $arrayAuxStates     = explode(",", $stateActivities);
+            $LINK   ->  close();
+            $LINK   =   new mysqli($URL, $USERNAME, $PASSWORD, $DATABASE);
 
-                for( $i=0; $i<sizeof($arrayAuxId); $i++ ){
-                    if( $arrayAuxStates[$i] == '0' ){
-                        $activitiesUnavailable[$index]  = $arrayAuxId[$i];
-                        $index++;
+            $data		=	array(
+                "type"			=>	"SELECT",
+                "query"			=>	"SELECT id, idActivities FROM sugerencia WHERE revisada = '1' AND fecha <= ?;",
+                "parameters"	=>	array(
+                                        "s",
+                                        $today
+                )
+            );
+            $result2	=	query($LINK, $data, false);
+    
+            // GETTING THE SUGGESTIONS LIST
+            if(sizeof($result2) > 0){
+                for($i=0; $i<sizeof($result2); $i++){
+                    $arraySuggest   = explode(",", $result2[$i]["idActivities"]);
+
+                    $data		=	array(
+                        "type"			=>	"SELECT",
+                        "query"			=>	"SELECT area FROM actividad WHERE id = ?;",
+                        "parameters"	=>	array(
+                                                "i",
+                                                $arraySuggest[0]
+                        )
+                    );
+                    $result3	=	query($LINK, $data, false);
+
+                    if($area == $result3[0]["area"]){
+                        $suggestions["id"]  = $result2[$i]["id"];
+
+                        for($j=0; $j<sizeof($arraySuggest); $j++){
+                            $data		=	array(
+                                "type"			=>	"SELECT",
+                                "query"			=>	"SELECT nombre, sector, prioridad, observacion FROM actividad WHERE id = ?;",
+                                "parameters"	=>	array(
+                                                        "i",
+                                                        $arraySuggest[$j]
+                                )
+                            );
+                            $result4	=	query($LINK, $data, false);
+                            
+                            array_push($activitiesSuggested, [
+                                'id'            => $arraySuggest[$j],
+                                'name'          => $result4[0]["nombre"],
+                                'location'      => $result4[0]["sector"],
+                                'priority'      => $result4[0]["prioridad"],
+                                'observation'   => $result4[0]["observacion"],
+                            ]);
+                        }
+
+                        $suggestions["data"]    = $activitiesSuggested;
                     }
                 }
             }
 
+            $data		=	array(
+                "type"			=>	"SELECT",
+                "query"			=>	"SELECT actividades, estados FROM registro WHERE estado = '0';",
+                "parameters"	=>	""
+            );
+            $result3	=	query($LINK, $data, false);
+
+            // CYCLE TO ADD THE ACTIVITIES UNAVAIBLES TO SHOW IN THE CALENDAR
+            if(sizeof($result3) > 0){
+               for($i=0; $i<sizeof($result3); $i++){
+                    $arrayAuxId         = explode(",", $result3[$i]["actividades"]);
+                    $arrayAuxStates     = explode(",", $result3[$i]["estados"]);
+
+                    for($j=0; $j<sizeof($arrayAuxId); $j++){
+                        if($arrayAuxStates[$j] == '0'){
+                            $activitiesUnavailable[$index]  = $arrayAuxId[$j];
+                            $index++;
+                        }
+                    }
+                }
+            };
+
+            // GETTING THE ACTIVITIES PER MONTHS
             for($i=1; $i<=12; $i++){
                 $arrayIds           = array();
                 $arrayNames         = array();
                 $arrayDates         = array();
                 $arrayPriorities    = array();
+                $index              = 0;
+                $query              = "";
+                $parameters         = "";
 
-                $SQL        = "";
-                $today      = date('Y-m-d');
-
-                if( $priority == "All" ){
-                    $SQL    = "SELECT id, nombre, proximaMantencion, sector, prioridad FROM actividad WHERE area = ? AND YEAR(proximaMantencion) = ? AND MONTH(proximaMantencion) = ? AND ultimaMantencion <= ? ORDER BY nombre DESC";
-                    $QUERY  =   $LINK->prepare($SQL);
-                    $QUERY  ->  bind_param("siis", $area, $year, $i, $today);
+                if($priority == "All"){
+                    $query      = "SELECT id, nombre, proximaMantencion, sector, prioridad FROM actividad WHERE area = ? AND 
+                                    YEAR(proximaMantencion) = ? AND MONTH(proximaMantencion) = ? AND ultimaMantencion <= ? ORDER BY nombre DESC";
+                    $parameters = array("ssis", $area, $year, $i, $today);
 
                 }else{
-                    $SQL    = "SELECT id, nombre, proximaMantencion, sector, prioridad FROM actividad WHERE prioridad = ? AND area = ? AND YEAR(proximaMantencion) = ? AND MONTH(proximaMantencion) = ? AND ultimaMantencion <= ? ORDER BY nombre DESC";
-                    $QUERY  =   $LINK->prepare($SQL);
-                    $QUERY  ->  bind_param("ssiis", $priority, $area, $year, $i, $today);
+                    $query      = "SELECT id, nombre, proximaMantencion, sector, prioridad FROM actividad WHERE prioridad = ? AND 
+                                    area = ? AND YEAR(proximaMantencion) = ? AND MONTH(proximaMantencion) = ? AND ultimaMantencion <= ? ORDER BY nombre DESC";
+                    $parameters = array("ssiis", $priority, $area, $year, $i, $today);
                 }
 
-                $QUERY  ->  execute();
-                $QUERY  ->  store_result();
-                $QUERY  ->  bind_result($id, $name, $nextMaintance, $location, $priorityResult);
+                $data		=	array(
+                    "type"			=>	"SELECT",
+                    "query"			=>	$query,
+                    "parameters"	=>	$parameters
+                );
+                $result4	=	query($LINK, $data, false);
 
-                if( $QUERY->num_rows>0 ){
-                    $found  = true;
-                }
-
-                $index      = 0;
-
-                while( $QUERY->fetch() ){
+                for($j=0; $j<sizeof($result4); $j++){
                     $available  = true;
 
-                    for( $j=0; $j<sizeof($activitiesUnavailable); $j++ ){
-                        if( $activitiesUnavailable[$j] == $id ){
+                    // DISCARTING THE ACTIVITIES UNAVAILABLES
+                    for($k=0; $k<sizeof($activitiesUnavailable); $k++){
+                        if($activitiesUnavailable[$k] == $result4[$j]["id"]){
                             $available  = false;
                             break;
                         }
                     }
 
-                    if( $available ){
-                        $arrayIds[$index]           = $id;
-                        $arrayNames[$index]         = $location.": ".$name;
-                        $arrayDates[$index]         = $nextMaintance;
-                        $arrayPriorities[$index]    = $priorityResult;
+                    // ADDING ALL THE ACTIVITIES AVAILABLES
+                    if($available){
+                        $arrayIds[$index]           = $result4[$j]["id"];
+                        $arrayNames[$index]         = $result4[$j]["sector"].": ".$result4[$j]["nombre"];
+                        $arrayDates[$index]         = $result4[$j]["proximaMantencion"];
+                        $arrayPriorities[$index]    = $result4[$j]["prioridad"];
 
                         $index++;
                     }
-                    
                 }
 
+                // STORE THE RESULTS
                 array_push($DATA, [
                     'elements'          => $index,
                     'ids'               => $arrayIds,
@@ -170,23 +246,13 @@
                     'nextMaintances'    => $arrayDates,
                     'priorities'        => $arrayPriorities, 
                 ]);
-
-                $QUERY  -> free_result();
             }
 
-            if( !$found ){
-                $DATA["ERROR"]      = true;
-                $DATA["ERRNO"]      = 8;
-                $DATA["MESSAGE"]    = "No se han encontrado resultados en su búsqueda";
-            
-            }else{
-                $DATA["ERROR"]      = false;
-                $DATA["workers"]    = $workers;
-
-            }
+            $DATA["ERROR"]          = false;
+            $DATA["workers"]        = $workers;
+            $DATA["suggestions"]    = $suggestions;
         }
 
-        $QUERY ->  free_result();
 		$LINK   ->  close();
 	}
 

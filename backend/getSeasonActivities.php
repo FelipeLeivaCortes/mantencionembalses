@@ -24,30 +24,29 @@
     /***************************************************************************** */
     /***************************************************************************** */
 
-        $QUERY  =   $LINK -> prepare("SELECT DISTINCT year(proximaMantencion) FROM actividad;");
-        $QUERY  ->  execute();
-        $QUERY  ->  store_result();
-        $QUERY  ->  bind_result($seasons);
-        
-        if( $QUERY->num_rows == 0 ){
-            $DATA["ERROR"]      = true;
+        $data		=	array(
+            "type"			=>	"SELECT",
+            "query"			=>	"SELECT DISTINCT year(proximaMantencion) FROM actividad;",
+            "parameters"	=>	""
+        );
+        $result1	=	query($LINK, $data, true);
+
+        if(sizeof($result1) == 0){
+            $DATA["ERROR"] 		= true;
             $DATA["ERRNO"]      = 8;
-            $DATA["MESSAGE"]    = "No se han encontrado resultados en su búsqueda";
+            $DATA["MESSAGE"]	= "No se han encontrado resultados en su búsqueda";
         
         }else{
             $DATA["ERROR"]      = false;
-            $DATA["COUNT"]      = $QUERY->num_rows;
+            $DATA["COUNT"]      = sizeof($result1);
 
-            while ( $QUERY -> fetch() ){
-				array_push($DATA, [
-				    'seasons'  => $seasons,
+            for($i=0; $i<sizeof($result1); $i++){
+                array_push($DATA, [
+				    'seasons'  => $result1[$i]["year(proximaMantencion)"]
 				]);
-			}
+            }	
         }
-
-        $QUERY ->  free_result();
-		$LINK   ->  close();
-	}
+    }
 
     header('Content-Type: application/json');
 	echo json_encode($DATA);

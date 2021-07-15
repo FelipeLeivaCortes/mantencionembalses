@@ -19,7 +19,7 @@
         $DATABASE   = "empresa".$ID_COMPANY;
         
         $LINK       ->  close();
-        $LINK       =   new mysqli($URL, $USERNAME, $PASSWORD, $DATABASE);
+    //    $LINK       =   new mysqli($URL, $USERNAME, $PASSWORD, $DATABASE);
 
     /***************************************************************************** */
     /***************************************************************************** */
@@ -47,11 +47,8 @@
             ]);
             
         }
-
-  		$LINK   ->  close();
 	}
 
     header('Content-Type: application/json');
 	echo json_encode($DATA);
-    $DATA   = "";
 ?>

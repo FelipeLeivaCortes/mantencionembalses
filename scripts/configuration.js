@@ -3,7 +3,9 @@ function initConfiguration(){
     EventToPressEnter("changePassword", "newPassword");
     EventToPressEnter("changePassword", "confirmNewPassword");
 
-    CloseSpinner();
+    setTimeout(()=>{
+        CloseSpinner();
+    }, delay);
 }
 
 function changePassword(){

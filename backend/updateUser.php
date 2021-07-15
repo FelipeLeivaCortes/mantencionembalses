@@ -35,27 +35,37 @@
 		if( $phone != "" ){
             $phone  = intval($phone);
 		}
-		
-		/*
-		PREPARE THE QUERY FOR UPDATE THE USER´S DATA IN THE DATABASE
-		*/
 
-		$QUERY  =   $LINK -> prepare("UPDATE usuario SET rut = ?, permisos = ?, nombre = ?, apellido = ?, correo = ?, telefono = ? WHERE id = ?");
-		$QUERY  ->	bind_param('issssii', $username, $permissions, $name, $lastname, $email, $phone, $id);
-        $QUERY  ->  execute();
-        
-        if( $QUERY->affected_rows == 1 ){
-            $DATA["ERROR"] 		= false;
-			$DATA["MESSAGE"]	= "Se han modificado los datos exitosamente";
-        
-        }else{
-            $DATA["ERROR"] 		= true;
+		$data		=	array(
+			"type"			=>	"UPDATE",
+			"query"			=>	"UPDATE usuario SET rut = ?, permisos = ?, nombre = ?, apellido = ?, correo = ?, telefono = ? WHERE id = ?",
+			"parameters"	=>	array(
+									"issssii",
+									$username,
+									$permissions,
+									$name,
+									$lastname,
+									$email,
+									$phone,
+									$id
+								)
+		);
+		$result1	=	query($LINK, $data, true);	
+	
+		if($result1 == 0){
+			$DATA["ERROR"] 		= true;
             $DATA["ERRNO"]      = 3;
 			$DATA["MESSAGE"]	= "No se pudo llevar a cabo la operación. Comuníquese con el administrador";
+		
+		}else if($result1 > 1){
+			$DATA["ERROR"] 		= true;
+            $DATA["ERRNO"]      = 5;
+			$DATA["MESSAGE"]	= "Se han encontrado duplicidades en los datos. Comuníquese con el administrador";
+		
+		}else{
+			$DATA["ERROR"] 		= false;
+			$DATA["MESSAGE"]	= "Se han modificado los datos exitosamente";
 		}
-
-        $QUERY  -> free_result();
-		$LINK   -> close();
     }
     header('Content-Type: application/json');
 	echo json_encode($DATA);

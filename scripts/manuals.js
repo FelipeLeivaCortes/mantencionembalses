@@ -25,99 +25,107 @@ function getManuals(){
         processData:    false,
         error:          (error)=>{console.log(error)},
         success:        (response)=>{
-            setTimeout(()=>{
-                CloseSpinner();
+            if(response.ERROR){
+                ModalReportEvent("Error", response.ERRNO, response.MESSAGE);
+        
+            }else{
+                let idTable     = "myTable";
+                let header;
+                let types       = ["Text","Link","Link"];
+                let permission  = sessionStorage.getItem("PERMISSIONS");
 
-                if(response.ERROR){
-                    ModalReportEvent("Error", response.ERRNO, response.MESSAGE);
-            
+                if(permission == "\"1000\""){
+                    types.push("Button");
+                    header  = {
+                        0:  {   name:   "N°",
+                                width:  "5%"      },
+                        1:  {   name:   "Nombre",
+                                width:  "10%"   },
+                        2:  {   name:   "Descripción",
+                                width:  "10%"   },
+                        3:  {   name:   "Acciones",
+                                width:  "20%"   },
+                        length:     4,
+                        table:  {
+                            width:  "width: 100%",
+                        },  
+                        father: {   id: "body-container",
+                                    style: "height: 300px; overflow: scroll"
+                        }
+                    }
                 }else{
-                    let idTable     = "myTable";
-                    let header;
-                    let types       = ["Text","Link","Link"];
-                    let permission  = sessionStorage.getItem("PERMISSIONS");
+                    header  = {
+                        0:  {   name:   "N°",
+                                width:  "5%"      },
+                        1:  {   name:   "Nombre",
+                                width:  "10%"   },
+                        2:  {   name:   "Descripción",
+                                width:  "10%"   },
+                        table:  {
+                            width:  "width: 100%",
+                        },  
+                        father: {   id: "body-container",
+                                    style: "height: 300px; overflow: scroll"
+                        },
+                        length:     3
+                    }
+                }
+
+                table   = new Table(
+                    idTable,
+                    header,
+                    header.length,
+                    false
+                );
+                
+                for(var i=0; i<response.count; i++){
+                    let data        = [];
+
+                    let name        = { content:    response[i].name,
+                                        function:   "mantancionembalses/" + response.fakepath + response[i].name,
+                                    };
+
+                    let description = { content:    "Ver Descripción",
+                                        function:   "javascript:showDescription('" + response[i].description + "')",                
+                                    };
+
+                    let buttons     = { 
+                                        0: {    text:       "Editar",
+                                                styleBtn:   "margin-right: 2%",
+                                                classBtn:   "btn btn-warning btn-sm",
+                                                classIcon:  "icon-edit icon-space",
+                                                action:     "javascript:openModalEditDocument(" + response[i].id + ",'" + response[i].description + "','Manual')"
+                                            },
+                                        1: {    text:       "Eliminar",
+                                                styleBtn:   "",
+                                                classBtn:   "btn btn-danger btn-sm",
+                                                classIcon:  "icon-circle-with-cross icon-space",
+                                                action:     "javascript:openModalDeleteDocument(" + response[i].id + ", 'Manual')"
+                                            },
+                                        items: 2
+                                    };
 
                     if(permission == "\"1000\""){
-                        types.push("Button");
-                        header  = {
-                            0:  {   name:   "N°",
-                                    width:  "5%"      },
-                            1:  {   name:   "Nombre",
-                                    width:  "10%"   },
-                            2:  {   name:   "Descripción",
-                                    width:  "10%"   },
-                            3:  {   name:   "Acciones",
-                                    width:  "20%"   },
-                            length:     4,
-                            father: {   id: "body-container",
-                                        style: "height: 300px; overflow: scroll"
-                            }
-                        }
+                        data    = [ i + 1,
+                                    name,
+                                    description,
+                                    buttons
+                                ];       
                     }else{
-                        header  = {
-                            0:  {   name:   "N°",
-                                    width:  "5%"      },
-                            1:  {   name:   "Nombre",
-                                    width:  "10%"   },
-                            2:  {   name:   "Descripción",
-                                    width:  "10%"   },
-                            length:     3,
-                            father:     "body-container"
-                        }
-                    }
-
-                    table   = new Table(
-                        idTable,
-                        header,
-                        header.length,
-                        false
-                    );
-                    
-                    for(var i=0; i<response.count; i++){
-                        let data        = [];
-
-                        let name        = { content:    response[i].name,
-                                            function:   "mantancionembalses/" + response.fakepath + response[i].name,
-                                        };
-
-                        let description = { content:    "Ver Descripción",
-                                            function:   "javascript:showDescription('" + response[i].description + "')",                
-                                        };
-
-                        let buttons     = { 
-                                            0: {    text:       "Editar",
-                                                    styleBtn:   "margin-right: 2%",
-                                                    classBtn:   "btn btn-warning btn-sm",
-                                                    classIcon:  "icon-edit icon-space",
-                                                    action:     "javascript:openModalEditDocument(" + response[i].id + ",'" + response[i].description + "','Manual')"
-                                                },
-                                            1: {    text:       "Eliminar",
-                                                    styleBtn:   "",
-                                                    classBtn:   "btn btn-danger btn-sm",
-                                                    classIcon:  "icon-circle-with-cross icon-space",
-                                                    action:     "javascript:openModalDeleteDocument(" + response[i].id + ", 'Manual')"
-                                                },
-                                            items: 2
-                                        };
-
-                        if(permission == "\"1000\""){
-                            data    = [ i + 1,
-                                        name,
-                                        description,
-                                        buttons
-                                    ];       
-                        }else{
-                            data    = [ i + 1,
-                                        name,
-                                        description
-                                    ];
-                        }
-
-                        table.addRow(types, data, "row:" + response[i].id);
+                        data    = [ i + 1,
+                                    name,
+                                    description
+                                ];
                     }
                     
-                    table.encapsulate();
+                    table.addRow(types, data, "row:" + response[i].id);
                 }
+                
+                table.encapsulate();
+            }
+
+            setTimeout(()=>{
+                CloseSpinner();   
             }, delay);
         }
     });
@@ -282,8 +290,6 @@ function deleteDocument(id, type){
                     $("#aboutDocumentForm").modal("toggle");
                 }
 
-                ModalReportEvent("Operación Exitosa", "", response.MESSAGE);
-    
                 let idTable = "myTable";
                 var table   = document.getElementById(idTable);
                 var target  = "row:" + id;
@@ -306,7 +312,8 @@ function deleteDocument(id, type){
                 }else{
                     document.getElementById("container:" + idTable).remove();
                 }
-                
+
+                ModalReportEvent("Operación Exitosa", "", response.MESSAGE);
             }
         }
     });

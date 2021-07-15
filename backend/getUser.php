@@ -26,35 +26,36 @@
     
         $username   = $_POST["username"];
 
-        $QUERY 	    =   $LINK -> prepare("SELECT id, permisos, nombre, apellido, correo, telefono  FROM usuario WHERE rut = ?");
-        $QUERY	    ->	bind_param('i', $username);
-        $QUERY      ->  execute();
-        $QUERY      ->  store_result();
-        $QUERY      ->  bind_result($id, $permissions, $name, $lastname, $email, $phone);
-        
-        if( $QUERY -> num_rows == 1 ){
-            $DATA["ERROR"] 		= false;
-            $DATA["MESSAGE"]	= "";
-
-            $QUERY              -> fetch();
-            
-            $DATA["id"]             = $id;
-            $DATA["permissions"] 	= $permissions;
-            $DATA["name"]           = $name;
-            $DATA["lastname"]       = $lastname;
-            $DATA["email"]          = $email;
-            $DATA["phone"]          = $phone;
-
-        }else{
+        $data		=	array(
+			"type"			=>	"SELECT",
+			"query"			=>	"SELECT id, permisos, nombre, apellido, correo, telefono  FROM usuario WHERE rut = ?",
+			"parameters"	=>	array(
+									"i",
+									$username
+								)
+		);
+		$result1	=	query($LINK, $data, true);	
+	
+		if(sizeof($result1) == 0){
             $DATA["ERROR"]      = true;
             $DATA["ERRNO"]      = 4;
             $DATA["MESSAGE"]    = "El rut ingresado no está registrado";
-            
+
+        }else if(sizeof($result1) > 1){
+            $DATA["ERROR"]      = true;
+            $DATA["ERRNO"]      = 5;
+            $DATA["MESSAGE"]    = "Se han encontrado duplicidades en los datos. Comuníquese con el administrador";
+
+        }else{
+            $DATA["ERROR"] 		    = false;
+
+            $DATA["id"]             = $result1[0]["id"];
+            $DATA["permissions"] 	= $result1[0]["permisos"];
+            $DATA["name"]           = $result1[0]["nombre"];
+            $DATA["lastname"]       = $result1[0]["apellido"];
+            $DATA["email"]          = $result1[0]["correo"];
+            $DATA["phone"]          = $result1[0]["telefono"];
         }
-        
-        $QUERY      -> free_result();
-        $LINK       -> close();
-        
 	}
 
     header('Content-Type: application/json');

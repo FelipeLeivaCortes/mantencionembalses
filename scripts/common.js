@@ -303,110 +303,108 @@ class User{
     }
 
     add(){
-        let data    = new FormData();
-        data.append("idCompany",    this.idCompany);
-        data.append("username",     this.username);
-        data.append("permissions",  this.permissions);
-        data.append("name",         this.name);
-        data.append("lastname",     this.lastname);
-        data.append("email",        this.email);
-        data.append("phone",        this.phone);
-        
-        $.ajax({
-            url:            "backend/addUser.php",
-            type:           "POST",
-            data:           data,
-            contentType:    false,
-            processData:    false,
-            error:          (error)=>{ console.log(error); },
-            success:        (response)=>{
-                setTimeout(()=>{
-                    CloseSpinner();
+        return new Promise((resolve, reject) => {
+            let data    = new FormData();
 
-                    if( response.ERROR === true ){
-                        ModalReportEvent("Error", response.ERRNO, response.MESSAGE);
-                        this.lastOperation  = false;
-                        return false;
+            data.append("idCompany",    this.idCompany);
+            data.append("username",     this.username);
+            data.append("permissions",  this.permissions);
+            data.append("name",         this.name);
+            data.append("lastname",     this.lastname);
+            data.append("email",        this.email);
+            data.append("phone",        this.phone);
+            
+            $.ajax({
+                url:            "backend/addUser.php",
+                type:           "POST",
+                data:           data,
+                contentType:    false,
+                processData:    false,
+                error:          (error)=>{ console.log(error); reject(false);},
+                success:        (response)=>{
+                    setTimeout(()=>{
+                        CloseSpinner();
 
-                    }else{
-                        ModalReportEvent("Operación Exitosa", "", response.MESSAGE);
-                        this.lastOperation  = true;
-                        return true;
-                    }
-                }, delay);
-            }
+                        if( response.ERROR === true ){
+                            ModalReportEvent("Error", response.ERRNO, response.MESSAGE);
+                            resolve(false);
+
+                        }else{
+                            ModalReportEvent("Operación Exitosa", "", response.MESSAGE);
+                            resolve(true);
+                        }
+                    }, delay);
+                }
+            });
         });
     }
 
     update(){
-        ShowSpinner();
+        return new Promise((resolve, reject) => {
+            let data    = new FormData();
 
-        let data    = new FormData();
-        data.append("id", this.id);
-        data.append("username", this.username);
-        data.append("permissions", this.permissions);
-        data.append("name", this.name);
-        data.append("lastname", this.lastname);
-        data.append("email", this.email);
-        data.append("phone", this.phone);
+            data.append("id", this.id);
+            data.append("username", this.username);
+            data.append("permissions", this.permissions);
+            data.append("name", this.name);
+            data.append("lastname", this.lastname);
+            data.append("email", this.email);
+            data.append("phone", this.phone);
 
-        $.ajax({
-            url:            "backend/updateUser.php",
-            type:           "POST",
-            data:           data,
-            contentType:    false,
-            processData:    false,
-            error:          (response)=>{console.log(response)},
-            success:        (response)=>{
-                setTimeout(()=>{
-                    CloseSpinner();
+            $.ajax({
+                url:            "backend/updateUser.php",
+                type:           "POST",
+                data:           data,
+                contentType:    false,
+                processData:    false,
+                error:          (error)=>{console.log(error); reject(false);},
+                success:        (response)=>{
+                    setTimeout(()=>{
+                        CloseSpinner();
 
-                    if( response.ERROR === true ){
-                        ModalReportEvent("Error", response.ERRNO, response.MESSAGE);
-                        this.lastOperation  = false;
-                        
-                    }else{
-                        ModalReportEvent("Operación Exitosa", "", response.MESSAGE);
-                        this.lastOperation  = true;
-                        
-                    }
-
-                    return;
-
-                }, 500);
-            }
+                        if(response.ERROR){
+                            ModalReportEvent("Error", response.ERRNO, response.MESSAGE);
+                            resolve(false);
+                            
+                        }else{
+                            ModalReportEvent("Operación Exitosa", "", response.MESSAGE);
+                            resolve(true);
+                            
+                        }
+                    }, delay);
+                }
+            });
         });
     }
 
     delete(){
-        ShowSpinner();
+        return new Promise((resolve, reject) => {
+            let data    = new FormData();
+            
+            data.append("username", this.username);
 
-        let data    = new FormData();
-        data.append("username", this.username);
+            $.ajax({
+                url:            "backend/deleteUser.php",
+                type:           "POST",
+                data:           data,
+                contentType:    false,
+                processData:    false,
+                error:          (error)=>{console.log(error); reject(false);},
+                success:        (response)=>{
+                    setTimeout(()=>{
+                        CloseSpinner();
 
-        $.ajax({
-            url:            "backend/deleteUser.php",
-            type:           "POST",
-            data:           data,
-            contentType:    false,
-            processData:    false,
-            error:          (response)=>{console.log(response)},
-            success:        (response)=>{
-                setTimeout(()=>{
-                    CloseSpinner();
+                        if(response.ERROR){
+                            ModalReportEvent("Error", response.ERRNO, response.MESSAGE);
+                            resolve(false);
 
-                    if( response.ERROR === true ){
-                        ModalReportEvent("Error", response.ERRNO, response.MESSAGE);
-                        this.lastOperation  = false;
-
-                    }else{
-                        ModalReportEvent("Operación Exitosa", "", response.MESSAGE);
-                        this.lastOperation  = true;
-                    }
-
-                    return;
-                }, delay);
-            }
+                        }else{
+                            ModalReportEvent("Operación Exitosa", "", response.MESSAGE);
+                            resolve(true);
+                        }
+                    }, delay);
+                }
+            });
         });
     }
 
@@ -415,33 +413,37 @@ class User{
      * @param {number} username: The username what will search to fill the inputs
      */
     get(username){
-       
-        let data    = new FormData();
-        data.append("username", username);
+        return new Promise((resolve, reject) => {
+            let data    = new FormData();
+            data.append("username", username);
 
-        $.ajax({
-            url:            "backend/getUser.php",
-            type:           "POST",
-            data:           data,
-            contentType:    false,
-            processData:    false,
-            error:          (response)=>{console.log(response)},
-            success:        (response)=>{
-                if( response.ERROR == true ){ 
-                    ModalReportEvent("Error", response.ERRNO, response.MESSAGE);
-                    document.getElementById("searchUname").value    = "";
-                
-                }else{
-                    this.idcompany      = sessionStorage.getItem("ID_COMPANY");
-                    this.username       = username;
-                    this.permissions    = response.permissions;
-                    this.name           = response.name;
-                    this.lastname       = response.lastname;
-                    this.email          = response.email;
-                    this.phone          = response.phone;
-                    this.id             = response.id;
+            $.ajax({
+                url:            "backend/getUser.php",
+                type:           "POST",
+                data:           data,
+                contentType:    false,
+                processData:    false,
+                error:          (response)=>{console.log(response); reject(false);},
+                success:        (response)=>{
+                    if(response.ERROR){ 
+                        ModalReportEvent("Error", response.ERRNO, response.MESSAGE);
+                        document.getElementById("searchUname").value    = "";
+                        resolve(false);
+                    
+                    }else{
+                        this.idcompany      = sessionStorage.getItem("ID_COMPANY");
+                        this.username       = username;
+                        this.permissions    = response.permissions;
+                        this.name           = response.name;
+                        this.lastname       = response.lastname;
+                        this.email          = response.email;
+                        this.phone          = response.phone;
+                        this.id             = response.id;
+
+                        resolve(true);
+                    }
                 }
-            }
+            });
         });
     }
 }
@@ -595,6 +597,19 @@ class Table{
 
                     break;
                 
+                case "Cell":
+                    for(let x=0; x<data[j].items; x++){
+                        let text    = document.createTextNode(data[j][x].text);
+                        let icon    = document.createElement("span");
+
+                        icon.setAttribute("class", data[j][x].classIcon);
+                        
+                        cell[j].appendChild(icon);
+                        cell[j].appendChild(text);
+                    }
+
+                    break;
+
                 case "Link":
                     let text    = document.createTextNode(data[j].content);
                     let link    = document.createElement("a");
@@ -603,10 +618,24 @@ class Table{
                     cell[j].appendChild(link);
 
                     break;
-                
+             
+                case "List":
+                    for(let x=0; x<data[j].length; x++){
+                        let container   = document.createElement("div");
+                        let content     = document.createTextNode(data[j][x].name);
+                        
+                        container.setAttribute("style", "margin-bottom: 3%;");
+
+                        container.appendChild(content);
+                        cell[j].appendChild(container);
+                    }
+
+                    break;
+
                 case "Select":
                     let select  = document.createElement("select");
-                    
+                    select.setAttribute("class", "custom-select");
+
                     for(var i=0; i<data[j].options.length; i++){
                         let option  = document.createElement("option");
                         option.textContent  = data[j].options[i];
@@ -713,9 +742,8 @@ class Activity{
         this._location      = location;
         this._priority      = priority;
         this._area          = area;
-        this._comments      = comments;
+        this._comments      = comments == undefined || comments == null ? "" : comments;
         this._id            = id;
-        this._lastOperation = 0;
         this._maintances    = "";
     }
 
@@ -747,10 +775,6 @@ class Activity{
         return this._comments;
     }
 
-    get lastOperation(){
-        return this._lastOperation;
-    }
-
     get id(){
         return this._id;
     }
@@ -768,6 +792,7 @@ class Activity{
     }
 
     set frecuency(value){
+        value   = value.replace(/ /g, "");
         this._frecuency = value;
     }
 
@@ -776,27 +801,22 @@ class Activity{
     }
 
     set priority(value){
+        value   = value.replace(/ /g, "");
         this._priority  = value;
     }
 
     set area(value){
+        value   = value.replace(/ /g, "");
         this._area      = value;
     }
 
     set priority(value){
+        value   = value.replace(/ /g, "");
         this._priority  = value;
-    }
-
-    set area(value){
-        this._area      = value;
     }
 
     set comments(value){
         this._comments  = value;
-    }
-
-    set lastOperation(value){
-        this._lastOperation     = value;
     }
 
     set id(value){
@@ -962,7 +982,7 @@ class Activity{
                 setTimeout(()=>{
                     CloseSpinner();
                     ModalReportEvent("Error", 43, "La ubicación en la posición " + index + " no está registrada");
-                }, 500);
+                }, delay);
             }
 
             return false;
@@ -1040,7 +1060,7 @@ class Activity{
             case "Bimensual":
                 return 60;
             case "Trimestral":
-                return 120;
+                return 90;
             case "Semestral":
                 return 180;
             case "Anual":
@@ -1055,148 +1075,131 @@ class Activity{
     }
 
     /**
-     * @param {boolean} showSpinner : Show spinner?
+     * @param {boolean} showMessage : Do you want to show an message when is added an activity?
+     * @param {boolean} isExcel: You are adding the data from an excel?  
      */
-    add(showSpinner){
-        if(showSpinner){
-            ShowSpinner();
-        }
+    add(showMessage, isExcel){
+        return new Promise((resolve, reject) => {
+            let data    = new FormData();
 
-        let data    = new FormData();
-        data.append("name", this.name);
-        data.append("date", this.date);
-        data.append("frecuency", this.frecuencyToPeriod());
-        data.append("location", this.location);
-        data.append("priority", this.priority);
-        data.append("area", this.area);
-        data.append("comments", this.comments);
+            data.append("isExcel", isExcel);
+            data.append("name", this.name);
+            data.append("date", this.date);
+            data.append("frecuency", this.frecuencyToPeriod());
+            data.append("location", this.location);
+            data.append("priority", this.priority);
+            data.append("area", this.area);
+            data.append("comments", this.comments);
 
-        $.ajax({
-            url:            "backend/addActivity.php",
-            type:           "POST",
-            data:           data,
-            contentType:    false,
-            processData:    false,
-            error:          (response)=>{console.log(response)},
-            success:        (response)=>{
-                setTimeout(()=>{
-                    if(showSpinner){
-                        CloseSpinner();
-                    }
-
-                    if( response.ERROR  === true ){
+            $.ajax({
+                url:            "backend/addActivity.php",
+                type:           "POST",
+                data:           data,
+                contentType:    false,
+                processData:    false,
+                error:          (response)=>{console.log(response); reject(false)},
+                success:        (response)=>{
+                    if(response.ERROR){
                         ModalReportEvent("Error", response.ERRNO, response.MESSAGE);
-                        this.lastOperation  = false;
-
+                        resolve(false);
                     }else{
-                        ModalReportEvent("Operación exitosa", "", response.MESSAGE);
-                        this.lastOperation  = true;
-
+                        if(showMessage){
+                            ModalReportEvent("Operación exitosa", "", response.MESSAGE);
+                        }
+                        resolve(true);
                     }
-
-                    return;
-                }, 500);
-            }
+                }
+            });
         });
     }
 
     maintances(){
-        ShowSpinner();
+        return new Promise((resolve, reject) => {
+            let data    = new FormData();
+            
+            data.append("idActivity", this.id);
 
-        let data    = new FormData();
-        data.append("idActivity", this.id);
-
-        $.ajax({
-            url:            "backend/getRecordsPerActivity.php",
-            type:           "POST",
-            data:           data,
-            contentType:    false,
-            processData:    false,
-            error:          (response)=>{console.log(response)},
-            success:        (response)=>{
-                setTimeout(()=>{
-                    CloseSpinner();
-
+            $.ajax({
+                url:            "backend/getRecordsPerActivity.php",
+                type:           "POST",
+                data:           data,
+                contentType:    false,
+                processData:    false,
+                error:          (error)=>{console.log(error); reject(false)},
+                success:        (response)=>{
                     if(response.ERROR){
                         ModalReportEvent("Error", response.ERRNO, response.MESSAGE);
-                        this.lastOperation  = false;
+                        resolve(false);
                     
                     }else{
                         this.maintances     = response;
-                        this.lastOperation  = true;
+                        resolve(true);
                     }
-
-                    return;
-                }, 500);
-            }
+                }
+            });
         });
     }
 
     update(){
-        ShowSpinner();
-        
-        let data    = new FormData();
-        data.append("id", this.id);
-        data.append("name", this.name);
-        data.append("date", this.date);
-        data.append("frecuency", this.frecuencyToPeriod());
-        data.append("location", this.location);
-        data.append("priority", this.priority);
-        data.append("area", this.area);
-        data.append("comments", this.comments);
+        return new Promise((resolve, reject) => {
+            let data    = new FormData();
+            data.append("id", this.id);
+            data.append("name", this.name);
+            data.append("date", this.date);
+            data.append("frecuency", this.frecuencyToPeriod());
+            data.append("location", this.location);
+            data.append("priority", this.priority);
+            data.append("area", this.area);
+            data.append("comments", this.comments);
 
-        $.ajax({
-            url:            "backend/updateActivity.php",
-            type:           "POST",
-            data:           data,
-            contentType:    false,
-            processData:    false,
-            error:          (response)=>{console.log(response)},
-            success:        (response)=>{
-                setTimeout(()=>{
-                    CloseSpinner();
+            $.ajax({
+                url:            "backend/updateActivity.php",
+                type:           "POST",
+                data:           data,
+                contentType:    false,
+                processData:    false,
+                error:          (response)=>{console.log(response); reject(false)},
+                success:        (response)=>{
+                    setTimeout(()=>{
+                        CloseSpinner();
 
-                    if( response.ERROR  === true ){
-                        ModalReportEvent("Error", response.ERRNO, response.MESSAGE);
-                        this.lastOperation  = false;
-
-                    }else{
-                        ModalReportEvent("Operación exitosa", "", response.MESSAGE);
-                        this.lastOperation  = true;
-
-                    }
-
-                    return;
-                }, 500);
-            }
+                        if(response.ERROR){
+                            ModalReportEvent("Error", response.ERRNO, response.MESSAGE);
+                            resolve(false);
+                        }else{
+                            ModalReportEvent("Operación exitosa", "", response.MESSAGE);
+                            resolve(true);
+                        }
+                    }, delay);
+                }
+            });
         });
     }
 
     delete(){
-        let data    = new FormData();
-        data.append("id",this.id);
+        return new Promise((resolve, reject) => {
+            let data    = new FormData();
+            data.append("id",this.id);
 
-        $.ajax({
-            url:            "backend/deleteActivity.php",
-            type:           "POST",
-            data:           data,
-            contentType:    false,
-            processData:    false,
-            error:          (response)=>{console.log(response)},
-            success:        (response)=>{
-                setTimeout(()=>{
-                    if(response.ERROR){
-                        ModalReportEvent("Error", response.ERRNO, response.MESSAGE);
-                        this.lastOperation  = false;
-
-                    }else{
-                        ModalReportEvent("Operación Exitosa", "", response.MESSAGE);
-                        this.lastOperation  = true;
-                    }
-
-                    return;
-                }, 500);
-            }
+            $.ajax({
+                url:            "backend/deleteActivity.php",
+                type:           "POST",
+                data:           data,
+                contentType:    false,
+                processData:    false,
+                error:          (response)=>{console.log(response); reject(false)},
+                success:        (response)=>{
+                    setTimeout(()=>{
+                        if(response.ERROR){
+                            ModalReportEvent("Error", response.ERRNO, response.MESSAGE);
+                            resolve(false);
+                        }else{
+                            ModalReportEvent("Operación Exitosa", "", response.MESSAGE);
+                            resolve(true);
+                        }
+                    }, delay);
+                }
+            });
         });
     }
 }
@@ -1475,30 +1478,36 @@ class Guide{
         this._warnings      = value;
     }
 
-    add(){
-        let data    = new FormData();
-        data.append("username", this.username);
-        data.append("activities", this.activities);
+    /**
+     * 
+     * @param {boolean} deleteSuggestion : Do you want to delete the suggestion associated?
+     * @param {number} idSuggestion: Id of the suggestion (OPTIONAL) 
+     */
+    add(deleteSuggestion, idSuggestion){
+        return new Promise((resolve, reject) => {
+            let data    = new FormData();
+            data.append("username", this.username);
+            data.append("activities", this.activities);
+            data.append("deleteSuggestion", deleteSuggestion);
+            data.append("idSuggestion", idSuggestion);
 
-        $.ajax({
-            url:            "backend/addRecord.php",
-            type:           "POST",
-            data:           data,
-            contentType:    false,
-            processData:    false,
-            error:          (error)=>{console.log(error)},
-            success:        (response)=>{
-                if(response.ERROR){
-                    ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
-                    this.lastOperation  = false;
-
-                }else{
-                    this.id             = response.id;
-                    this.lastOperation  = true;
+            $.ajax({
+                url:            "backend/addRecord.php",
+                type:           "POST",
+                data:           data,
+                contentType:    false,
+                processData:    false,
+                error:          (error)=>{console.log(error); reject(false)},
+                success:        (response)=>{
+                    if(response.ERROR){
+                        ModalReportEvent("Error", DATA.ERRNO, DATA.MESSAGE);
+                        resolve(false);
+                    }else{
+                        this.id             = response.id;
+                        resolve(true);
+                    }
                 }
-
-                return;
-            }
+            });
         });
     }
 
@@ -1508,27 +1517,24 @@ class Guide{
      * @param {boolean} isAdmin : Is the user an admin?
      */
     get(username, isAdmin){
-        ShowSpinner();
+        return new Promise((resolve, reject) => {
+            let data    = new FormData();
 
-        let data    = new FormData();
-        data.append("idRecord", this.id);
-        data.append("username", username);
-        data.append("isAdmin", isAdmin);
+            data.append("idRecord", this.id);
+            data.append("username", username);
+            data.append("isAdmin", isAdmin);
 
-        $.ajax({
-            url:            "backend/getRecord.php",
-            type:           "POST",
-            data:           data,
-            contentType:    false,
-            processData:    false,
-            error:          (error)=>{console.log(error)},
-            success:        (response)=>{
-                setTimeout(()=>{
-                    CloseSpinner();
-
+            $.ajax({
+                url:            "backend/getRecord.php",
+                type:           "POST",
+                data:           data,
+                contentType:    false,
+                processData:    false,
+                error:          (error)=>{console.log(error); reject(false)},
+                success:        (response)=>{
                     if(response.ERROR){
                         ModalReportEvent("Error", response.ERRNO, response.MESSAGE);
-                        this.lastOperation  = false;
+                        resolve(false);
 
                     }else{
                         for(let i=0; i<response.COUNT; i++){
@@ -1579,48 +1585,42 @@ class Guide{
                         this.state          = response.stateRecord;
                         this.username       = response.name_mandated + " " + response.lastname_mandated;
                         this.dateEmitted    = assingFormatDate(response.dateStart);
-                        this.lastOperation  = true;
+                        
+                        resolve(true);
                     }
-
-                    return;
-                }, delay);
-            }
+                }
+            });
         });
     }
 
     update(){
-        ShowSpinner();
+        return new Promise((resolve, reject) => {
+            let data = new FormData();
 
-        let data = new FormData();
-        data.append("idRecord", this.id);
-        data.append("arrayObservations", this.observations);
-        data.append("arrayStates", this.states);
-        data.append("piezometriaData", this.piezometrias);
-        data.append("arrayImportances", this.importances);
-    
-    
-        $.ajax({
-            type:           "POST",
-            url:            "backend/updateRecord.php",
-            contentType:    false,
-            processData:    false,
-            data:           data,
-            error:          (error)=>{console.log(error)},
-            success:        (response)=>{
-                setTimeout(()=>{
-                    CloseSpinner();
-
+            data.append("idRecord", this.id);
+            data.append("arrayObservations", this.observations);
+            data.append("arrayStates", this.states);
+            data.append("piezometriaData", this.piezometrias);
+            data.append("arrayImportances", this.importances);
+        
+            $.ajax({
+                type:           "POST",
+                url:            "backend/updateRecord.php",
+                contentType:    false,
+                processData:    false,
+                data:           data,
+                error:          (error)=>{console.log(error); reject(false)},
+                success:        (response)=>{
                     if(response.ERROR){
                         ModalReportEvent("Error", response.ERRNO, response.MESSAGE);
-                        this.lastOperation  = false;
+                        resolve(false);
 
                     }else{
                         ModalReportEvent("Operación exitosa", "", response.MESSAGE);
-                        this.lastOperation  = true;
+                        resolve(true);
                     }
-                    return;
-                }, delay);
-            }
+                }
+            });
         });
     }
 }
@@ -1875,14 +1875,66 @@ function areValidPermissions(option){
     
  }
 
- function isValidIntegerNumber(value){
-    var regex   = /^([1-9]+([0-9]*))$/;
-    
-    if( regex.test(value) ){
-        return value;
+function getActivities(idRecord){
+    return new Promise((resolve, reject) => {
+        let data    = new FormData();
+        data.append("all", 1);
+        data.append("idRecord", idRecord);
+       // data.append("arrayIdActivities", []);
 
-    }else{
-        ModalReportEvent("Error", 29, "El N° ingresado contiene carácteres incorrectos");
-        return 0;
+        $.ajax({
+            url:            "backend/getActivities.php",
+            type:           "POST",
+            data:           data,
+            processData:    false,
+            contentType:    false,
+            error:          (error)=>{console.log(error); reject("")},
+            success:        (response)=>{
+                if(response.ERROR){
+                    CloseSpinner();
+                    resolve("");
+
+                }else{
+                    resolve(response);
+                }
+            }
+        });
+    });
+};
+
+function rolToPermission(idRol){
+    return new Promise((resolve) => {
+        let role    = document.getElementById(idRol).innerHTML;
+        switch(role){
+            case "Mecánico":
+                resolve("Mecánica");
+                break;
+            case "Electricista":
+                resolve("Eléctrica");
+                break;
+            case "Jardinero":
+                resolve("Jardinería");
+                break;
+            default:
+                resolve("ERROR");
+                break;
+        }
+    });
+}
+
+function compareDateToToday(inputId){
+    let date        = new Date(document.getElementById(inputId).value);
+    let today       = new Date();
+
+    let difference  = Math.round((today.getTime() - date.getTime()) / (1000*60*60*24));
+
+    return difference > 0 ? true : false;
+}
+
+function clearSelect(inputId){
+    let select  = document.getElementById(inputId);
+
+    for(let i=0; i<select.length; i++){
+        select.remove(i);
     }
- }
+}

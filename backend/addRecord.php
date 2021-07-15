@@ -24,8 +24,11 @@
 	/***************************************************************************** */
 	/***************************************************************************** */
 	
-		$username 	= $_POST["username"];
-        $activities	= $_POST["activities"];
+		$username 			= $_POST["username"];
+        $activities			= $_POST["activities"];
+		$deleteSuggestion	= boolval($_POST["deleteSuggestion"]);
+		$idSuggestion		= $_POST["idSuggestion"];
+
 		$dateStart	= date('Y-m-d');
 
 		$arrayActivities	= explode(",", $activities);
@@ -37,39 +40,70 @@
 			$stringImportance	= $stringImportance.",0";
 		}
 
-		$QUERY  =   $LINK -> prepare("INSERT INTO registro (encargado, actividades, fechaInicio, fechaTermino, estados, importancias) VALUES (?, ?, ?, ?, ?, ?);");
-		$QUERY  ->  bind_param('isssss', $username, $activities, $dateStart, $defaultDate, $stringStates, $stringImportance);
-		$QUERY  ->  execute();
+		$data		=	array(
+			"type"			=>	"INSERT",
+			"query"			=>	"INSERT INTO registro (encargado, actividades, fechaInicio, fechaTermino, estados, importancias) VALUES (?, ?, ?, ?, ?, ?);",
+			"parameters"	=>	array(
+									"isssss",
+									$username,
+									$activities,
+									$dateStart,
+									$defaultDate,
+									$stringStates,
+									$stringImportance
+								)
+		);
+		$result1	=	query($LINK, $data, false);
 
-		if( $QUERY->affected_rows == 1 ){
-
-			$QUERY1	=   $LINK->prepare("SELECT LAST_INSERT_ID();");
-        	$QUERY1	->  execute();
-        	$QUERY1	->  store_result();
-        	$QUERY1	->  bind_result($idRecord);
-			$QUERY1	->  fetch();
-
-			if( $QUERY1->num_rows == 1 ){
-				$DATA["ERROR"] 		= false;
-				$DATA["MESSAGE"]	= "Se han registrado las actividades exitosamente";
-				$DATA["id"]			= $idRecord;
-
-				$QUERY1	-> free_result();
-
-			}else{
-				$DATA["ERROR"]      = true;
-				$DATA["ERRNO"]      = 3;
-				$DATA["MESSAGE"]    = "No se pudo llevar a cabo la operación. Comuníquese con el administrador";
-			}
-
-		}else{
+		if($result1 == 0){
 			$DATA["ERROR"]	    = true;
 			$DATA["ERRNO"]      = 3;
 			$DATA["MESSAGE"]    = "No se pudo llevar a cabo la operación. Comuníquese con el administrador";
-		}
+		
+		}else if($result1 == 1){
+			$data		=	array(
+				"type"			=>	"SELECT",
+				"query"			=>	"SELECT LAST_INSERT_ID();",
+				"parameters"	=>	""
+			);
+			$result2	=	query($LINK, $data, false);
+	
+			if(sizeof($result2) == 0){
+				$DATA["ERROR"]      = true;
+				$DATA["ERRNO"]      = 3;
+				$DATA["MESSAGE"]    = "No se pudo llevar a cabo la operación. Comuníquese con el administrador";
 
-        $QUERY  -> free_result();
-		$LINK   -> close();
+			}else if(sizeof($result2) == 1){
+
+				if($deleteSuggestion){
+					$data		=	array(
+						"type"			=>	"DELETE",
+						"query"			=>	"DELETE FROM sugerencia WHERE id = ?;",
+						"parameters"	=>	array(
+												"i",
+												$idSuggestion
+											)
+					);
+					$result3	=	query($LINK, $data, false);
+			
+					if($result3 == 0){
+						$DATA["ERROR"] 		= false;
+						$DATA["MESSAGE"]	= "Se han registrado las actividades exitosamente";
+						$DATA["id"]			= $result2[0]["LAST_INSERT_ID()"];
+					
+					}else{
+						$DATA["ERROR"] 		= true;
+						$DATA["ERRNO"]		= "N";
+						$DATA["MESSAGE"]	= "No se ha podido eliminar la sugerencia con id: ".$idSuggestion;
+					}
+
+				}else{
+					$DATA["ERROR"] 		= false;
+					$DATA["MESSAGE"]	= "Se han registrado las actividades exitosamente";
+					$DATA["id"]			= $result2[0]["LAST_INSERT_ID()"];
+				}
+			}
+		}
 	}
 
     header('Content-Type: application/json');

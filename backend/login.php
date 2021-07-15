@@ -12,91 +12,97 @@
 		$username	=   $_POST["username"];
 		$password	=   $_POST["password"];
 		
-		$QUERY	=   $LINK->prepare("SELECT idEmpresa, estado, AES_DECRYPT(clave,?), permisos, nombre, apellido FROM usuario WHERE rut = ?;");
-		$QUERY	->  bind_param('si', $KEY, $username);
-		$QUERY	->  execute();
-		$QUERY	->  store_result();
-        $QUERY	->  bind_result($idEmpresa, $state, $clave, $permisos, $nombre, $apellido);
-        
-        if( $QUERY->num_rows == 1 ){
-			$QUERY->fetch();
+		$data		=	array(
+			"type"			=>	"SELECT",
+			"query"			=>	"SELECT idEmpresa, estado, AES_DECRYPT(clave,?), permisos, nombre, apellido FROM usuario WHERE rut = ?;",
+			"parameters"	=>	array(
+									"si",
+									$KEY,
+									$username
+								)
+		);
+		$result1	=	query($LINK, $data, false);
 
-	      	if( $state == 1 ){
-            
-	        	if( $password == $clave ){
-					$QUERY	->  free_result();
-					$QUERY	=   $LINK -> prepare("SELECT usuario, AES_DECRYPT(licencia, ?), AES_DECRYPT(clave, ?) FROM empresa WHERE id = ?");
-					$QUERY	->  bind_param("ssi", $KEY, $KEY, $idEmpresa);
-					$QUERY	->  execute();
-					$QUERY 	->  store_result();
-					$QUERY 	->  bind_result($userDatabase, $licenseDecoded, $passDatabase);
-					$QUERY 	->  fetch();
+		if(sizeof($result1) == 0){
+			$DATA["ERROR"]      = true;
+			$DATA["ERRNO"]      = 4;
+			$DATA["MESSAGE"]    = "El rut ingresado no está registrado";
+		
+		}else if(sizeof($result1) > 1){
+			$DATA["ERROR"]      = true;
+			$DATA["ERRNO"]      = 9;
+			$DATA["MESSAGE"]    = "Se han encontrado duplicidades en sus datos. Comuníquese con el administrador";
+		
+		}else{
+			if($result1[0]["estado"] == 0){
+				$DATA["ERROR"]		= true;
+				$DATA["ERRNO"]		= 49;
+				$DATA["MESSAGE"]	= "El acceso a este usuario se encuentra deshabilidado. Comuníquese con el administrador";
+			
+			}else{
+				if($result1[0]["AES_DECRYPT(clave,?)"] != $password){
+					$DATA["ERROR"]      = true;
+					$DATA["ERRNO"]      = 14;
+					$DATA["MESSAGE"]    = "La contraseña ingresada es incorrecta";
 
-					if($QUERY->num_rows == 0){
+				}else{
+					$data	=	array(
+						"type"			=>	"SELECT",
+						"query"			=>	"SELECT usuario, AES_DECRYPT(licencia, ?), AES_DECRYPT(clave, ?) FROM empresa WHERE id = ?",
+						"parameters"	=>	array(
+												"ssi",
+												$KEY,
+												$KEY,
+												$result1[0]["idEmpresa"]
+											)
+					);
+					$result2	=	query($LINK, $data, true);
+
+					if(sizeof($result2) == 0){
 						$DATA["ERROR"]	= true;
 						$DATA["ERRNO"]	= 38;
 						$DATA["MESSAGE"]	= "No se han encontrado licencias registradas. Comuníquese con el administrador";
-							
-					}else if($QUERY->num_rows > 1){
-						$DATA["ERROR"]	= true;
-						$DATA["ERRNO"]	= 9;
-						$DATA["MESSAGE"]	= "Se han encontrado duplicidades en sus datos. Comuníquese con el administrador";
-							
+					
+					}else if(sizeof($result2) > 1){
+						$DATA["ERROR"]      = true;
+						$DATA["ERRNO"]      = 9;
+						$DATA["MESSAGE"]    = "Se han encontrado duplicidades en sus datos. Comuníquese con el administrador";
+					
 					}else{
 						$today 			= date('Y-m-d');
-						$expiration 	= explode(":", $licenseDecoded);
+						$expiration 	= explode(":", $result2[0]["AES_DECRYPT(licencia, ?)"]);
 
-						if($today <= $expiration[2]){
+						if($today > $expiration[2]){
+							$DATA["ERROR"]      = true;
+							$DATA["ERRNO"]      = 11;
+							$DATA["MESSAGE"]    = "La licencia ha expirado. Comuníquese con el administrador";
+
+						}else{
 							$DATA["ERROR"]				= false;
-							$DATA["permissions"]		= $permisos;
-							$DATA["name"]				= $nombre;
-							$DATA["lastname"]			= $apellido;
-							$DATA["idCompany"]			= $idEmpresa;
+							$DATA["permissions"]		= $result1[0]["permisos"];
+							$DATA["name"]				= $result1[0]["nombre"];
+							$DATA["lastname"]			= $result1[0]["apellido"];
+							$DATA["idCompany"]			= $result1[0]["idEmpresa"];
+
+							$_SESSION['idCompany']		= $result1[0]["idEmpresa"];
+							$_SESSION['userDatabase']	= $result2[0]["usuario"];
+							$_SESSION['passDatabase']	= $result2[0]["AES_DECRYPT(clave, ?)"];
+							$_SESSION['username']		= $_POST["username"];
+							$_SESSION['name']			= $result1[0]["nombre"];
+							$_SESSION['lastname']		= $result1[0]["apellido"];
+							$_SESSION['timesession']	= time();
 
 							$detect	= new Mobile_Detect();
 
 							if( $detect->isMobile() || $detect->isTablet() ){
-								$DATA["userDatabase"]		= $userDatabase;
-								$DATA["passDatabase"]		= $passDatabase;
+								$DATA["userDatabase"]		= $result2[0]["usuario"];
+								$DATA["passDatabase"]		= $result2[0]["AES_DECRYPT(clave, ?)"];
 							}
-
-							$_SESSION['idCompany']		= $idEmpresa;
-							$_SESSION['userDatabase']	= $userDatabase;
-							$_SESSION['passDatabase']	= $passDatabase;
-							$_SESSION['username']		= $_POST["username"];
-							$_SESSION['name']			= $nombre;
-							$_SESSION['lastname']		= $apellido;
-							$_SESSION['timesession']	= time();
-								
-						}else{
-							$DATA["ERROR"]      = true;
-							$DATA["ERRNO"]      = 11;
-							$DATA["MESSAGE"]    = "La licencia ha expirado. Comuníquese con el administrador";
 						}
-
 					}
-
-				}else{
-					$DATA["ERROR"]      = true;
-					$DATA["ERRNO"]      = 14;
-					$DATA["MESSAGE"]    = "La contraseña ingresada es incorrecta";
 				}
-
-			}else{
-				$DATA["ERROR"]		= true;
-				$DATA["ERRNO"]		= 49;
-				$DATA["MESSAGE"]	= "El acceso a este usuario se encuentra deshabilidado. Comuníquese con el administrador";
 			}
-
-		}else{
-			$DATA["ERROR"]      = true;
-			$DATA["ERRNO"]      = 4;
-			$DATA["MESSAGE"]    = "El rut ingresado no está registrado";
-
 		}
-
-    	$QUERY  -> free_result();
-		$LINK   -> close();
 	}
 
     header('Content-Type: application/json');

@@ -24,35 +24,34 @@
     /***************************************************************************** */
     /***************************************************************************** */
 
-        $QUERY  =   $LINK -> prepare("SELECT id, fechaInicio, estado FROM registro ORDER BY id DESC LIMIT 20;");
-        $QUERY  ->  execute();
-        $QUERY  ->  store_result();
-        $QUERY  ->  bind_result($id, $dateStart, $state);
+        $data		=	array(
+            "type"			=>	"SELECT",
+            "query"			=>	"SELECT id, fechaInicio, estado FROM registro ORDER BY id DESC LIMIT 20;",
+            "parameters"	=>	""
+        );
+        $result1	=	query($LINK, $data, true);
 
-        if( $QUERY->num_rows == 0 ){
+        if(sizeof($result1) == 0){
             $DATA["ERROR"]      = true;
             $DATA["ERRNO"]      = 73;
             $DATA["MESSAGE"]    = "No se han encontrado registros de mantenciones pendientes en el sistema";
         
         }else{
-            $DATA["COUNT"]  = $QUERY->num_rows;
+            $DATA["count"]  = sizeof($result1);
 
-            while ( $QUERY -> fetch() ){
+            for($i=0; $i<sizeof($result1); $i++){
                 $today      = new DateTime("now");
-                $dateAux    = new DateTime($dateStart);
+                $dateAux    = new DateTime($result1[$i]["fechaInicio"]);
                 $daysLate   = date_diff($dateAux, $today)->format('%a');
 
                 array_push($DATA, [
-                    'id'        => $id,
-                    'state'     => $state,
-                    'dateStart' => $dateStart,
+                    'id'        => $result1[$i]["id"],
+                    'state'     => $result1[$i]["estado"],
+                    'dateStart' => $result1[$i]["fechaInicio"],
                     'daysLate'  => $daysLate,
                 ]);
             }
         }
-
-        $QUERY  ->  free_result();
-		$LINK   ->  close();
 	}
 
     header('Content-Type: application/json');

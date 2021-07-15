@@ -13,13 +13,14 @@
 	/****** ---> DO NOT EDIT THIS UNLESS IT EXTREMELY NECESSARY <--- ************* */
 	/***************************************************************************** */
 
-        $USERNAME   = $_SESSION["userDatabase"];
+    /*    $USERNAME   = $_SESSION["userDatabase"];
         $PASSWORD   = $_SESSION["passDatabase"];
         $ID_COMPANY = $_SESSION["idCompany"];
         $DATABASE   = "empresa".$ID_COMPANY;
-        
+      
         $LINK       ->  close();
         $LINK       =   new mysqli($URL, $USERNAME, $PASSWORD, $DATABASE);
+    */
 
     /***************************************************************************** */
     /***************************************************************************** */
@@ -29,50 +30,68 @@
             $hash       = str_replace(' ', '+', $_POST["hash"]);
         }
 
-        $QUERY  =   $LINK -> prepare("SELECT usuario.idEmpresa, usuario.permisos, empresa.nombre, AES_DECRYPT(licencia, ?) FROM usuario INNER JOIN empresa ON usuario.idEmpresa = empresa.id WHERE usuario.rut = ?");
-        $QUERY  ->  bind_param("si", $KEY, $username);
-        $QUERY  ->  execute();
-        $QUERY  ->  store_result();
-        $QUERY  ->  bind_result($companyId, $permisions, $companyName, $currentLicense);
-        $QUERY  ->  fetch();
+        $data		=	array(
+            "type"			=>	"SELECT",
+            "query"			=>	"SELECT usuario.idEmpresa, usuario.permisos, empresa.nombre, AES_DECRYPT(licencia, ?) 
+                                FROM usuario INNER JOIN empresa ON usuario.idEmpresa = empresa.id WHERE usuario.rut = ?",
+            "parameters"	=>	array(
+                                    "si",
+                                    $KEY,
+                                    $username                                    
+                                )
+        );
+        $result1	=	query($LINK, $data, false);
 
-        if($permisions == '1000'){
-            $hashDecrypted  = decrypt($hash, $KEY);
-            $licenseSplited = explode(":", $hashDecrypted);
-
-            if($companyName != $licenseSplited[0]){
-                $DATA["ERROR"]      = true;
-                $DATA["ERRNO"]      = 39;
-                $DATA["MESSAGE"]    = "La licencia ingresada no es válida";
-                
-                $QUERY  =   $LINK -> prepare("UPDATE empresa SET licencia = AES_ENCRYPT(?, ?) WHERE id = ?");
-                $QUERY  ->  bind_param("ssi", $currentLicense, $KEY, $companyId);
-                $QUERY  ->  execute();
-
-            }else{
-                $QUERY  =   $LINK -> prepare("UPDATE empresa SET licencia = AES_ENCRYPT(?, ?) WHERE id = ?");
-                $QUERY  ->  bind_param("ssi", $hashDecrypted, $KEY, $companyId);
-                $QUERY  ->  execute();
-
-                if($QUERY->affected_rows == 1){
-                    $DATA["ERROR"]      = false;
-                    $DATA["MESSAGE"]    = "Su licencia se ha activado exitosamente, vuela a iniciar sesión.";
-                }else{
-                    $DATA["ERROR"]      = true;
-                    $DATA["ERRNO"]      = 3;
-                    $DATA["MESSAGE"]    = "No se pudo llevar a cabo la operación. Comuníquese con el administrador";
-                }
-                
-            }
+        if(sizeof($result1) == 0){
+            $DATA["ERROR"]      = true;
+            $DATA["ERRNO"]      = 8;
+            $DATA["MESSAGE"]    = "No se han encontrado resultados para su búsqueda";
+        
+        }else if(sizeof($result1) > 1){
+            $DATA["ERROR"]      = true;
+            $DATA["ERRNO"]      = 5;
+            $DATA["MESSAGE"]    = "Se han encontrado duplicidades en los datos. Comuníquese con el administrador";
 
         }else{
-            $DATA["ERROR"]      = true;
-            $DATA["ERRNO"]      = 39;
-            $DATA["MESSAGE"]    = "Su usuario no cuenta con los permisos necesarios para llevar a cabo esta operación";
-        }
+            if($result1[0]["permisos"] != "1000"){
+                $DATA["ERROR"]      = true;
+                $DATA["ERRNO"]      = 39;
+                $DATA["MESSAGE"]    = "Su usuario no cuenta con los permisos necesarios para llevar a cabo esta operación";
+            
+            }else{
+                $hashDecrypted  = decrypt($hash, $KEY);
+                $licenseSplited = explode(":", $result1[0]["AES_DECRYPT(licencia, ?)"]);
 
-        $QUERY ->  free_result();
-		$LINK   ->  close();
+                if($result1[0]["nombre"] != $licenseSplited[0]){
+                    $DATA["ERROR"]      = true;
+                    $DATA["ERRNO"]      = 39;
+                    $DATA["MESSAGE"]    = "La licencia ingresada no es válida para su empresa";
+
+                }else{
+                    $data		=	array(
+                        "type"			=>	"UPDATE",
+                        "query"			=>	"UPDATE empresa SET licencia = AES_ENCRYPT(?, ?) WHERE id = ?",
+                        "parameters"	=>	array(
+                                                "ssi",
+                                                $hashDecrypted,
+                                                $KEY,
+                                                $result1[0]["idEmpresa"]                    
+                        )
+                    );
+                    $result2	=	query($LINK, $data, true);
+
+                    if($result2 == 1){
+                        $DATA["ERROR"]      = false;
+                        $DATA["MESSAGE"]    = "Su licencia se ha activado exitosamente, vuela a iniciar sesión.";
+                    
+                    }else{
+                        $DATA["ERROR"]      = true;
+                        $DATA["ERRNO"]      = 3;
+                        $DATA["MESSAGE"]    = "No se pudo llevar a cabo la operación. Comuníquese con el administrador";
+                    }
+                }
+            }
+        }
 	}
 
     header('Content-Type: application/json');
